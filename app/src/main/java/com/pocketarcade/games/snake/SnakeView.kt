@@ -38,8 +38,10 @@ class SnakeView @JvmOverloads constructor(
     var onScoreChanged: ((Int) -> Unit)? = null
     var onGameOver: ((Int) -> Unit)? = null
     var onGameStarted: (() -> Unit)? = null
+    var onDemoStopped: (() -> Unit)? = null
 
     var swipeThresholdDp: Float = 20f
+    private var swipeEnabled = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
@@ -122,6 +124,7 @@ class SnakeView @JvmOverloads constructor(
 
     fun startGame() {
         demoMode = false
+        swipeEnabled = true
         resetState()
         started = true
         handler.removeCallbacks(tickRunnable)
@@ -132,6 +135,7 @@ class SnakeView @JvmOverloads constructor(
 
     fun startDemo() {
         demoMode = true
+        swipeEnabled = false
         resetState()
         started = true
         handler.removeCallbacks(tickRunnable)
@@ -141,6 +145,7 @@ class SnakeView @JvmOverloads constructor(
 
     fun stopGame() {
         handler.removeCallbacks(tickRunnable)
+        swipeEnabled = false
         gameOver = true
         started = false
     }
@@ -173,6 +178,7 @@ class SnakeView @JvmOverloads constructor(
         if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS ||
             snake.any { it.x == head.x && it.y == head.y }
         ) {
+            swipeEnabled = false
             gameOver = true
             if (demoMode) {
                 invalidate()
@@ -213,8 +219,7 @@ class SnakeView @JvmOverloads constructor(
     }
 
     fun steer(dx: Int, dy: Int) {
-        if (demoMode) { startGame(); return }
-        if (!started || gameOver) return
+        if (!swipeEnabled || !started || gameOver || demoMode) return
         val nd = Point(dx, dy)
         if (nd.x != -dir.x || nd.y != -dir.y) nextDir = nd
     }
@@ -230,11 +235,11 @@ class SnakeView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 touchStartX = event.x; touchStartY = event.y
-                if (demoMode) { startGame(); return true }
+                if (demoMode) { demoMode = false; stopGame(); onDemoStopped?.invoke() }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
-                if (gameOver) return true
+                if (!swipeEnabled) return true
                 val dx = event.x - touchStartX
                 val dy = event.y - touchStartY
                 if (abs(dx) < threshPx && abs(dy) < threshPx) return true
@@ -253,11 +258,11 @@ class SnakeView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 extTouchStartX = event.x; extTouchStartY = event.y
-                if (demoMode) { startGame(); return true }
+                if (demoMode) { demoMode = false; stopGame(); onDemoStopped?.invoke() }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
-                if (gameOver) return true
+                if (!swipeEnabled) return true
                 val dx = event.x - extTouchStartX
                 val dy = event.y - extTouchStartY
                 if (abs(dx) < threshPx && abs(dy) < threshPx) return true

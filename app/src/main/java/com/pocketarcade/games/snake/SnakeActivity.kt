@@ -96,7 +96,8 @@ class SnakeActivity : AppCompatActivity() {
         updateHighScore()
         applyThemeToUi()
 
-        snakeView.onGameStarted = { runOnUiThread { btnRestart.visibility = View.GONE } }
+        snakeView.onGameStarted  = { runOnUiThread { btnRestart.visibility = View.GONE } }
+        snakeView.onDemoStopped  = { runOnUiThread { btnRestart.visibility = View.VISIBLE } }
         snakeView.onScoreChanged = { score -> runOnUiThread { tvScore.text = "SCORE: $score" } }
         snakeView.onGameOver = { score ->
             PrefsManager.setHighScore(this, PrefsManager.GAME_SNAKE, score)
