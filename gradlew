@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 #
 # Gradle wrapper script for UN*X
 
