@@ -4,23 +4,29 @@
     android:height="108dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <!-- Snake body segments -->
-    <path android:fillColor="#4f8ef7"
-        android:pathData="M6,18 h6 v6 h-6 z
-                          M12,18 h6 v6 h-6 z
-                          M18,18 h6 v6 h-6 z
-                          M24,18 h6 v6 h-6 z
-                          M24,12 h6 v6 h-6 z
-                          M30,12 h6 v6 h-6 z
-                          M36,12 h6 v6 h-6 z" />
-    <!-- Snake head -->
-    <path android:fillColor="#4f8ef7"
-        android:pathData="M36,18 h6 v12 h-6 z" />
-    <!-- Eyes -->
-    <path android:fillColor="#0f1117"
-        android:pathData="M38,20 h2 v2 h-2 z
-                          M38,26 h2 v2 h-2 z" />
-    <!-- Food dot -->
-    <path android:fillColor="#e74c3c"
-        android:pathData="M11,32 a3,3 0 1,1 -6,0 a3,3 0 0,1 6,0 z" />
+    <group
+        android:scaleX="0.67"
+        android:scaleY="0.67"
+        android:pivotX="24"
+        android:pivotY="24">
+        <!-- Snake body segments -->
+        <path android:fillColor="#4f8ef7"
+            android:pathData="M6,18 h6 v6 h-6 z
+                              M12,18 h6 v6 h-6 z
+                              M18,18 h6 v6 h-6 z
+                              M24,18 h6 v6 h-6 z
+                              M24,12 h6 v6 h-6 z
+                              M30,12 h6 v6 h-6 z
+                              M36,12 h6 v6 h-6 z" />
+        <!-- Snake head -->
+        <path android:fillColor="#4f8ef7"
+            android:pathData="M36,18 h6 v12 h-6 z" />
+        <!-- Eyes -->
+        <path android:fillColor="#0f1117"
+            android:pathData="M38,20 h2 v2 h-2 z
+                              M38,26 h2 v2 h-2 z" />
+        <!-- Food dot -->
+        <path android:fillColor="#e74c3c"
+            android:pathData="M11,32 a3,3 0 1,1 -6,0 a3,3 0 0,1 6,0 z" />
+    </group>
 </vector>

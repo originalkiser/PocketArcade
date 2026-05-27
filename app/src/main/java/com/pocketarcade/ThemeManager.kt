@@ -1,6 +1,8 @@
 package com.pocketarcade
 
+import android.app.Activity
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import com.pocketarcade.storage.PrefsManager
 
 object ThemeManager {
@@ -17,6 +19,13 @@ object ThemeManager {
             PrefsManager.getGameThemeIndex(ctx, game)
         else
             themeIndex(ctx)
+
+    /** Sets window and root layout background to match the current theme. */
+    fun applyWindowBackground(activity: Activity, game: String? = null) {
+        val bg = currentTheme(activity, game).bg
+        activity.window.setBackgroundDrawable(ColorDrawable(bg))
+        activity.window.decorView.setBackgroundColor(bg)
+    }
 
     /** The active GameTheme for a game. Pass game = null for the global theme. */
     fun currentTheme(ctx: Context, game: String? = null): GameTheme {

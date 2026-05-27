@@ -9,6 +9,16 @@ object ShareUtils {
     private const val DOWNLOAD_URL =
         "https://github.com/originalkiser/PocketArcade/releases/latest"
 
+    fun shareApp(activity: Activity) {
+        val text = "🕹️ POCKET ARCADE\n\nSnake · Pong · Asteroids · Brick Breaker\n\nAll the classics, free!\n\n$DOWNLOAD_URL"
+        activity.startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) },
+                "Share Pocket Arcade"
+            )
+        )
+    }
+
     fun shareScore(activity: Activity, game: String, score: Int, date: String = "") {
         val text = buildShareText(game, score, date)
         val intent = Intent(Intent.ACTION_SEND).apply {

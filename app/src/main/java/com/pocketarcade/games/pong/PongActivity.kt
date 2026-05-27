@@ -176,6 +176,7 @@ class PongActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         pongView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_PONG))
+        ThemeManager.applyWindowBackground(this, PrefsManager.GAME_PONG)
         updateSoundButton()
         updateLightModeButton()
         idleHandler.postDelayed(idleRunnable, 15_000L)

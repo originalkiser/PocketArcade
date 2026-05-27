@@ -96,6 +96,7 @@ class SnakeActivity : AppCompatActivity() {
         updateHighScore()
         applyThemeToUi()
 
+        snakeView.onGameStarted = { runOnUiThread { btnRestart.visibility = View.GONE } }
         snakeView.onScoreChanged = { score -> runOnUiThread { tvScore.text = "SCORE: $score" } }
         snakeView.onGameOver = { score ->
             PrefsManager.setHighScore(this, PrefsManager.GAME_SNAKE, score)
@@ -150,6 +151,7 @@ class SnakeActivity : AppCompatActivity() {
         super.onResume()
         applyThemeToUi()
         updateSoundButton()
+        btnRestart.visibility = if (snakeView.isRunning()) View.GONE else View.VISIBLE
         scheduleIdle()
     }
 
@@ -169,6 +171,7 @@ class SnakeActivity : AppCompatActivity() {
     private fun applyThemeToUi() {
         val theme = ThemeManager.currentTheme(this, PrefsManager.GAME_SNAKE)
         snakeView.applyTheme(theme)
+        ThemeManager.applyWindowBackground(this, PrefsManager.GAME_SNAKE)
 
         val d = resources.displayMetrics.density
         val gd = GradientDrawable()

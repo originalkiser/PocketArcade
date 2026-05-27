@@ -79,6 +79,7 @@ class SettingsActivity : AppCompatActivity() {
         val tvAdFreeChevron = findViewById<TextView>(R.id.tvAdFreeChevron)
         val btnRestore     = findViewById<TextView>(R.id.btnRestore)
         val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
+        val btnShareApp    = findViewById<TextView>(R.id.btnShareApp)
         val btnCredits     = findViewById<TextView>(R.id.btnCredits)
         val btnReset       = findViewById<TextView>(R.id.btnResetScores)
         findViewById<TextView>(R.id.tvVersion).text = "v${BuildConfig.VERSION_NAME}"
@@ -111,6 +112,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         btnRestore.setOnClickListener { billing.restorePurchases() }
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
+        btnShareApp.setOnClickListener { ShareUtils.shareApp(this) }
         btnCredits.setOnClickListener { showCreditsDialog(this) }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
@@ -138,6 +140,13 @@ class SettingsActivity : AppCompatActivity() {
             chevron.visibility = View.VISIBLE
             row.isClickable = true
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ThemeManager.applyWindowBackground(this)
+        val bg = ThemeManager.currentTheme(this).bg
+        findViewById<LinearLayout>(R.id.rootLayout).setBackgroundColor(bg)
     }
 
     override fun onDestroy() {

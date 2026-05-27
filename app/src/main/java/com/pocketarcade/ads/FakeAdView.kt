@@ -118,7 +118,7 @@ class FakeAdView @JvmOverloads constructor(
 
         canvas.restore()
 
-        tagPaint.textSize = h * 0.30f
+        tagPaint.textSize = h * 0.225f
         canvas.drawText("AD ", 8f, h - 6f, tagPaint)
     }
 }

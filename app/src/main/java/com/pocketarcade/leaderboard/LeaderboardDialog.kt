@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
 import com.pocketarcade.ShareUtils
@@ -147,16 +146,26 @@ fun showInitialsThenLeaderboard(
     }
 
     view.findViewById<TextView>(R.id.btnDontAdd).setOnClickListener {
-        AlertDialog.Builder(activity)
-            .setMessage("Skip adding this score to the leaderboard?")
-            .setPositiveButton("Yes, skip it") { _, _ ->
-                dialog.dismiss()
-                activity.runOnUiThread {
-                    showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
-                }
+        val confirmView = LayoutInflater.from(activity).inflate(R.layout.dialog_confirm, null)
+        val confirmDialog = Dialog(activity)
+        confirmDialog.setContentView(confirmView)
+        confirmDialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+        confirmView.findViewById<TextView>(R.id.tvConfirmMessage).text =
+            "Skip this score?\nIt won\'t be saved to the leaderboard."
+        confirmView.findViewById<TextView>(R.id.btnConfirmNo).setOnClickListener {
+            confirmDialog.dismiss()
+        }
+        confirmView.findViewById<TextView>(R.id.btnConfirmYes).setOnClickListener {
+            confirmDialog.dismiss()
+            dialog.dismiss()
+            activity.runOnUiThread {
+                showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
             }
-            .setNegativeButton("No, keep it", null)
-            .show()
+        }
+        confirmDialog.show()
     }
 
     dialog.show()

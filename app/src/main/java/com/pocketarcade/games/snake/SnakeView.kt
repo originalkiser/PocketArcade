@@ -37,6 +37,7 @@ class SnakeView @JvmOverloads constructor(
 
     var onScoreChanged: ((Int) -> Unit)? = null
     var onGameOver: ((Int) -> Unit)? = null
+    var onGameStarted: (() -> Unit)? = null
 
     var swipeThresholdDp: Float = 20f
 
@@ -125,6 +126,7 @@ class SnakeView @JvmOverloads constructor(
         started = true
         handler.removeCallbacks(tickRunnable)
         handler.postDelayed(tickRunnable, TICK_MS)
+        onGameStarted?.invoke()
         invalidate()
     }
 
@@ -212,8 +214,7 @@ class SnakeView @JvmOverloads constructor(
 
     fun steer(dx: Int, dy: Int) {
         if (demoMode) { startGame(); return }
-        if (!started) { startGame(); return }
-        if (gameOver) return
+        if (!started || gameOver) return
         val nd = Point(dx, dy)
         if (nd.x != -dir.x || nd.y != -dir.y) nextDir = nd
     }
@@ -230,7 +231,6 @@ class SnakeView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 touchStartX = event.x; touchStartY = event.y
                 if (demoMode) { startGame(); return true }
-                if (!started) { startGame(); return true }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -254,7 +254,6 @@ class SnakeView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 extTouchStartX = event.x; extTouchStartY = event.y
                 if (demoMode) { startGame(); return true }
-                if (!started) { startGame(); return true }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -330,7 +329,7 @@ class SnakeView @JvmOverloads constructor(
             canvas.drawRect(0f, 0f, gridW, gridH, overlayPaint)
             val cx = gridW / 2f; val cy = gridH / 2f
             gameOverTextPaint.textSize = cs * 1.1f
-            canvas.drawText("TAP TO START", cx, cy - cs * 0.5f, gameOverTextPaint)
+            canvas.drawText("PRESS START", cx, cy - cs * 0.5f, gameOverTextPaint)
             hintPaint.textSize = cs * 0.6f
             canvas.drawText("swipe or use D-pad", cx, cy + cs * 0.8f, hintPaint)
         } else if (gameOver && !demoMode) {

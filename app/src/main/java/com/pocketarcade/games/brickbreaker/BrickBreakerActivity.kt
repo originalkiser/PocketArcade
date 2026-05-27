@@ -99,9 +99,16 @@ class BrickBreakerActivity : AppCompatActivity() {
         btnSound.setOnClickListener { toggleSound() }
         btnLightMode.setOnClickListener { toggleLightMode() }
 
+        bbView.difficulty = indexToDifficulty(PrefsManager.getBBDifficulty(this))
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()
+    }
+
+    private fun indexToDifficulty(i: Int) = when (i) {
+        0 -> BBDifficulty.EASY
+        2 -> BBDifficulty.HARD
+        else -> BBDifficulty.MEDIUM
     }
 
     private fun showSettingsDialog() {
@@ -120,6 +127,37 @@ class BrickBreakerActivity : AppCompatActivity() {
         switchSound.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setSoundEnabled(this, checked)
             updateSoundButton()
+        }
+
+        // Difficulty buttons
+        val btnEasy   = view.findViewById<TextView>(R.id.btnDiffEasy)
+        val btnMedium = view.findViewById<TextView>(R.id.btnDiffMedium)
+        val btnHard   = view.findViewById<TextView>(R.id.btnDiffHard)
+
+        fun refreshDiff() {
+            val d = PrefsManager.getBBDifficulty(this)
+            val active   = getColor(R.color.accent_yellow)
+            val inactive = getColor(R.color.muted)
+            btnEasy.setTextColor(if (d == 0) active else inactive)
+            btnMedium.setTextColor(if (d == 1) active else inactive)
+            btnHard.setTextColor(if (d == 2) active else inactive)
+        }
+        refreshDiff()
+
+        btnEasy.setOnClickListener {
+            PrefsManager.setBBDifficulty(this, 0)
+            bbView.difficulty = BBDifficulty.EASY
+            refreshDiff()
+        }
+        btnMedium.setOnClickListener {
+            PrefsManager.setBBDifficulty(this, 1)
+            bbView.difficulty = BBDifficulty.MEDIUM
+            refreshDiff()
+        }
+        btnHard.setOnClickListener {
+            PrefsManager.setBBDifficulty(this, 2)
+            bbView.difficulty = BBDifficulty.HARD
+            refreshDiff()
         }
 
         val themeIndex = ThemeManager.effectiveThemeIndex(this, PrefsManager.GAME_BRICKBREAKER)
@@ -167,6 +205,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         bbView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_BRICKBREAKER))
+        ThemeManager.applyWindowBackground(this, PrefsManager.GAME_BRICKBREAKER)
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()

@@ -93,9 +93,10 @@ class AsteroidsActivity : AppCompatActivity() {
     }
 
     private fun updateAutoFireButton() {
-        btnAutoFire.setTextColor(
-            if (astView.autoFire) getColor(R.color.accent_cyan) else getColor(R.color.muted)
-        )
+        val on = astView.autoFire
+        btnAutoFire.setTextColor(if (on) getColor(R.color.accent_cyan) else getColor(R.color.muted))
+        controlsPanel.autoFireEnabled = on
+        controlsPanel.invalidate()
     }
 
     private fun showSettingsDialog() {
@@ -134,6 +135,7 @@ class AsteroidsActivity : AppCompatActivity() {
         val theme = ThemeManager.currentTheme(this, PrefsManager.GAME_ASTEROIDS)
         astView.applyTheme(theme)
         controlsPanel.applyTheme(theme.accent, theme.muted)
+        ThemeManager.applyWindowBackground(this, PrefsManager.GAME_ASTEROIDS)
     }
 
     private fun updateHighScore() {

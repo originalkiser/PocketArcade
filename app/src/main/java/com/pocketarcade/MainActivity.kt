@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         startBlinkPrompt()
         IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
+        showChangelogIfNeeded(this)
 
         // Show splash curtain as overlay — reveals game menu as it lifts
         if (savedInstanceState == null) {
@@ -120,6 +121,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
+        ThemeManager.applyWindowBackground(this)
+        findViewById<FrameLayout>(R.id.rootFrame).setBackgroundColor(ThemeManager.currentTheme(this).bg)
 
         if (PrefsManager.onSessionStart(this)) {
             showUpsellDialog()

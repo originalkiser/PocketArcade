@@ -17,6 +17,8 @@ object PrefsManager {
     private const val KEY_LAST_UPDATE_CHECK = "last_update_check"
     private const val KEY_LAST_INITIALS = "last_initials"
     private const val KEY_LEADERBOARD_SIZE = "leaderboard_size"
+    private const val KEY_LAST_VERSION_CODE = "last_version_code"
+    private const val KEY_BB_DIFFICULTY = "bb_difficulty"
 
     const val GAME_SNAKE = "snake"
     const val GAME_PONG = "pong"
@@ -105,6 +107,13 @@ object PrefsManager {
 
     fun setLeaderboardSize(ctx: Context, size: Int) =
         prefs(ctx).edit { putInt(KEY_LEADERBOARD_SIZE, size.coerceIn(1, 15)) }
+
+    fun getLastVersionCode(ctx: Context): Int = prefs(ctx).getInt(KEY_LAST_VERSION_CODE, -1)
+    fun setLastVersionCode(ctx: Context, code: Int) = prefs(ctx).edit { putInt(KEY_LAST_VERSION_CODE, code) }
+
+    // 0 = Easy, 1 = Medium, 2 = Hard
+    fun getBBDifficulty(ctx: Context): Int = prefs(ctx).getInt(KEY_BB_DIFFICULTY, 1)
+    fun setBBDifficulty(ctx: Context, value: Int) = prefs(ctx).edit { putInt(KEY_BB_DIFFICULTY, value.coerceIn(0, 2)) }
 
     private fun nextUpsellInterval() = (3..5).random()
 }

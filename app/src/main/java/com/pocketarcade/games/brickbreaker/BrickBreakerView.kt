@@ -15,6 +15,7 @@ import kotlin.math.*
 
 enum class BBState { IDLE, AIM, PLAYING, LEVEL_CLEAR, GAME_OVER, WIN }
 enum class PowerUpType { WIDE_PADDLE, SLOW_BALL, MULTI_BALL, LASER }
+enum class BBDifficulty { EASY, MEDIUM, HARD }
 
 data class Ball(var x: Float, var y: Float, var vx: Float, var vy: Float, val r: Float = 16f)
 data class Brick(val col: Int, val row: Int, var hp: Int)
@@ -29,6 +30,11 @@ class BrickBreakerView @JvmOverloads constructor(
         const val BRICK_ROWS = 7
         const val PADDLE_H = 12f
         const val BASE_BALL_SPEED = 28f
+        fun speedForDifficulty(d: BBDifficulty) = when (d) {
+            BBDifficulty.EASY   -> 18f
+            BBDifficulty.MEDIUM -> 22f
+            BBDifficulty.HARD   -> 28f
+        }
         const val SLOW_BALL_MULTIPLIER = 0.6f
         const val WIDE_PADDLE_FACTOR = 1.7f
         const val POWERUP_SPEED = 3f
@@ -87,6 +93,8 @@ class BrickBreakerView @JvmOverloads constructor(
                     intArrayOf(3,3,3,3,3,3,3,3))
         )
     }
+
+    var difficulty = BBDifficulty.MEDIUM
 
     var onScoreChanged: ((Int) -> Unit)? = null
     var onLevelChanged: ((Int) -> Unit)? = null
@@ -224,6 +232,7 @@ class BrickBreakerView @JvmOverloads constructor(
     fun startGame(demo: Boolean = false) {
         demoMode = demo
         score = 0; level = 0
+        ballSpeed = speedForDifficulty(difficulty)
         widePaddleTimer = 0; slowBallTimer = 0; laserTimer = 0
         computeLayout(); initPaddle()
         loadLevel()

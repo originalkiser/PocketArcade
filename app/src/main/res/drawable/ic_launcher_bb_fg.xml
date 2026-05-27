@@ -4,19 +4,25 @@
     android:height="108dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <!-- Bricks row 1 (red) -->
-    <path android:fillColor="#e74c3c"
-        android:pathData="M2,6 h13 v6 h-13 z M17,6 h13 v6 h-13 z M32,6 h14 v6 h-14 z" />
-    <!-- Bricks row 2 (yellow) -->
-    <path android:fillColor="#f1c40f"
-        android:pathData="M2,14 h13 v6 h-13 z M17,14 h13 v6 h-13 z M32,14 h14 v6 h-14 z" />
-    <!-- Bricks row 3 (green) -->
-    <path android:fillColor="#2ecc71"
-        android:pathData="M2,22 h13 v6 h-13 z M17,22 h13 v6 h-13 z M32,22 h14 v6 h-14 z" />
-    <!-- Ball -->
-    <path android:fillColor="#e8ecf0"
-        android:pathData="M28,36 a4,4 0 1,1 -8,0 a4,4 0 0,1 8,0 z" />
-    <!-- Paddle -->
-    <path android:fillColor="#4f8ef7"
-        android:pathData="M8,43 h32 v5 h-32 z" />
+    <group
+        android:scaleX="0.67"
+        android:scaleY="0.67"
+        android:pivotX="24"
+        android:pivotY="24">
+        <!-- Bricks row 1 (red) -->
+        <path android:fillColor="#e74c3c"
+            android:pathData="M2,6 h13 v6 h-13 z M17,6 h13 v6 h-13 z M32,6 h14 v6 h-14 z" />
+        <!-- Bricks row 2 (yellow) -->
+        <path android:fillColor="#f1c40f"
+            android:pathData="M2,14 h13 v6 h-13 z M17,14 h13 v6 h-13 z M32,14 h14 v6 h-14 z" />
+        <!-- Bricks row 3 (green) -->
+        <path android:fillColor="#2ecc71"
+            android:pathData="M2,22 h13 v6 h-13 z M17,22 h13 v6 h-13 z M32,22 h14 v6 h-14 z" />
+        <!-- Ball -->
+        <path android:fillColor="#e8ecf0"
+            android:pathData="M28,36 a4,4 0 1,1 -8,0 a4,4 0 0,1 8,0 z" />
+        <!-- Paddle -->
+        <path android:fillColor="#4f8ef7"
+            android:pathData="M8,43 h32 v5 h-32 z" />
+    </group>
 </vector>

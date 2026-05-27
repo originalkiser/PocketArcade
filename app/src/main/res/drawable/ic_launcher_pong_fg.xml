@@ -4,21 +4,27 @@
     android:height="108dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <!-- Center dashed line -->
-    <path android:fillColor="#3a4a6e"
-        android:pathData="M23,4 h2 v4 h-2 z
-                          M23,12 h2 v4 h-2 z
-                          M23,20 h2 v4 h-2 z
-                          M23,28 h2 v4 h-2 z
-                          M23,36 h2 v4 h-2 z
-                          M23,44 h2 v4 h-2 z" />
-    <!-- Top paddle (AI) -->
-    <path android:fillColor="#e74c3c"
-        android:pathData="M4,4 h14 v5 h-14 z" />
-    <!-- Bottom paddle (Player) -->
-    <path android:fillColor="#4f8ef7"
-        android:pathData="M30,39 h14 v5 h-14 z" />
-    <!-- Ball -->
-    <path android:fillColor="#e8ecf0"
-        android:pathData="M26,24 a4,4 0 1,1 -8,0 a4,4 0 0,1 8,0 z" />
+    <group
+        android:scaleX="0.67"
+        android:scaleY="0.67"
+        android:pivotX="24"
+        android:pivotY="24">
+        <!-- Center dashed line -->
+        <path android:fillColor="#3a4a6e"
+            android:pathData="M23,4 h2 v4 h-2 z
+                              M23,12 h2 v4 h-2 z
+                              M23,20 h2 v4 h-2 z
+                              M23,28 h2 v4 h-2 z
+                              M23,36 h2 v4 h-2 z
+                              M23,44 h2 v4 h-2 z" />
+        <!-- Top paddle (AI) -->
+        <path android:fillColor="#e74c3c"
+            android:pathData="M4,4 h14 v5 h-14 z" />
+        <!-- Bottom paddle (Player) -->
+        <path android:fillColor="#4f8ef7"
+            android:pathData="M30,39 h14 v5 h-14 z" />
+        <!-- Ball -->
+        <path android:fillColor="#e8ecf0"
+            android:pathData="M26,24 a4,4 0 1,1 -8,0 a4,4 0 0,1 8,0 z" />
+    </group>
 </vector>

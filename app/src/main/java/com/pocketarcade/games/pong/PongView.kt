@@ -236,37 +236,44 @@ class PongView @JvmOverloads constructor(
         aiX += (aiTargetX - aiX).coerceIn(-aiSpeed, aiSpeed)
         aiX = aiX.coerceIn(0f, w - paddleW)
 
-        // Move ball
+        // Move ball — save previous position for swept collision
+        val prevBy = by
         bx += bvx; by += bvy
 
         // Wall bounce (left/right)
         if (bx - BALL_R < 0) { bx = BALL_R; bvx = abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
         if (bx + BALL_R > w) { bx = w - BALL_R; bvx = -abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
 
-        // Player paddle collision (bottom)
-        if (bvy > 0 && by + BALL_R >= playerY - PADDLE_H / 2f &&
-            by + BALL_R <= playerY + PADDLE_H &&
-            bx >= playerX && bx <= playerX + paddleW
+        // Player paddle collision (bottom) — swept: check if ball crossed paddle plane this frame
+        if (bvy > 0 &&
+            prevBy + BALL_R <= playerY &&
+            by + BALL_R > playerY &&
+            bx + BALL_R > playerX && bx - BALL_R < playerX + paddleW
         ) {
             bvy = -abs(bvy)
-            by = playerY - PADDLE_H / 2f - BALL_R
+            by = playerY - BALL_R
             volley++
-            bvx *= 1.03f; bvy *= 1.03f
+            val maxSpd = baseSpeed() * 2.5f
+            val spd = sqrt(bvx * bvx + bvy * bvy)
+            if (spd < maxSpd) { bvx *= 1.03f; bvy *= 1.03f }
             if (!demoMode) {
                 SoundManager.play(SoundManager.SFX.PONG_BOUNCE, context)
                 post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
             }
         }
 
-        // AI paddle collision (top)
-        if (bvy < 0 && by - BALL_R <= aiY + PADDLE_H / 2f &&
-            by - BALL_R >= aiY - PADDLE_H &&
-            bx >= aiX && bx <= aiX + paddleW
+        // AI paddle collision (top) — swept
+        if (bvy < 0 &&
+            prevBy - BALL_R >= aiY &&
+            by - BALL_R < aiY &&
+            bx + BALL_R > aiX && bx - BALL_R < aiX + paddleW
         ) {
             bvy = abs(bvy)
-            by = aiY + PADDLE_H / 2f + BALL_R
+            by = aiY + BALL_R
             volley++
-            bvx *= 1.03f; bvy *= 1.03f
+            val maxSpd = baseSpeed() * 2.5f
+            val spd = sqrt(bvx * bvx + bvy * bvy)
+            if (spd < maxSpd) { bvx *= 1.03f; bvy *= 1.03f }
             if (!demoMode) {
                 SoundManager.play(SoundManager.SFX.PONG_BOUNCE, context)
                 post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }

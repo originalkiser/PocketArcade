@@ -14,6 +14,8 @@ class AsteroidsControlsView @JvmOverloads constructor(
     var onJoystick: ((dx: Float, dy: Float) -> Unit)? = null
     var onFire: ((pressed: Boolean) -> Unit)? = null
 
+    var autoFireEnabled = false  // set by Activity to show tooltip
+
     private var joystickId = -1
     private var joystickCenterX = 0f
     private var joystickCenterY = 0f
@@ -22,30 +24,33 @@ class AsteroidsControlsView @JvmOverloads constructor(
     private var fireId = -1
     private var fireActive = false
 
-    private val r = 54f   // joystick ring radius
-    private val kr = 24f  // knob radius
-    private val fr = 48f  // fire button radius
+    private val r  = 72f   // joystick ring radius (was 54)
+    private val kr = 32f   // knob radius (was 24)
+    private val fr = 68f   // fire button radius (was 48)
 
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#203a4a6e"); style = Paint.Style.FILL
+        color = Color.parseColor("#803a4a6e"); style = Paint.Style.FILL
     }
     private val ringStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#503a4a6e"); style = Paint.Style.STROKE; strokeWidth = 2f
+        color = Color.parseColor("#803a4a6e"); style = Paint.Style.STROKE; strokeWidth = 2f
     }
     private val knobPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#604f8ef7"); style = Paint.Style.FILL
+        color = Color.parseColor("#804f8ef7"); style = Paint.Style.FILL
     }
     private val firePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#40e74c3c"); style = Paint.Style.FILL
+        color = Color.parseColor("#80e74c3c"); style = Paint.Style.FILL
     }
     private val fireActivePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#80e74c3c"); style = Paint.Style.FILL
+        color = Color.parseColor("#CCe74c3c"); style = Paint.Style.FILL
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE; textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
     private val hintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#406b7a99"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#806b7a99"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+    }
+    private val autoFirePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#B300d4ff"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
@@ -96,20 +101,19 @@ class AsteroidsControlsView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        labelPaint.textSize = h * 0.28f
-        hintPaint.textSize = h * 0.18f
+        labelPaint.textSize = h * 0.32f
+        hintPaint.textSize  = h * 0.18f
+        autoFirePaint.textSize = h * 0.15f
 
         // Left half: joystick
         val jcx = if (joystickId >= 0) joystickCenterX else w / 4f
         val jcy = if (joystickId >= 0) joystickCenterY else h / 2f
         canvas.drawCircle(jcx, jcy, r, ringPaint)
         canvas.drawCircle(jcx, jcy, r, ringStrokePaint)
-        val mag = sqrt(joystickDX * joystickDX + joystickDY * joystickDY)
         val kx = if (joystickId >= 0) (jcx + joystickDX.coerceIn(-r, r)) else jcx
         val ky = if (joystickId >= 0) (jcy + joystickDY.coerceIn(-r, r)) else jcy
         canvas.drawCircle(kx, ky, kr, knobPaint)
         if (joystickId < 0) {
-            hintPaint.textAlign = Paint.Align.CENTER
             canvas.drawText("STEER", w / 4f, h * 0.88f, hintPaint)
         }
 
@@ -117,16 +121,22 @@ class AsteroidsControlsView @JvmOverloads constructor(
         val divPaint = Paint().apply { color = Color.parseColor("#1a3a4a6e"); strokeWidth = 1f }
         canvas.drawLine(w / 2f, 8f, w / 2f, h - 8f, divPaint)
 
-        // Right half: fire
+        // Right half: fire button
         val fcx = w * 3f / 4f; val fcy = h / 2f
         canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
         canvas.drawText("●", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
-        canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
+
+        if (autoFireEnabled) {
+            // Auto-fire tooltip badge above the button
+            canvas.drawText("▸ AUTO FIRE ON ◂", fcx, fcy - fr - 8f, autoFirePaint)
+        } else {
+            canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
+        }
     }
 
     fun applyTheme(accent: Int, muted: Int) {
-        knobPaint.color = (accent and 0x00FFFFFF) or 0x60000000
-        ringPaint.color = (muted and 0x00FFFFFF) or 0x20000000
+        knobPaint.color  = (accent and 0x00FFFFFF) or 0x80000000.toInt()
+        ringPaint.color  = (muted  and 0x00FFFFFF) or 0x80000000.toInt()
         invalidate()
     }
 }
