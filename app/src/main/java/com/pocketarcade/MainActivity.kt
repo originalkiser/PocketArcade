@@ -14,6 +14,7 @@ import com.pocketarcade.games.asteroids.AsteroidsActivity
 import com.pocketarcade.games.brickbreaker.BrickBreakerActivity
 import com.pocketarcade.games.pong.PongActivity
 import com.pocketarcade.games.snake.SnakeActivity
+import com.pocketarcade.leaderboard.LeaderboardManager
 import com.pocketarcade.storage.PrefsManager
 
 class MainActivity : AppCompatActivity() {
@@ -25,9 +26,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MobileAds.initialize(this) {}
-
-        AdManager.populateBannerContainer(findViewById(R.id.adContainer))
+        MobileAds.initialize(this) {
+            runOnUiThread { AdManager.populateBannerContainer(findViewById(R.id.adContainer)) }
+        }
 
         billing = BillingManager(
             activity = this,
@@ -74,14 +75,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateScores() {
+        fun topDetail(game: String): String {
+            val top = LeaderboardManager.getEntries(this, game).firstOrNull() ?: return ""
+            val initials = top.initials.trim()
+            return if (initials.isNotEmpty()) "$initials · ${top.formattedDate}" else top.formattedDate
+        }
+
+        val pongScore = PrefsManager.getHighScore(this, PrefsManager.GAME_PONG)
         findViewById<TextView>(R.id.tvScoreSnake).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_SNAKE)}"
         findViewById<TextView>(R.id.tvScorePong).text =
-            if (PrefsManager.getHighScore(this, PrefsManager.GAME_PONG) > 0) "WON!" else "High Score: 0"
+            if (pongScore > 0) "WON!" else "High Score: 0"
         findViewById<TextView>(R.id.tvScoreAsteroids).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS)}"
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
+
+        findViewById<TextView>(R.id.tvScoreSnakeDetail).text = topDetail(PrefsManager.GAME_SNAKE)
+        findViewById<TextView>(R.id.tvScorePongDetail).text = topDetail(PrefsManager.GAME_PONG)
+        findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
+        findViewById<TextView>(R.id.tvScoreBBDetail).text = topDetail(PrefsManager.GAME_BRICKBREAKER)
     }
 
     // ── Upsell dialog ─────────────────────────────────────────────────────────

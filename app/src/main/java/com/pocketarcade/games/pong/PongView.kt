@@ -42,8 +42,12 @@ class PongView @JvmOverloads constructor(
     private var volley = 0
     private var countdownValue = 3
 
-    // Touch
-    private var touchX = -1f
+    // Touch — offset-based so paddle tracks delta, not absolute position
+    private var touchActive = false
+    private var touchStartX = 0f
+    private var paddleStartX = 0f
+
+    var readyForRestart = false
 
     // Demo: virtual "finger" for player paddle
     private var demoTouchX = 0f
@@ -177,9 +181,9 @@ class PongView @JvmOverloads constructor(
     }
 
     private fun baseSpeed() = when (difficulty) {
-        PongDifficulty.EASY -> 9f
-        PongDifficulty.MEDIUM -> 12f
-        PongDifficulty.HARD -> 15f
+        PongDifficulty.EASY -> 14f
+        PongDifficulty.MEDIUM -> 18f
+        PongDifficulty.HARD -> 22f
     }
 
     fun isUserPlaying() = state == PongState.PLAYING && !demoMode
@@ -195,12 +199,17 @@ class PongView @JvmOverloads constructor(
 
     fun setIdle() { state = PongState.IDLE }
 
-    fun feedExternalTouch(x: Float, isDown: Boolean) {
-        if (isDown) {
-            if (demoMode || state != PongState.PLAYING) startGame(false)
-            touchX = x
-        } else {
-            touchX = -1f
+    fun feedExternalTouch(action: Int, x: Float) {
+        when (action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                if (demoMode || state == PongState.IDLE) { startGame(false); return }
+                if (state == PongState.GAME_OVER && readyForRestart) { startGame(false); return }
+                touchStartX = x; paddleStartX = playerX; touchActive = true
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                if (touchActive) playerX = (paddleStartX + (x - touchStartX)).coerceIn(0f, width - paddleW)
+            }
+            android.view.MotionEvent.ACTION_UP -> touchActive = false
         }
     }
 
@@ -215,14 +224,11 @@ class PongView @JvmOverloads constructor(
         val playerY = h - margin
         val aiY = margin
 
-        // Move player paddle (touch or demo AI)
-        val targetX = if (demoMode) {
-            // Demo: both AI
-            bx - paddleW / 2f + (-10..10).random()
-        } else {
-            if (touchX >= 0) touchX - paddleW / 2f else playerX
+        // Move player paddle (offset-tracked touch or demo AI)
+        if (demoMode) {
+            playerX = (bx - paddleW / 2f + (-10..10).random()).coerceIn(0f, w - paddleW)
         }
-        playerX = targetX.coerceIn(0f, w - paddleW)
+        // playerX is updated live by feedExternalTouch during real play
 
         // AI paddle
         val aiTargetX = bx - paddleW / 2f + aiJitter()
@@ -295,9 +301,9 @@ class PongView @JvmOverloads constructor(
     }
 
     private fun aiMoveSpeed() = when (difficulty) {
-        PongDifficulty.EASY -> 4f
-        PongDifficulty.MEDIUM -> 7f
-        PongDifficulty.HARD -> 11f
+        PongDifficulty.EASY -> 7f
+        PongDifficulty.MEDIUM -> 13f
+        PongDifficulty.HARD -> 19f
     }
 
     private fun aiJitter(): Float = when (difficulty) {
@@ -308,14 +314,7 @@ class PongView @JvmOverloads constructor(
 
     // ── Touch ──────────────────────────────────────────────────────────────────
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (demoMode || state != PongState.PLAYING) startGame(false)
-                touchX = event.x
-            }
-            MotionEvent.ACTION_MOVE -> touchX = event.x
-            MotionEvent.ACTION_UP -> touchX = -1f
-        }
+        feedExternalTouch(event.action, event.x)
         return true
     }
 
@@ -364,7 +363,7 @@ class PongView @JvmOverloads constructor(
                 canvas.drawText(if (playerWon) "YOU WIN!" else "GAME OVER", w / 2f, h * 0.4f, paint)
                 labelPaint.textSize = h * 0.035f
                 canvas.drawText("$playerScore — $aiScore", w / 2f, h * 0.5f, labelPaint)
-                canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.6f, labelPaint)
+                if (readyForRestart) canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.6f, labelPaint)
             }
             else -> {}
         }

@@ -28,7 +28,7 @@ class BrickBreakerView @JvmOverloads constructor(
         const val COLS = 8
         const val BRICK_ROWS = 7
         const val PADDLE_H = 12f
-        const val BASE_BALL_SPEED = 16f
+        const val BASE_BALL_SPEED = 28f
         const val SLOW_BALL_MULTIPLIER = 0.6f
         const val WIDE_PADDLE_FACTOR = 1.7f
         const val POWERUP_SPEED = 3f
@@ -112,7 +112,13 @@ class BrickBreakerView @JvmOverloads constructor(
 
     // Aim mode
     private var aimAngle = -PI.toFloat() / 2f
-    private var touchX = 0f
+
+    // Touch — offset-based paddle control
+    private var touchStartX = 0f
+    private var paddleStartX = 0f
+    private var touchActive = false
+
+    var readyForRestart = false
 
     // Derived layout
     private var brickW = 0f; private var brickH = 0f
@@ -415,35 +421,40 @@ class BrickBreakerView @JvmOverloads constructor(
     }
 
     // ── Touch ──────────────────────────────────────────────────────────────────
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+
+    /** Called by both onTouchEvent and the external swipe zone. */
+    fun feedTouch(action: Int, x: Float, y: Float) {
         val w = width.toFloat()
-        when (event.action) {
+        when (action) {
             MotionEvent.ACTION_DOWN -> {
-                if (demoMode) { startGame(false); return true }
-                touchX = event.x
+                if (demoMode) { startGame(false); return }
+                touchStartX = x; paddleStartX = paddleX; touchActive = true
                 when (state) {
                     BBState.IDLE -> startGame(false)
                     BBState.LEVEL_CLEAR -> loadLevel()
-                    BBState.GAME_OVER, BBState.WIN -> startGame(false)
-                    BBState.AIM -> { /* Move and set aim */ }
+                    BBState.GAME_OVER, BBState.WIN -> if (readyForRestart) startGame(false)
                     else -> {}
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                touchX = event.x
-                if (state == BBState.AIM || state == BBState.PLAYING) {
-                    paddleX = (touchX - paddleW / 2f).coerceIn(0f, w - paddleW)
+                if (touchActive && (state == BBState.AIM || state == BBState.PLAYING)) {
+                    paddleX = (paddleStartX + (x - touchStartX)).coerceIn(0f, w - paddleW)
                     if (state == BBState.AIM) {
-                        val ball = balls.firstOrNull() ?: return true
-                        val angle = atan2(event.y - ball.y, event.x - ball.x)
+                        val ball = balls.firstOrNull() ?: return
+                        val angle = atan2(y - ball.y, x - ball.x)
                         aimAngle = if (angle > -0.15f) -PI.toFloat() / 2f else angle
                     }
                 }
             }
             MotionEvent.ACTION_UP -> {
+                touchActive = false
                 if (state == BBState.AIM) launchBall()
             }
         }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        feedTouch(event.action, event.x, event.y)
         return true
     }
 
@@ -516,7 +527,7 @@ class BrickBreakerView @JvmOverloads constructor(
                 centerPaint.color = Color.parseColor("#4f8ef7")
                 subPaint.textSize = h * 0.035f
                 canvas.drawText("SCORE: $score", w / 2f, h * 0.5f, subPaint)
-                canvas.drawText("TAP TO RETRY", w / 2f, h * 0.6f, subPaint)
+                if (readyForRestart) canvas.drawText("TAP TO RETRY", w / 2f, h * 0.6f, subPaint)
             }
             BBState.WIN -> {
                 canvas.drawRect(0f, 0f, w, h, overlayPaint)
@@ -527,7 +538,7 @@ class BrickBreakerView @JvmOverloads constructor(
                 subPaint.textSize = h * 0.032f
                 canvas.drawText("ALL 10 LEVELS CLEARED!", w / 2f, h * 0.48f, subPaint)
                 canvas.drawText("SCORE: $score", w / 2f, h * 0.56f, subPaint)
-                canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.64f, subPaint)
+                if (readyForRestart) canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.64f, subPaint)
             }
             else -> {}
         }

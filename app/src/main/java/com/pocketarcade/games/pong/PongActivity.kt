@@ -27,6 +27,8 @@ class PongActivity : AppCompatActivity() {
     private lateinit var tvHighScore: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
+    private lateinit var btnSound: TextView
+    private lateinit var btnLightMode: TextView
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
 
@@ -47,6 +49,8 @@ class PongActivity : AppCompatActivity() {
         tvHighScore    = findViewById(R.id.tvHighScore)
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
+        btnSound       = findViewById(R.id.btnSound)
+        btnLightMode   = findViewById(R.id.btnLightMode)
         swipeZone      = findViewById(R.id.swipeZone)
 
         updateHighScore()
@@ -56,23 +60,33 @@ class PongActivity : AppCompatActivity() {
             runOnUiThread { tvScore.text = "P:$p  AI:$ai" }
         }
         pongView.onMatchEnd = { playerWon, playerScore ->
+            pongView.readyForRestart = false
             if (playerWon) {
                 PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, playerScore)
                 runOnUiThread { updateHighScore() }
             }
             idleHandler.postDelayed({
-                runOnUiThread { checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, playerScore) }
+                runOnUiThread {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, playerScore) {
+                        pongView.readyForRestart = true
+                    }
+                }
             }, 1500L)
             idleHandler.postDelayed(idleRunnable, 15_000L)
         }
 
         swipeZone.setOnTouchListener { _, event ->
-            pongView.feedExternalTouch(event.x, event.action != MotionEvent.ACTION_UP)
+            pongView.feedExternalTouch(event.action, event.x)
             true
         }
 
         btnSettings.setOnClickListener { showSettingsDialog() }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_PONG) }
+        btnSound.setOnClickListener { toggleSound() }
+        btnLightMode.setOnClickListener { toggleLightMode() }
+
+        updateSoundButton()
+        updateLightModeButton()
     }
 
     private fun showDifficultyDialog(cancelable: Boolean = true) {
@@ -113,6 +127,7 @@ class PongActivity : AppCompatActivity() {
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
         switchSound.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setSoundEnabled(this, checked)
+            updateSoundButton()
         }
 
         val themeIndex = ThemeManager.effectiveThemeIndex(this, PrefsManager.GAME_PONG)
@@ -136,12 +151,33 @@ class PongActivity : AppCompatActivity() {
 
     private fun updateHighScore() {
         val hi = PrefsManager.getHighScore(this, PrefsManager.GAME_PONG)
-        tvHighScore.text = "Best: $hi pts"
+        tvHighScore.text = "Best: $hi"
+    }
+
+    private fun toggleSound() {
+        PrefsManager.setSoundEnabled(this, !PrefsManager.isSoundEnabled(this))
+        updateSoundButton()
+    }
+
+    private fun updateSoundButton() {
+        btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
+    }
+
+    private fun toggleLightMode() {
+        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        updateLightModeButton()
+        pongView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_PONG))
+    }
+
+    private fun updateLightModeButton() {
+        btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
     }
 
     override fun onResume() {
         super.onResume()
         pongView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_PONG))
+        updateSoundButton()
+        updateLightModeButton()
         idleHandler.postDelayed(idleRunnable, 15_000L)
     }
 

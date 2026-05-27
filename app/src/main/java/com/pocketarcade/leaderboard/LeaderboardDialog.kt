@@ -9,13 +9,15 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
+import com.pocketarcade.storage.PrefsManager
 
 private val LETTERS = Array(27) { i -> if (i == 0) " " else ('A' + i - 1).toString() }
 
 fun showLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
-    highlightRank: Int = -1
+    highlightRank: Int = -1,
+    onDismiss: () -> Unit = {}
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_leaderboard, null)
     val container = view.findViewById<LinearLayout>(R.id.leaderboardContainer)
@@ -56,6 +58,7 @@ fun showLeaderboardDialog(
         setBackgroundDrawableResource(android.R.color.transparent)
         setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
     }
+    dialog.setOnDismissListener { onDismiss() }
 
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
@@ -64,7 +67,8 @@ fun showLeaderboardDialog(
 fun showInitialsThenLeaderboard(
     activity: AppCompatActivity,
     game: String,
-    score: Int
+    score: Int,
+    onDone: () -> Unit = {}
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_initials, null)
     val pickerA = view.findViewById<NumberPicker>(R.id.pickerA)
@@ -73,14 +77,24 @@ fun showInitialsThenLeaderboard(
     val preview = view.findViewById<TextView>(R.id.tvInitialsPreview)
     view.findViewById<TextView>(R.id.tvInitialsScore).text = "SCORE: $score"
 
-    fun configPicker(p: NumberPicker) {
+    val last = PrefsManager.getLastInitials(activity).padEnd(3)
+
+    fun letterIndex(ch: Char): Int {
+        if (ch == ' ') return 0
+        val idx = ch.uppercaseChar() - 'A' + 1
+        return idx.coerceIn(0, 26)
+    }
+
+    fun configPicker(p: NumberPicker, defaultChar: Char) {
         p.minValue = 0
         p.maxValue = LETTERS.size - 1
         p.displayedValues = LETTERS
-        p.value = 1  // default 'A'
+        p.value = letterIndex(defaultChar)
         p.wrapSelectorWheel = true
     }
-    configPicker(pickerA); configPicker(pickerB); configPicker(pickerC)
+    configPicker(pickerA, last[0])
+    configPicker(pickerB, last[1])
+    configPicker(pickerC, last[2])
 
     fun updatePreview() {
         preview.text = "${LETTERS[pickerA.value]}${LETTERS[pickerB.value]}${LETTERS[pickerC.value]}"
@@ -102,14 +116,15 @@ fun showInitialsThenLeaderboard(
 
     view.findViewById<TextView>(R.id.btnSave).setOnClickListener {
         val initials = "${LETTERS[pickerA.value]}${LETTERS[pickerB.value]}${LETTERS[pickerC.value]}"
+        PrefsManager.setLastInitials(activity, initials)
         val rank = LeaderboardManager.addEntry(activity, game, score, initials)
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game, rank) }
+        activity.runOnUiThread { showLeaderboardDialog(activity, game, rank, onDismiss = onDone) }
     }
     view.findViewById<TextView>(R.id.btnSkip).setOnClickListener {
         LeaderboardManager.addEntry(activity, game, score, "   ")
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game) }
+        activity.runOnUiThread { showLeaderboardDialog(activity, game, onDismiss = onDone) }
     }
 
     dialog.show()
@@ -118,12 +133,13 @@ fun showInitialsThenLeaderboard(
 fun checkAndShowLeaderboard(
     activity: AppCompatActivity,
     game: String,
-    score: Int
+    score: Int,
+    onDone: () -> Unit = {}
 ) {
     if (LeaderboardManager.isTopTen(activity, game, score)) {
-        showInitialsThenLeaderboard(activity, game, score)
+        showInitialsThenLeaderboard(activity, game, score, onDone)
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")
-        showLeaderboardDialog(activity, game)
+        showLeaderboardDialog(activity, game, onDismiss = onDone)
     }
 }

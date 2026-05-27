@@ -11,13 +11,14 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
+    <!-- Controls bar (above game, below ad) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
+        android:layout_height="48dp"
+        android:paddingHorizontal="12dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@color/surface">
 
         <TextView
             android:id="@+id/tvScore"
@@ -26,47 +27,67 @@
             android:layout_weight="1"
             android:text="SCORE: 0"
             android:textColor="@color/accent_yellow"
-            android:textSize="18sp"
-            android:fontFamily="monospace" />
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:singleLine="true" />
 
         <TextView
             android:id="@+id/tvLevel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:text="LV: 1"
+            android:text="LV:1"
             android:textColor="@color/accent_green"
-            android:textSize="18sp"
-            android:fontFamily="monospace" />
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="6dp" />
 
         <TextView
             android:id="@+id/tvHighScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="High Score: 0"
+            android:text="Best:0"
             android:textColor="@color/muted"
-            android:textSize="18sp"
-            android:fontFamily="monospace" />
+            android:textSize="10sp"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/btnSound"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#128266;"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnLightMode"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#127769;"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
             android:id="@+id/btnLeaderboard"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:text="&#127942;"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
 
         <TextView
             android:id="@+id/btnSettings"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="4dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:text="&#9881;"
             android:textColor="@color/muted"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
@@ -76,6 +97,25 @@
         android:id="@+id/brickBreakerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="2" />
+
+    <FrameLayout
+        android:id="@+id/swipeZone"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="&#9664;  swipe to move paddle  •  tap to launch  &#9654;"
+            android:textColor="@color/muted"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+    </FrameLayout>
 
 </LinearLayout>

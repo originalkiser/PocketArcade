@@ -68,17 +68,15 @@ class AsteroidsView @JvmOverloads constructor(
     private var chainMultiplier = 1
 
     // Controls
-    private var rotLeft = false
-    private var rotRight = false
     private var thrusting = false
     private var firePressed = false
     private var fireTimer = 0
 
-    // Joystick tracking
-    private var joystickId = -1
-    private var joystickCenterX = 0f; private var joystickCenterY = 0f
+    // Joystick input (set externally by AsteroidsActivity)
     private var joystickDX = 0f; private var joystickDY = 0f
-    private var firePointerId = -1
+
+    var autoFire = false
+    var readyForRestart = false
 
     // Demo AI state
     private var demoTargetAsteroid: Asteroid? = null
@@ -123,18 +121,6 @@ class AsteroidsView @JvmOverloads constructor(
         color = Color.parseColor("#6b7a99")
         typeface = Typeface.MONOSPACE
         textAlign = Paint.Align.CENTER
-    }
-    private val joystickBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#203a4a6e")
-        style = Paint.Style.FILL
-    }
-    private val joystickKnobPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#604f8ef7")
-        style = Paint.Style.FILL
-    }
-    private val fireBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#40e74c3c")
-        style = Paint.Style.FILL
     }
     private val demoWatermark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#80f1c40f")
@@ -215,6 +201,9 @@ class AsteroidsView @JvmOverloads constructor(
     fun isUserPlaying() = state == AsteroidsState.PLAYING && !demoMode
     fun isDemoMode() = demoMode
 
+    fun setJoystick(dx: Float, dy: Float) { joystickDX = dx; joystickDY = dy }
+    fun setFireInput(pressed: Boolean) { if (!autoFire) firePressed = pressed }
+
     fun startGame(demo: Boolean = false) {
         demoMode = demo
         score = 0; wave = 0
@@ -287,7 +276,8 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (ship.invincible > 0) ship.invincible--
 
-        // Fire
+        // Fire (auto-fire always fires)
+        if (autoFire) firePressed = true
         if (firePressed) {
             fireTimer++
             if (fireTimer == 1 || fireTimer % RAPID_FIRE_INTERVAL == 0) {
@@ -417,46 +407,13 @@ class AsteroidsView @JvmOverloads constructor(
     private fun dist(ax: Float, ay: Float, bx: Float, by: Float) =
         sqrt((ax - bx).pow(2) + (ay - by).pow(2))
 
-    // ── Touch ──────────────────────────────────────────────────────────────────
-    private val joystickR = 60f
-    private val fireBtnR = 50f
-
+    // ── Touch — only handles start/restart; actual controls are in AsteroidsActivity ──
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            if (demoMode) { startGame(false); return true }
-            if (state != AsteroidsState.PLAYING) { startGame(false); return true }
-        }
-        val w = width.toFloat(); val h = height.toFloat()
-        val fireCX = w * 0.85f; val fireCY = h * 0.8f
-
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                val idx = event.actionIndex
-                val px = event.getX(idx); val py = event.getY(idx)
-                val pid = event.getPointerId(idx)
-                if (dist(px, py, fireCX, fireCY) < fireBtnR * 1.5f) {
-                    firePointerId = pid; firePressed = true
-                } else {
-                    joystickId = pid; joystickCenterX = px; joystickCenterY = py
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                for (i in 0 until event.pointerCount) {
-                    val pid = event.getPointerId(i)
-                    val px = event.getX(i); val py = event.getY(i)
-                    if (pid == joystickId) {
-                        joystickDX = px - joystickCenterX
-                        joystickDY = py - joystickCenterY
-                    }
-                }
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
-                val idx = event.actionIndex; val pid = event.getPointerId(idx)
-                if (pid == joystickId) {
-                    joystickId = -1; joystickDX = 0f; joystickDY = 0f
-                    rotLeft = false; rotRight = false; thrusting = false
-                }
-                if (pid == firePointerId) { firePointerId = -1; firePressed = false }
+            when {
+                demoMode -> startGame(false)
+                state == AsteroidsState.IDLE -> startGame(false)
+                state == AsteroidsState.GAME_OVER && readyForRestart -> startGame(false)
             }
         }
         return true
@@ -519,25 +476,6 @@ class AsteroidsView @JvmOverloads constructor(
         val livesStr = "♥".repeat(ship.lives.coerceAtLeast(0))
         canvas.drawText(livesStr, 20f, h * 0.09f + hudPaint.textSize, hudPaint)
 
-        // Virtual joystick
-        if (!demoMode) {
-            val jcx = w * 0.2f; val jcy = h * 0.8f
-            canvas.drawCircle(jcx, jcy, joystickR, joystickBgPaint)
-            val knobX = if (joystickId >= 0) (jcx + joystickDX.coerceIn(-joystickR, joystickR)) else jcx
-            val knobY = if (joystickId >= 0) (jcy + joystickDY.coerceIn(-joystickR, joystickR)) else jcy
-            canvas.drawCircle(knobX, knobY, 22f, joystickKnobPaint)
-
-            val fcx = w * 0.85f; val fcy = h * 0.8f
-            val fp = if (firePressed) {
-                Paint(fireBtnPaint).apply { color = Color.parseColor("#80e74c3c") }
-            } else fireBtnPaint
-            canvas.drawCircle(fcx, fcy, fireBtnR, fp)
-            hudPaint.textAlign = Paint.Align.CENTER
-            hudPaint.textSize = h * 0.025f
-            canvas.drawText("FIRE", fcx, fcy + hudPaint.textSize / 3f, hudPaint)
-            hudPaint.textAlign = Paint.Align.LEFT
-        }
-
         // Overlays
         when (state) {
             AsteroidsState.IDLE -> {
@@ -554,7 +492,7 @@ class AsteroidsView @JvmOverloads constructor(
                 subPaint.textSize = h * 0.04f
                 canvas.drawText("SCORE: $score", w / 2f, h * 0.48f, subPaint)
                 subPaint.textSize = h * 0.03f
-                canvas.drawText("TAP TO RESTART", w / 2f, h * 0.58f, subPaint)
+                if (readyForRestart) canvas.drawText("TAP TO RESTART", w / 2f, h * 0.58f, subPaint)
             }
             else -> {}
         }

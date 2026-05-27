@@ -11,13 +11,14 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
+    <!-- Controls bar (above game, below ad) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
+        android:layout_height="48dp"
+        android:paddingHorizontal="12dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@color/surface">
 
         <TextView
             android:id="@+id/tvScore"
@@ -26,45 +27,91 @@
             android:layout_weight="1"
             android:text="SCORE: 0"
             android:textColor="@color/accent_cyan"
-            android:textSize="18sp"
+            android:textSize="12sp"
             android:fontFamily="monospace" />
 
         <TextView
             android:id="@+id/tvHighScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="High Score: 0"
+            android:text="Best: 0"
             android:textColor="@color/muted"
-            android:textSize="18sp"
-            android:fontFamily="monospace" />
+            android:textSize="10sp"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="4dp" />
 
         <TextView
-            android:id="@+id/btnLeaderboard"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:text="&#127942;"
-            android:textSize="18sp"
+            android:id="@+id/btnAutoFire"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:paddingHorizontal="8dp"
+            android:text="AUTO"
+            android:textColor="@color/muted"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/btnSound"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#128266;"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
 
         <TextView
-            android:id="@+id/btnTheme"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="4dp"
-            android:text="&#127912;"
-            android:textSize="18sp"
+            android:id="@+id/btnLightMode"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#127769;"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnLeaderboard"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#127942;"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#9881;"
+            android:textColor="@color/muted"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
     </LinearLayout>
 
+    <!-- Game area (shorter to leave room for controls) -->
     <com.pocketarcade.games.asteroids.AsteroidsView
         android:id="@+id/asteroidsView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="3" />
+
+    <!-- Dedicated controls panel: joystick left, fire right -->
+    <com.pocketarcade.games.asteroids.AsteroidsControlsView
+        android:id="@+id/controlsPanel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/surface"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>

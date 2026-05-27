@@ -1,6 +1,8 @@
 package com.pocketarcade.games.brickbreaker
 
 import android.app.Dialog
+import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import android.os.Bundle
 import android.os.Handler
@@ -26,6 +28,9 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var tvLevel: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
+    private lateinit var btnSound: TextView
+    private lateinit var btnLightMode: TextView
+    private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
 
     private val idleRunnable = Runnable {
@@ -46,6 +51,9 @@ class BrickBreakerActivity : AppCompatActivity() {
         tvLevel        = findViewById(R.id.tvLevel)
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
+        btnSound       = findViewById(R.id.btnSound)
+        btnLightMode   = findViewById(R.id.btnLightMode)
+        swipeZone      = findViewById(R.id.swipeZone)
 
         updateHighScore()
 
@@ -53,27 +61,46 @@ class BrickBreakerActivity : AppCompatActivity() {
             runOnUiThread { tvScore.text = "SCORE: $score" }
         }
         bbView.onLevelChanged = { level ->
-            runOnUiThread { tvLevel.text = "LV: $level" }
+            runOnUiThread { tvLevel.text = "LV:$level" }
         }
         bbView.onGameOver = { score ->
+            bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({
-                runOnUiThread { checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) }
+                runOnUiThread {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) {
+                        bbView.readyForRestart = true
+                    }
+                }
             }, 1500L)
             idleHandler.postDelayed(idleRunnable, 15_000L)
         }
         bbView.onWin = { score ->
+            bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({
-                runOnUiThread { checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) }
+                runOnUiThread {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) {
+                        bbView.readyForRestart = true
+                    }
+                }
             }, 1500L)
+        }
+
+        swipeZone.setOnTouchListener { _, event ->
+            bbView.feedTouch(event.action, event.x, event.y)
+            true
         }
 
         btnSettings.setOnClickListener { showSettingsDialog() }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER) }
+        btnSound.setOnClickListener { toggleSound() }
+        btnLightMode.setOnClickListener { toggleLightMode() }
 
+        updateSoundButton()
+        updateLightModeButton()
         scheduleIdle()
     }
 
@@ -92,6 +119,7 @@ class BrickBreakerActivity : AppCompatActivity() {
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
         switchSound.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setSoundEnabled(this, checked)
+            updateSoundButton()
         }
 
         val themeIndex = ThemeManager.effectiveThemeIndex(this, PrefsManager.GAME_BRICKBREAKER)
@@ -109,7 +137,26 @@ class BrickBreakerActivity : AppCompatActivity() {
     }
 
     private fun updateHighScore() {
-        tvHighScore.text = "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
+        tvHighScore.text = "Best:${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
+    }
+
+    private fun toggleSound() {
+        PrefsManager.setSoundEnabled(this, !PrefsManager.isSoundEnabled(this))
+        updateSoundButton()
+    }
+
+    private fun updateSoundButton() {
+        btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
+    }
+
+    private fun toggleLightMode() {
+        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        updateLightModeButton()
+        bbView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_BRICKBREAKER))
+    }
+
+    private fun updateLightModeButton() {
+        btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
     }
 
     private fun scheduleIdle() {
@@ -120,6 +167,8 @@ class BrickBreakerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         bbView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_BRICKBREAKER))
+        updateSoundButton()
+        updateLightModeButton()
         scheduleIdle()
     }
 

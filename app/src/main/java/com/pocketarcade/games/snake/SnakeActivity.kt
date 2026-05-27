@@ -98,12 +98,13 @@ class SnakeActivity : AppCompatActivity() {
         snakeView.onScoreChanged = { score -> runOnUiThread { tvScore.text = "SCORE: $score" } }
         snakeView.onGameOver = { score ->
             PrefsManager.setHighScore(this, PrefsManager.GAME_SNAKE, score)
-            runOnUiThread {
-                updateHighScore()
-                btnRestart.visibility = View.VISIBLE
-            }
+            runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({
-                runOnUiThread { checkAndShowLeaderboard(this, PrefsManager.GAME_SNAKE, score) }
+                runOnUiThread {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_SNAKE, score) {
+                        btnRestart.visibility = View.VISIBLE
+                    }
+                }
             }, 1500L)
             scheduleIdle()
         }

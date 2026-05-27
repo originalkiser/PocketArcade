@@ -15,6 +15,7 @@ object PrefsManager {
     private const val KEY_THEME_INDEX = "theme_index"
     private const val KEY_LIGHT_MODE = "light_mode"
     private const val KEY_LAST_UPDATE_CHECK = "last_update_check"
+    private const val KEY_LAST_INITIALS = "last_initials"
 
     const val GAME_SNAKE = "snake"
     const val GAME_PONG = "pong"
@@ -85,6 +86,12 @@ object PrefsManager {
         prefs(ctx).getBoolean("game_global_$game", true)
     fun setGameUsingGlobalTheme(ctx: Context, game: String, value: Boolean) =
         prefs(ctx).edit { putBoolean("game_global_$game", value) }
+
+    fun getLastInitials(ctx: Context): String =
+        prefs(ctx).getString(KEY_LAST_INITIALS, "AAA") ?: "AAA"
+
+    fun setLastInitials(ctx: Context, initials: String) =
+        prefs(ctx).edit { putString(KEY_LAST_INITIALS, initials.take(3).padEnd(3)) }
 
     fun getLastUpdateCheck(ctx: Context): Long =
         prefs(ctx).getLong(KEY_LAST_UPDATE_CHECK, 0L)
