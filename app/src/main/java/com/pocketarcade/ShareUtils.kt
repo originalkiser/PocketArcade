@@ -7,7 +7,7 @@ import com.pocketarcade.storage.PrefsManager
 object ShareUtils {
 
     private const val DOWNLOAD_URL =
-        "https://github.com/originalkiser/PocketArcade/releases/latest/download/PocketArcade.apk"
+        "https://github.com/originalkiser/PocketArcade/releases/latest"
 
     fun shareScore(activity: Activity, game: String, score: Int, date: String = "") {
         val text = buildShareText(game, score, date)

@@ -81,6 +81,7 @@ class SettingsActivity : AppCompatActivity() {
         val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
         val btnCredits     = findViewById<TextView>(R.id.btnCredits)
         val btnReset       = findViewById<TextView>(R.id.btnResetScores)
+        findViewById<TextView>(R.id.tvVersion).text = "v${BuildConfig.VERSION_NAME}"
 
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
