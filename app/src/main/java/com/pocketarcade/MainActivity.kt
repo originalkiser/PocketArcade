@@ -68,9 +68,8 @@ class MainActivity : AppCompatActivity() {
         startBlinkPrompt()
         IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
-        showChangelogIfNeeded(this)
 
-        // Show splash curtain as overlay — reveals game menu as it lifts
+        // Show splash curtain — changelog appears only after curtain lifts
         if (savedInstanceState == null) {
             val root = findViewById<FrameLayout>(R.id.rootFrame)
             val splash = SplashView(this)
@@ -78,7 +77,10 @@ class MainActivity : AppCompatActivity() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
-            splash.onDone = { root.removeView(splash) }
+            splash.onDone = {
+                root.removeView(splash)
+                showChangelogIfNeeded(this)
+            }
             root.addView(splash)
             splash.post { splash.start() }
         }
@@ -124,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applyWindowBackground(this)
         findViewById<FrameLayout>(R.id.rootFrame).setBackgroundColor(ThemeManager.currentTheme(this).bg)
 
-        if (PrefsManager.onSessionStart(this)) {
+        if (PrefsManager.checkAndConsumeUpsellTrigger(this)) {
             showUpsellDialog()
         }
     }

@@ -62,6 +62,7 @@ class AsteroidsActivity : AppCompatActivity() {
             runOnUiThread { tvScore.text = "SCORE: $score" }
         }
         astView.onGameOver = { score ->
+            PrefsManager.recordGamePlayed(this)
             astView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_ASTEROIDS, score)
             runOnUiThread { updateHighScore() }

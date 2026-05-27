@@ -64,6 +64,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             runOnUiThread { tvLevel.text = "LV:$level" }
         }
         bbView.onGameOver = { score ->
+            PrefsManager.recordGamePlayed(this)
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
@@ -77,6 +78,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             idleHandler.postDelayed(idleRunnable, 15_000L)
         }
         bbView.onWin = { score ->
+            PrefsManager.recordGamePlayed(this)
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }

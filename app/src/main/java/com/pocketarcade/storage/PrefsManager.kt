@@ -19,6 +19,8 @@ object PrefsManager {
     private const val KEY_LEADERBOARD_SIZE = "leaderboard_size"
     private const val KEY_LAST_VERSION_CODE = "last_version_code"
     private const val KEY_BB_DIFFICULTY = "bb_difficulty"
+    private const val KEY_GAMES_PLAYED = "games_played"
+    private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
     const val GAME_SNAKE = "snake"
     const val GAME_PONG = "pong"
@@ -116,4 +118,22 @@ object PrefsManager {
     fun setBBDifficulty(ctx: Context, value: Int) = prefs(ctx).edit { putInt(KEY_BB_DIFFICULTY, value.coerceIn(0, 2)) }
 
     private fun nextUpsellInterval() = (3..5).random()
+
+    fun recordGamePlayed(ctx: Context) {
+        val count = prefs(ctx).getInt(KEY_GAMES_PLAYED, 0) + 1
+        prefs(ctx).edit { putInt(KEY_GAMES_PLAYED, count) }
+    }
+
+    /** Returns true (once) every 3rd game played, never on first launch. */
+    fun checkAndConsumeUpsellTrigger(ctx: Context): Boolean {
+        if (isAdFree(ctx)) return false
+        val count = prefs(ctx).getInt(KEY_GAMES_PLAYED, 0)
+        if (count == 0) return false
+        val lastShown = prefs(ctx).getInt(KEY_LAST_UPSELL_AT, 0)
+        if (count % 3 == 0 && count != lastShown) {
+            prefs(ctx).edit { putInt(KEY_LAST_UPSELL_AT, count) }
+            return true
+        }
+        return false
+    }
 }

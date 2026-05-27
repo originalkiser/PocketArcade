@@ -60,6 +60,7 @@ class PongActivity : AppCompatActivity() {
             runOnUiThread { tvScore.text = "P:$p  AI:$ai" }
         }
         pongView.onMatchEnd = { playerWon, playerScore ->
+            PrefsManager.recordGamePlayed(this)
             pongView.readyForRestart = false
             if (playerWon) {
                 PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, playerScore)
