@@ -27,6 +27,7 @@ google-services.json
 *.jks
 *.keystore
 release.properties
+keystore.properties
 
 # OS
 .DS_Store
