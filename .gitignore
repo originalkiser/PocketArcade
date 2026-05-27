@@ -1,3 +1,6 @@
+# Gradle wrapper JAR is intentionally committed (bootstrap binary, ~43KB)
+!gradle/wrapper/gradle-wrapper.jar
+
 # Built outputs
 *.apk
 *.aab
