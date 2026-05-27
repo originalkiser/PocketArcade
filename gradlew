@@ -2,13 +2,11 @@
 #
 # Gradle wrapper script for UN*X
 
-# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS.
 DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 
 APP_NAME="Gradle"
 APP_BASE_NAME=`basename "$0"`
 
-# Resolve links
 PRG="$0"
 while [ -h "$PRG" ] ; do
   ls=`ls -ld "$PRG"`
@@ -23,14 +21,23 @@ cd "$SAVED" >/dev/null
 
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
-# Determine Java executable
 if [ -n "$JAVA_HOME" ] ; then
   JAVACMD="$JAVA_HOME/bin/java"
 else
   JAVACMD="java"
 fi
 
-exec "$JAVACMD" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS \
+set -- \
   "-Dorg.gradle.appname=$APP_BASE_NAME" \
   -classpath "$CLASSPATH" \
-  org.gradle.wrapper.GradleWrapperMain "$@"
+  org.gradle.wrapper.GradleWrapperMain \
+  "$@"
+
+eval "set -- $(
+  printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+  xargs -n1 |
+  sed 's/[\\$'"'"']/\\&/g;' |
+  tr '\n' ' '
+) $@"
+
+exec "$JAVACMD" "$@"
