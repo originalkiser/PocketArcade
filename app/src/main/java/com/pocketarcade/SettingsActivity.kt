@@ -55,6 +55,24 @@ class SettingsActivity : AppCompatActivity() {
         // ── Other toggles ──────────────────────────────────────────────────────
         val switchDemo  = findViewById<Switch>(R.id.switchDemoMode)
         val switchSound = findViewById<Switch>(R.id.switchSound)
+
+        // Leaderboard size
+        val tvLbSize  = findViewById<TextView>(R.id.tvLeaderboardSize)
+        val btnLbMinus = findViewById<TextView>(R.id.btnLbMinus)
+        val btnLbPlus  = findViewById<TextView>(R.id.btnLbPlus)
+        fun refreshLbSize() { tvLbSize.text = PrefsManager.getLeaderboardSize(this).toString() }
+        refreshLbSize()
+        btnLbMinus.setOnClickListener {
+            val n = PrefsManager.getLeaderboardSize(this)
+            if (n > 1) PrefsManager.setLeaderboardSize(this, n - 1)
+            refreshLbSize()
+        }
+        btnLbPlus.setOnClickListener {
+            val n = PrefsManager.getLeaderboardSize(this)
+            if (n < 15) PrefsManager.setLeaderboardSize(this, n + 1)
+            refreshLbSize()
+        }
+
         val rowAdFree   = findViewById<LinearLayout>(R.id.rowAdFree)
         val tvAdFreeTitle   = findViewById<TextView>(R.id.tvAdFreeTitle)
         val tvAdFreeDesc    = findViewById<TextView>(R.id.tvAdFreeDesc)
@@ -92,7 +110,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         btnRestore.setOnClickListener { billing.restorePurchases() }
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
-        btnCredits.setOnClickListener { showCreditsDialog() }
+        btnCredits.setOnClickListener { showCreditsDialog(this) }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_scores_confirm))
@@ -119,19 +137,6 @@ class SettingsActivity : AppCompatActivity() {
             chevron.visibility = View.VISIBLE
             row.isClickable = true
         }
-    }
-
-    private fun showCreditsDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("★  CREDITS")
-            .setMessage(
-                "DEVELOPER\n  Michael Kiser\n\n" +
-                "AI PROGRAMMING PARTNER\n  Claude (Anthropic)\n\n" +
-                "LOFTICE PRODUCTIONS\n  2024 – 2026\n\n" +
-                "Thank you for playing!"
-            )
-            .setPositiveButton("CLOSE", null)
-            .show()
     }
 
     override fun onDestroy() {

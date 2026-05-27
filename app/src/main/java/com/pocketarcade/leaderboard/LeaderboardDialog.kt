@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
 import com.pocketarcade.ShareUtils
@@ -64,8 +65,10 @@ fun showLeaderboardDialog(
 
     val topScore = entries.firstOrNull()?.score ?: 0
     val scoreToShare = if (shareScore >= 0) shareScore else topScore
+    val scoreDate = entries.firstOrNull { it.score == scoreToShare }?.formattedDate ?: ""
+
     view.findViewById<TextView>(R.id.btnShare).setOnClickListener {
-        ShareUtils.shareScore(activity, game, scoreToShare)
+        ShareUtils.shareScore(activity, game, scoreToShare, scoreDate)
     }
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
@@ -83,6 +86,10 @@ fun showInitialsThenLeaderboard(
     val pickerC = view.findViewById<NumberPicker>(R.id.pickerC)
     val preview = view.findViewById<TextView>(R.id.tvInitialsPreview)
     view.findViewById<TextView>(R.id.tvInitialsScore).text = "SCORE: $score"
+
+    // Dynamic "NEW TOP N" label
+    val lbSize = PrefsManager.getLeaderboardSize(activity)
+    view.findViewById<TextView>(R.id.tvNewTop).text = "🏆 NEW TOP $lbSize!"
 
     val last = PrefsManager.getLastInitials(activity).padEnd(3)
 
@@ -126,12 +133,30 @@ fun showInitialsThenLeaderboard(
         PrefsManager.setLastInitials(activity, initials)
         val rank = LeaderboardManager.addEntry(activity, game, score, initials)
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game, rank, shareScore = score, onDismiss = onDone) }
+        activity.runOnUiThread {
+            showLeaderboardDialog(activity, game, rank, shareScore = score, onDismiss = onDone)
+        }
     }
+
     view.findViewById<TextView>(R.id.btnSkip).setOnClickListener {
         LeaderboardManager.addEntry(activity, game, score, "   ")
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone) }
+        activity.runOnUiThread {
+            showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
+        }
+    }
+
+    view.findViewById<TextView>(R.id.btnDontAdd).setOnClickListener {
+        AlertDialog.Builder(activity)
+            .setMessage("Skip adding this score to the leaderboard?")
+            .setPositiveButton("Yes, skip it") { _, _ ->
+                dialog.dismiss()
+                activity.runOnUiThread {
+                    showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
+                }
+            }
+            .setNegativeButton("No, keep it", null)
+            .show()
     }
 
     dialog.show()
@@ -143,7 +168,7 @@ fun checkAndShowLeaderboard(
     score: Int,
     onDone: () -> Unit = {}
 ) {
-    if (LeaderboardManager.isTopTen(activity, game, score)) {
+    if (LeaderboardManager.qualifies(activity, game, score)) {
         showInitialsThenLeaderboard(activity, game, score, onDone)
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")

@@ -109,7 +109,7 @@
         <FrameLayout
             android:id="@+id/dpadContainer"
             android:layout_width="168dp"
-            android:layout_height="176dp"
+            android:layout_height="168dp"
             android:layout_gravity="center"
             android:visibility="gone">
 
@@ -134,7 +134,7 @@
                 android:layout_height="56dp"
                 android:layout_gravity="top|start"
                 android:layout_marginStart="0dp"
-                android:layout_marginTop="60dp"
+                android:layout_marginTop="56dp"
                 android:gravity="center"
                 android:text="◄"
                 android:textColor="@color/text"
@@ -149,7 +149,7 @@
                 android:layout_height="56dp"
                 android:layout_gravity="top|start"
                 android:layout_marginStart="112dp"
-                android:layout_marginTop="60dp"
+                android:layout_marginTop="56dp"
                 android:gravity="center"
                 android:text="►"
                 android:textColor="@color/text"
@@ -164,7 +164,7 @@
                 android:layout_height="56dp"
                 android:layout_gravity="top|start"
                 android:layout_marginStart="56dp"
-                android:layout_marginTop="120dp"
+                android:layout_marginTop="112dp"
                 android:gravity="center"
                 android:text="▼"
                 android:textColor="@color/text"

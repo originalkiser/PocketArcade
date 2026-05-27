@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -115,10 +116,10 @@ class SnakeActivity : AppCompatActivity() {
             snakeView.startGame()
         }
 
-        btnUp.setOnClickListener    { snakeView.dpadUp() }
-        btnDown.setOnClickListener  { snakeView.dpadDown() }
-        btnLeft.setOnClickListener  { snakeView.dpadLeft() }
-        btnRight.setOnClickListener { snakeView.dpadRight() }
+        btnUp.setOnTouchListener    { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadUp();    true }
+        btnDown.setOnTouchListener  { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadDown();  true }
+        btnLeft.setOnTouchListener  { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadLeft();  true }
+        btnRight.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadRight(); true }
 
         btnSwipeMode.setOnClickListener  { setDpadMode(false) }
         btnDpadMode.setOnClickListener   { setDpadMode(true) }
@@ -199,7 +200,7 @@ class SnakeActivity : AppCompatActivity() {
         isDpadMode       = prefs.getBoolean("control_dpad", false)
         dpadButtonSizeDp = prefs.getFloat("dpad_btn_size", 56f)
         dpadHSpreadDp    = prefs.getFloat("dpad_h_spread", 0f)
-        dpadVSpacingDp   = prefs.getFloat("dpad_v_spacing", 4f)
+        dpadVSpacingDp   = prefs.getFloat("dpad_v_spacing", 0f)
         swipeSensitivity = prefs.getInt("swipe_sensitivity", 2)
 
         snakeView.swipeThresholdDp = sensitivityToThresholdDp(swipeSensitivity)
@@ -248,9 +249,10 @@ class SnakeActivity : AppCompatActivity() {
         val contH   = 3 * bPx + 2 * vPx
         val centerX = bPx + sPx / 2
 
-        val dcLp = dpadContainer.layoutParams
-        dcLp.width  = contW
-        dcLp.height = contH
+        val dcLp = dpadContainer.layoutParams as FrameLayout.LayoutParams
+        dcLp.width   = contW
+        dcLp.height  = contH
+        dcLp.gravity = Gravity.CENTER
         dpadContainer.layoutParams = dcLp
 
         setDpadBtn(btnUp,    centerX,        0,               bPx)
@@ -408,7 +410,7 @@ class SnakeActivity : AppCompatActivity() {
             .setPositiveButton("DONE") { _, _ -> saveSettings() }
             .setNegativeButton("RESET") { _, _ ->
                 dpadButtonSizeDp = 56f; dpadHSpreadDp = 0f
-                dpadVSpacingDp = 4f; swipeSensitivity = 2
+                dpadVSpacingDp = 0f; swipeSensitivity = 2
                 snakeView.swipeThresholdDp = sensitivityToThresholdDp(2)
                 applyDpadLayout()
                 saveSettings()

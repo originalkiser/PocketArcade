@@ -1,6 +1,5 @@
 package com.pocketarcade
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -9,7 +8,9 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.MobileAds
 import com.pocketarcade.ads.AdManager
@@ -56,7 +57,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        findViewById<TextView>(R.id.btnCredits).setOnClickListener { showCreditsDialog() }
+        findViewById<TextView>(R.id.btnCredits).setOnClickListener {
+            showCreditsDialog(this)
+        }
 
         // Marquee requires isSelected = true to scroll
         findViewById<TextView>(R.id.tvMarquee).isSelected = true
@@ -65,6 +68,19 @@ class MainActivity : AppCompatActivity() {
         startBlinkPrompt()
         IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
+
+        // Show splash curtain as overlay — reveals game menu as it lifts
+        if (savedInstanceState == null) {
+            val root = findViewById<FrameLayout>(R.id.rootFrame)
+            val splash = SplashView(this)
+            splash.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            splash.onDone = { root.removeView(splash) }
+            root.addView(splash)
+            splash.post { splash.start() }
+        }
     }
 
     private fun bindTile(tileId: Int, activityClass: Class<*>) {
@@ -98,19 +114,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         blinkHandler.post(blink)
-    }
-
-    private fun showCreditsDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("★  CREDITS")
-            .setMessage(
-                "DEVELOPER\n  Michael Kiser\n\n" +
-                "AI PROGRAMMING PARTNER\n  Claude (Anthropic)\n\n" +
-                "LOFTICE PRODUCTIONS\n  2024 – 2026\n\n" +
-                "Thank you for playing!"
-            )
-            .setPositiveButton("CLOSE", null)
-            .show()
     }
 
     override fun onResume() {
@@ -154,6 +157,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScorePongDetail).text     = topDetail(PrefsManager.GAME_PONG)
         findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
         findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
+
+        // Update score ticker
+        val tvMarquee = findViewById<TextView>(R.id.tvMarquee)
+        tvMarquee.text = buildMarqueeTicker()
+        tvMarquee.isSelected = true
+    }
+
+    private fun buildMarqueeTicker(): String {
+        data class G(val key: String, val label: String, val isPong: Boolean)
+        val games = listOf(
+            G(PrefsManager.GAME_SNAKE,        "SNAKE",     false),
+            G(PrefsManager.GAME_PONG,         "PONG",      true),
+            G(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS", false),
+            G(PrefsManager.GAME_BRICKBREAKER, "BRKR",      false)
+        )
+        val parts = games.map { (key, label, isPong) ->
+            val top = LeaderboardManager.getEntries(this, key).firstOrNull()
+            if (top == null) {
+                "$label · NO SCORES"
+            } else {
+                val initials = top.initials.trim()
+                val score    = if (isPong) "WON!" else "${top.score} PTS"
+                val inits    = if (initials.isNotEmpty()) "$initials · " else ""
+                "$label · $inits$score · ${top.formattedDate}"
+            }
+        }
+        return "TOP SCORES  ✦  ${parts.joinToString("  ✦  ")}  ✦  "
     }
 
     // ── Upsell dialog ──────────────────────────────────────────────────────────

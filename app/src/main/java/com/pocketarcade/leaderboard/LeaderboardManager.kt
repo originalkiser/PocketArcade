@@ -18,7 +18,6 @@ data class LeaderboardEntry(
 
 object LeaderboardManager {
 
-    private const val MAX_ENTRIES = 10
     private val fmt = SimpleDateFormat("MM/dd/yy", Locale.US)
 
     private fun key(game: String) = "leaderboard_$game"
@@ -41,18 +40,20 @@ object LeaderboardManager {
         }
     }
 
-    fun isTopTen(ctx: Context, game: String, score: Int): Boolean {
+    fun qualifies(ctx: Context, game: String, score: Int): Boolean {
+        val size    = PrefsManager.getLeaderboardSize(ctx)
         val entries = getEntries(ctx, game)
-        return entries.size < MAX_ENTRIES || score > (entries.minOfOrNull { it.score } ?: -1)
+        return entries.size < size || score > (entries.minOfOrNull { it.score } ?: -1)
     }
 
     fun addEntry(ctx: Context, game: String, score: Int, initials: String): Int {
+        val size    = PrefsManager.getLeaderboardSize(ctx)
         val entries = getEntries(ctx, game).toMutableList()
-        val entry = LeaderboardEntry(score, System.currentTimeMillis(), initials.take(3).padEnd(3))
+        val entry   = LeaderboardEntry(score, System.currentTimeMillis(), initials.take(3).padEnd(3))
         entries.add(entry)
         entries.sortByDescending { it.score }
-        val trimmed = entries.take(MAX_ENTRIES)
-        val rank = trimmed.indexOfFirst { it.score == entry.score && it.date == entry.date } + 1
+        val trimmed = entries.take(size)
+        val rank    = trimmed.indexOfFirst { it.score == entry.score && it.date == entry.date } + 1
 
         val arr = JSONArray()
         trimmed.forEach { e ->

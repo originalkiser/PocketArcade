@@ -7,9 +7,10 @@
     android:background="@color/surface">
 
     <TextView
+        android:id="@+id/tvNewTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="&#127942; NEW TOP 10!"
+        android:text="&#127942; NEW TOP 5!"
         android:textColor="@color/accent_yellow"
         android:textSize="20sp"
         android:fontFamily="monospace"
@@ -115,5 +116,19 @@
             android:focusable="true" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/btnDontAdd"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:text="DON'T ADD TO LEADERBOARD"
+        android:textColor="@color/accent_red"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>

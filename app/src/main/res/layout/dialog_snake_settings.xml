@@ -168,7 +168,7 @@
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="smol"
+                android:text="Small"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
@@ -185,7 +185,7 @@
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="chonk"
+                android:text="Large"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
                 android:fontFamily="monospace"
@@ -260,7 +260,7 @@
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="cozy"
+                android:text="Compact"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
@@ -272,12 +272,12 @@
                 android:layout_weight="1"
                 android:min="0"
                 android:max="20"
-                android:progress="4" />
+                android:progress="0" />
 
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="airy"
+                android:text="Spacious"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
                 android:fontFamily="monospace"

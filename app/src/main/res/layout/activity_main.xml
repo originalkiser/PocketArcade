@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#050510">
@@ -24,7 +25,7 @@
             android:orientation="vertical"
             android:gravity="center_horizontal"
             android:paddingTop="10dp"
-            android:paddingBottom="4dp"
+            android:paddingBottom="5dp"
             android:background="#07071A">
 
             <TextView
@@ -56,7 +57,7 @@
             android:background="@color/accent_blue"
             android:alpha="0.3" />
 
-        <!-- Game grid -->
+        <!-- Game list -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -68,41 +69,40 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="12dp">
+                android:padding="10dp">
 
-                <!-- Row 1: Snake | Pong -->
+                <!-- ── SNAKE ──────────────────────────────────────────────── -->
                 <LinearLayout
+                    android:id="@+id/tileSnake"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="10dp">
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_snake"
+                        android:contentDescription="Snake" />
 
                     <LinearLayout
-                        android:id="@+id/tileSnake"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="5dp"
                         android:orientation="vertical"
-                        android:gravity="center_horizontal"
-                        android:padding="14dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <ImageView
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/ic_snake"
-                            android:contentDescription="Snake" />
+                        android:layout_marginStart="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:text="@string/game_snake"
                             android:textColor="@color/accent_blue"
-                            android:textSize="10sp"
+                            android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
 
@@ -110,10 +110,10 @@
                             android:id="@+id/tvScoreSnake"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
-                            android:textSize="8sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace" />
 
                         <TextView
@@ -123,37 +123,53 @@
                             android:layout_marginTop="2dp"
                             android:text=""
                             android:textColor="@color/accent_blue"
-                            android:textSize="7sp"
+                            android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶"
+                        android:textColor="@color/accent_blue"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <!-- ── PONG ───────────────────────────────────────────────── -->
+                <LinearLayout
+                    android:id="@+id/tilePong"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_pong"
+                        android:contentDescription="Pong" />
+
                     <LinearLayout
-                        android:id="@+id/tilePong"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="5dp"
                         android:orientation="vertical"
-                        android:gravity="center_horizontal"
-                        android:padding="14dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <ImageView
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/ic_pong"
-                            android:contentDescription="Pong" />
+                        android:layout_marginStart="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:text="@string/game_pong"
                             android:textColor="@color/accent_red"
-                            android:textSize="10sp"
+                            android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
 
@@ -161,10 +177,10 @@
                             android:id="@+id/tvScorePong"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
-                            android:textSize="8sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace" />
 
                         <TextView
@@ -174,44 +190,53 @@
                             android:layout_marginTop="2dp"
                             android:text=""
                             android:textColor="@color/accent_red"
-                            android:textSize="7sp"
+                            android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶"
+                        android:textColor="@color/accent_red"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- Row 2: Asteroids | Brick Breaker -->
+                <!-- ── ASTEROIDS ──────────────────────────────────────────── -->
                 <LinearLayout
+                    android:id="@+id/tileAsteroids"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_asteroids"
+                        android:contentDescription="Asteroids" />
 
                     <LinearLayout
-                        android:id="@+id/tileAsteroids"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="5dp"
                         android:orientation="vertical"
-                        android:gravity="center_horizontal"
-                        android:padding="14dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <ImageView
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/ic_asteroids"
-                            android:contentDescription="Asteroids" />
+                        android:layout_marginStart="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:text="@string/game_asteroids"
                             android:textColor="@color/accent_cyan"
-                            android:textSize="9sp"
+                            android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
 
@@ -219,10 +244,10 @@
                             android:id="@+id/tvScoreAsteroids"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
-                            android:textSize="8sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace" />
 
                         <TextView
@@ -232,37 +257,53 @@
                             android:layout_marginTop="2dp"
                             android:text=""
                             android:textColor="@color/accent_cyan"
-                            android:textSize="7sp"
+                            android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶"
+                        android:textColor="@color/accent_cyan"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <!-- ── BRICK BREAKER ──────────────────────────────────────── -->
+                <LinearLayout
+                    android:id="@+id/tileBrickBreaker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_brickbreaker"
+                        android:contentDescription="Brick Breaker" />
+
                     <LinearLayout
-                        android:id="@+id/tileBrickBreaker"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="5dp"
                         android:orientation="vertical"
-                        android:gravity="center_horizontal"
-                        android:padding="14dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <ImageView
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/ic_brickbreaker"
-                            android:contentDescription="Brick Breaker" />
+                        android:layout_marginStart="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:text="@string/game_brickbreaker"
                             android:textColor="@color/accent_yellow"
-                            android:textSize="7sp"
+                            android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
 
@@ -270,10 +311,10 @@
                             android:id="@+id/tvScoreBrickBreaker"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
-                            android:textSize="8sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace" />
 
                         <TextView
@@ -283,10 +324,19 @@
                             android:layout_marginTop="2dp"
                             android:text=""
                             android:textColor="@color/accent_yellow"
-                            android:textSize="7sp"
+                            android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶"
+                        android:textColor="@color/accent_yellow"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -340,13 +390,13 @@
                 android:focusable="true" />
         </LinearLayout>
 
-        <!-- INSERT COIN marquee -->
+        <!-- Top scores ticker -->
         <TextView
             android:id="@+id/tvMarquee"
             android:layout_width="match_parent"
             android:layout_height="22dp"
-            android:text="✦  INSERT COIN  ✦  POCKET ARCADE  ✦  LOFTICE PRODUCTIONS  ✦  INSERT COIN  ✦  POCKET ARCADE  ✦"
-            android:textColor="@color/accent_blue"
+            android:text="TOP SCORES  ✦  PLAY TO SET RECORDS  ✦"
+            android:textColor="@color/accent_yellow"
             android:textSize="8sp"
             android:fontFamily="monospace"
             android:gravity="center_vertical"

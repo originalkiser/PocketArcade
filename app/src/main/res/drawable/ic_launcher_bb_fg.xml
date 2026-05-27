@@ -1,55 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pixel-art brick breaker icon -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Brick row 1 (top) - 4 bricks -->
-    <path android:fillColor="#f87171" android:pathData="M14,16 h18 v10 h-18 z" />
-    <path android:fillColor="#fca5a5" android:pathData="M15,17 h6 v2 h-6 z" />
-    <path android:fillColor="#fb923c" android:pathData="M34,16 h18 v10 h-18 z" />
-    <path android:fillColor="#fdba74" android:pathData="M35,17 h6 v2 h-6 z" />
-    <path android:fillColor="#f87171" android:pathData="M54,16 h18 v10 h-18 z" />
-    <path android:fillColor="#fca5a5" android:pathData="M55,17 h6 v2 h-6 z" />
-    <path android:fillColor="#fb923c" android:pathData="M74,16 h20 v10 h-20 z" />
-    <path android:fillColor="#fdba74" android:pathData="M75,17 h6 v2 h-6 z" />
-
-    <!-- Brick row 2 -->
-    <path android:fillColor="#a78bfa" android:pathData="M14,28 h18 v10 h-18 z" />
-    <path android:fillColor="#c4b5fd" android:pathData="M15,29 h6 v2 h-6 z" />
-    <path android:fillColor="#f1c40f" android:pathData="M34,28 h18 v10 h-18 z" />
-    <path android:fillColor="#fde047" android:pathData="M35,29 h6 v2 h-6 z" />
-    <path android:fillColor="#a78bfa" android:pathData="M54,28 h18 v10 h-18 z" />
-    <path android:fillColor="#c4b5fd" android:pathData="M55,29 h6 v2 h-6 z" />
-    <path android:fillColor="#f1c40f" android:pathData="M74,28 h20 v10 h-20 z" />
-    <path android:fillColor="#fde047" android:pathData="M75,29 h6 v2 h-6 z" />
-
-    <!-- Brick row 3 (partial - some broken) -->
-    <path android:fillColor="#4ade80" android:pathData="M14,40 h18 v10 h-18 z" />
-    <path android:fillColor="#86efac" android:pathData="M15,41 h6 v2 h-6 z" />
-    <path android:fillColor="#4ade80" android:pathData="M54,40 h18 v10 h-18 z" />
-    <path android:fillColor="#86efac" android:pathData="M55,41 h6 v2 h-6 z" />
-    <path android:fillColor="#4ade80" android:pathData="M74,40 h20 v10 h-20 z" />
-
-    <!-- Ball trail (motion effect) -->
-    <path android:fillColor="#ffffff" android:alpha="0.3"
-        android:pathData="M48,56 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
-    <path android:fillColor="#ffffff" android:alpha="0.15"
-        android:pathData="M44,62 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
-
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Bricks row 1 (red) -->
+    <path android:fillColor="#e74c3c"
+        android:pathData="M2,6 h13 v6 h-13 z M17,6 h13 v6 h-13 z M32,6 h14 v6 h-14 z" />
+    <!-- Bricks row 2 (yellow) -->
+    <path android:fillColor="#f1c40f"
+        android:pathData="M2,14 h13 v6 h-13 z M17,14 h13 v6 h-13 z M32,14 h14 v6 h-14 z" />
+    <!-- Bricks row 3 (green) -->
+    <path android:fillColor="#2ecc71"
+        android:pathData="M2,22 h13 v6 h-13 z M17,22 h13 v6 h-13 z M32,22 h14 v6 h-14 z" />
     <!-- Ball -->
-    <path android:fillColor="#ffffff"
-        android:pathData="M54,68 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
-    <!-- Ball highlight -->
-    <path android:fillColor="#c7d2fe"
-        android:pathData="M50,64 h4 v4 h-4 z" />
-
+    <path android:fillColor="#e8ecf0"
+        android:pathData="M28,36 a4,4 0 1,1 -8,0 a4,4 0 0,1 8,0 z" />
     <!-- Paddle -->
-    <path android:fillColor="#60a5fa"
-        android:pathData="M28,88 h52 v8 h-52 z" />
-    <path android:fillColor="#93c5fd"
-        android:pathData="M30,89 h14 v2 h-14 z" />
-
+    <path android:fillColor="#4f8ef7"
+        android:pathData="M8,43 h32 v5 h-32 z" />
 </vector>

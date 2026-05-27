@@ -52,15 +52,28 @@ class IconRotationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
             val pm = context.packageManager
             val pkg = context.packageName
 
+            // Enable next icon first so there is always at least one active launcher entry
+            val enableTarget = ComponentName(pkg, pkg + ALIASES[next])
+            try {
+                pm.setComponentEnabledSetting(
+                    enableTarget,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+            } catch (_: Exception) {
+                return  // If we can't enable the next one, don't disable anything
+            }
+
             ALIASES.forEachIndexed { index, alias ->
-                val component = ComponentName(pkg, pkg + alias)
-                val state = if (index == next)
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                else
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                try {
-                    pm.setComponentEnabledSetting(component, state, PackageManager.DONT_KILL_APP)
-                } catch (_: Exception) {}
+                if (index != next) {
+                    try {
+                        pm.setComponentEnabledSetting(
+                            ComponentName(pkg, pkg + alias),
+                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                            PackageManager.DONT_KILL_APP
+                        )
+                    } catch (_: Exception) {}
+                }
             }
 
             prefs.edit().putInt(KEY_INDEX, next).apply()

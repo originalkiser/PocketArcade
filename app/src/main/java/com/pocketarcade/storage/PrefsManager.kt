@@ -16,6 +16,7 @@ object PrefsManager {
     private const val KEY_LIGHT_MODE = "light_mode"
     private const val KEY_LAST_UPDATE_CHECK = "last_update_check"
     private const val KEY_LAST_INITIALS = "last_initials"
+    private const val KEY_LEADERBOARD_SIZE = "leaderboard_size"
 
     const val GAME_SNAKE = "snake"
     const val GAME_PONG = "pong"
@@ -98,6 +99,12 @@ object PrefsManager {
 
     fun setLastUpdateCheck(ctx: Context, time: Long) =
         prefs(ctx).edit { putLong(KEY_LAST_UPDATE_CHECK, time) }
+
+    fun getLeaderboardSize(ctx: Context): Int =
+        prefs(ctx).getInt(KEY_LEADERBOARD_SIZE, 5)
+
+    fun setLeaderboardSize(ctx: Context, size: Int) =
+        prefs(ctx).edit { putInt(KEY_LEADERBOARD_SIZE, size.coerceIn(1, 15)) }
 
     private fun nextUpsellInterval() = (3..5).random()
 }

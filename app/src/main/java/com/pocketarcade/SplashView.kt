@@ -100,7 +100,12 @@ class SplashView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         val w = width.toFloat()
         val h = height.toFloat()
-        canvas.drawRect(0f, 0f, w, h, bgPaint)
+        // Fill only the gap above the curtain top during the anticipation dip;
+        // once the curtain lifts (curtainY < 0) the game menu shows through.
+        val curtainTop = curtainY - 80f
+        if (curtainTop > 0f) {
+            canvas.drawRect(0f, 0f, w, curtainTop, bgPaint)
+        }
         canvas.save()
         canvas.translate(0f, curtainY)
         drawCurtain(canvas, right = false, w, h)

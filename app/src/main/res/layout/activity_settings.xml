@@ -161,6 +161,76 @@
                     android:checked="true" />
             </LinearLayout>
 
+            <!-- Leaderboard size -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LEADERBOARD SIZE"
+                        android:textColor="@color/text"
+                        android:textSize="9sp"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Entries saved per game (1–15)"
+                        android:textColor="@color/muted"
+                        android:textSize="7sp"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btnLbMinus"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:text="−"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="20sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/tvLeaderboardSize"
+                    android:layout_width="32dp"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="16sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/btnLbPlus"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:text="+"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="20sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
             <!-- Ad-free purchase -->
             <LinearLayout
                 android:id="@+id/rowAdFree"

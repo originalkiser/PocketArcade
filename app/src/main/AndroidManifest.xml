@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:allowBackup="true"
@@ -29,7 +30,7 @@
         <!-- Default arcade cabinet (enabled on fresh install) -->
         <activity-alias
             android:name=".icon.Arcade"
-            android:targetActivity=".SplashActivity"
+            android:targetActivity=".MainActivity"
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
@@ -43,7 +44,7 @@
 
         <activity-alias
             android:name=".icon.Snake"
-            android:targetActivity=".SplashActivity"
+            android:targetActivity=".MainActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_snake"
@@ -56,7 +57,7 @@
 
         <activity-alias
             android:name=".icon.Pong"
-            android:targetActivity=".SplashActivity"
+            android:targetActivity=".MainActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_pong"
@@ -69,7 +70,7 @@
 
         <activity-alias
             android:name=".icon.Asteroids"
-            android:targetActivity=".SplashActivity"
+            android:targetActivity=".MainActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_asteroids"
@@ -82,7 +83,7 @@
 
         <activity-alias
             android:name=".icon.BrickBreaker"
-            android:targetActivity=".SplashActivity"
+            android:targetActivity=".MainActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_bb"
@@ -129,6 +130,16 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>

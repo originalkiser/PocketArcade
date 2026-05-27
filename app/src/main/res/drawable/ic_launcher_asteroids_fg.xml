@@ -1,66 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pixel-art asteroids icon -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Stars background dots -->
-    <path android:fillColor="#ffffff" android:alpha="0.6"
-        android:pathData="M22,20 h2 v2 h-2 z" />
-    <path android:fillColor="#ffffff" android:alpha="0.6"
-        android:pathData="M80,30 h2 v2 h-2 z" />
-    <path android:fillColor="#ffffff" android:alpha="0.6"
-        android:pathData="M34,80 h2 v2 h-2 z" />
-    <path android:fillColor="#ffffff" android:alpha="0.6"
-        android:pathData="M88,72 h2 v2 h-2 z" />
-    <path android:fillColor="#ffffff" android:alpha="0.4"
-        android:pathData="M16,60 h1 v1 h-1 z" />
-    <path android:fillColor="#ffffff" android:alpha="0.4"
-        android:pathData="M92,42 h1 v1 h-1 z" />
-
-    <!-- Ship (triangle, pointing up) centered -->
-    <path
-        android:fillColor="#67e8f9"
-        android:pathData="M54,26 L66,58 L54,52 L42,58 Z" />
-    <!-- Ship cockpit -->
-    <path
-        android:fillColor="#0891b2"
-        android:pathData="M54,34 L60,52 L54,48 L48,52 Z" />
-    <!-- Engine glow -->
-    <path
-        android:fillColor="#f97316"
-        android:pathData="M50,58 h8 v6 h-8 z" />
-    <path
-        android:fillColor="#fbbf24"
-        android:alpha="0.7"
-        android:pathData="M52,62 h4 v4 h-4 z" />
-
-    <!-- Bullet (above ship) -->
-    <path
-        android:fillColor="#ffffff"
-        android:pathData="M52,16 h4 v8 h-4 z" />
-
-    <!-- Large asteroid (top-left) -->
-    <path
-        android:fillColor="#6b7280"
-        android:pathData="M20,24 L32,18 L40,26 L36,38 L24,40 L16,32 Z" />
-    <path
-        android:fillColor="#9ca3af"
-        android:pathData="M24,22 h4 v4 h-4 z" />
-
-    <!-- Small asteroid (bottom-right) -->
-    <path
-        android:fillColor="#6b7280"
-        android:pathData="M76,72 L84,68 L90,76 L84,84 L74,82 Z" />
-    <path
-        android:fillColor="#9ca3af"
-        android:pathData="M80,72 h3 v3 h-3 z" />
-
-    <!-- Medium asteroid (bottom-left) -->
-    <path
-        android:fillColor="#4b5563"
-        android:pathData="M24,72 L32,66 L40,72 L38,82 L26,84 L20,78 Z" />
-
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Ship triangle -->
+    <path android:fillColor="#00d4ff"
+        android:pathData="M24,4 L34,36 L24,30 L14,36 Z" />
+    <!-- Ship thrust -->
+    <path android:fillColor="#e67e22"
+        android:pathData="M20,34 L24,44 L28,34 Z" />
+    <!-- Asteroid 1 (large) -->
+    <path android:fillColor="#6b7a99"
+        android:pathData="M6,10 L12,6 L16,10 L14,16 L8,17 L4,14 Z" />
+    <!-- Asteroid 2 (medium) -->
+    <path android:fillColor="#6b7a99"
+        android:pathData="M34,12 L38,10 L42,14 L40,19 L35,20 L32,16 Z" />
+    <!-- Bullet -->
+    <path android:fillColor="#f1c40f"
+        android:pathData="M23,14 h2 v4 h-2 z" />
 </vector>
