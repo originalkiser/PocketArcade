@@ -59,9 +59,10 @@ class SettingsActivity : AppCompatActivity() {
         val tvAdFreeTitle   = findViewById<TextView>(R.id.tvAdFreeTitle)
         val tvAdFreeDesc    = findViewById<TextView>(R.id.tvAdFreeDesc)
         val tvAdFreeChevron = findViewById<TextView>(R.id.tvAdFreeChevron)
-        val btnRestore  = findViewById<TextView>(R.id.btnRestore)
+        val btnRestore     = findViewById<TextView>(R.id.btnRestore)
         val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
-        val btnReset    = findViewById<TextView>(R.id.btnResetScores)
+        val btnCredits     = findViewById<TextView>(R.id.btnCredits)
+        val btnReset       = findViewById<TextView>(R.id.btnResetScores)
 
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
@@ -91,6 +92,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         btnRestore.setOnClickListener { billing.restorePurchases() }
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
+        btnCredits.setOnClickListener { showCreditsDialog() }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_scores_confirm))
@@ -117,6 +119,19 @@ class SettingsActivity : AppCompatActivity() {
             chevron.visibility = View.VISIBLE
             row.isClickable = true
         }
+    }
+
+    private fun showCreditsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("★  CREDITS")
+            .setMessage(
+                "DEVELOPER\n  Michael Kiser\n\n" +
+                "AI PROGRAMMING PARTNER\n  Claude (Anthropic)\n\n" +
+                "LOFTICE PRODUCTIONS\n  2024 – 2026\n\n" +
+                "Thank you for playing!"
+            )
+            .setPositiveButton("CLOSE", null)
+            .show()
     }
 
     override fun onDestroy() {

@@ -1,84 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
-    android:orientation="vertical">
+    android:background="#050510">
 
-    <!-- Banner ad slot (top) -->
-    <FrameLayout
-        android:id="@+id/adContainer"
+    <!-- ── Main column ─────────────────────────────────────────────────────── -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@drawable/bg_ad_banner" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <!-- Main content -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        <!-- Banner ad slot -->
+        <FrameLayout
+            android:id="@+id/adContainer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_ad_banner" />
 
+        <!-- Title header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="4dp"
+            android:background="#07071A">
 
-            <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="4dp"
-                android:text="POCKET"
+                android:text="POCKET ARCADE"
                 android:textColor="@color/accent_blue"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:fontFamily="monospace"
-                android:letterSpacing="0.1" />
+                android:textStyle="bold"
+                android:letterSpacing="0.12" />
 
             <TextView
+                android:id="@+id/tvSelectGame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="ARCADE"
-                android:textColor="@color/accent_red"
-                android:textSize="28sp"
+                android:layout_marginTop="2dp"
+                android:text="≡  SELECT YOUR GAME  ≡"
+                android:textColor="@color/muted"
+                android:textSize="9sp"
                 android:fontFamily="monospace"
-                android:letterSpacing="0.1" />
+                android:letterSpacing="0.08" />
+        </LinearLayout>
 
-            <!-- Row 1: Snake | Pong -->
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/accent_blue"
+            android:alpha="0.3" />
+
+        <!-- Game grid -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/tileSnake"
-                    android:layout_width="0dp"
+                <!-- Row 1: Snake | Pong -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    app:cardBackgroundColor="@color/card"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/tileSnake"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="5dp"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
+                        android:gravity="center_horizontal"
+                        android:padding="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
                             android:src="@drawable/ic_snake"
                             android:contentDescription="Snake" />
 
@@ -89,7 +103,8 @@
                             android:text="@string/game_snake"
                             android:textColor="@color/accent_blue"
                             android:textSize="10sp"
-                            android:fontFamily="monospace" />
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvScoreSnake"
@@ -107,36 +122,28 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="@color/muted"
+                            android:textColor="@color/accent_blue"
                             android:textSize="7sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/tilePong"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    app:cardBackgroundColor="@color/card"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/tilePong"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="5dp"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
+                        android:gravity="center_horizontal"
+                        android:padding="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
                             android:src="@drawable/ic_pong"
                             android:contentDescription="Pong" />
 
@@ -147,7 +154,8 @@
                             android:text="@string/game_pong"
                             android:textColor="@color/accent_red"
                             android:textSize="10sp"
-                            android:fontFamily="monospace" />
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvScorePong"
@@ -165,43 +173,35 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="@color/muted"
+                            android:textColor="@color/accent_red"
                             android:textSize="7sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                </LinearLayout>
 
-            <!-- Row 2: Asteroids | Brick Breaker -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/tileAsteroids"
-                    android:layout_width="0dp"
+                <!-- Row 2: Asteroids | Brick Breaker -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    app:cardBackgroundColor="@color/card"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp">
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/tileAsteroids"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="5dp"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
+                        android:gravity="center_horizontal"
+                        android:padding="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
                             android:src="@drawable/ic_asteroids"
                             android:contentDescription="Asteroids" />
 
@@ -212,7 +212,8 @@
                             android:text="@string/game_asteroids"
                             android:textColor="@color/accent_cyan"
                             android:textSize="9sp"
-                            android:fontFamily="monospace" />
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvScoreAsteroids"
@@ -230,36 +231,28 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="@color/muted"
+                            android:textColor="@color/accent_cyan"
                             android:textSize="7sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/tileBrickBreaker"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    app:cardBackgroundColor="@color/card"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/tileBrickBreaker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="5dp"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
+                        android:gravity="center_horizontal"
+                        android:padding="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
                             android:src="@drawable/ic_brickbreaker"
                             android:contentDescription="Brick Breaker" />
 
@@ -270,7 +263,8 @@
                             android:text="@string/game_brickbreaker"
                             android:textColor="@color/accent_yellow"
                             android:textSize="7sp"
-                            android:fontFamily="monospace" />
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvScoreBrickBreaker"
@@ -288,29 +282,89 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="@color/muted"
+                            android:textColor="@color/accent_yellow"
                             android:textSize="7sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                </LinearLayout>
 
-            <!-- Settings button -->
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/muted"
+            android:alpha="0.2" />
+
+        <!-- Bottom control bar: Settings | Credits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:orientation="horizontal"
+            android:background="#07071A"
+            android:gravity="center_vertical">
+
             <TextView
                 android:id="@+id/btnSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:text="[ SETTINGS ]"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="⚙  SETTINGS"
                 android:textColor="@color/muted"
                 android:textSize="9sp"
                 android:fontFamily="monospace"
+                android:gravity="center"
                 android:clickable="true"
-                android:focusable="true"
-                android:padding="12dp" />
+                android:focusable="true" />
 
+            <View
+                android:layout_width="1dp"
+                android:layout_height="20dp"
+                android:background="@color/muted"
+                android:alpha="0.3" />
+
+            <TextView
+                android:id="@+id/btnCredits"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="★  CREDITS"
+                android:textColor="@color/muted"
+                android:textSize="9sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+
+        <!-- INSERT COIN marquee -->
+        <TextView
+            android:id="@+id/tvMarquee"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:text="✦  INSERT COIN  ✦  POCKET ARCADE  ✦  LOFTICE PRODUCTIONS  ✦  INSERT COIN  ✦  POCKET ARCADE  ✦"
+            android:textColor="@color/accent_blue"
+            android:textSize="8sp"
+            android:fontFamily="monospace"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="8dp"
+            android:background="#03030E"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:scrollHorizontally="true" />
+
+    </LinearLayout>
+
+    <!-- CRT scanline + vignette overlay (non-interactive) -->
+    <com.pocketarcade.CrtOverlayView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+
+</FrameLayout>

@@ -2,8 +2,12 @@ package com.pocketarcade
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +25,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var billing: BillingManager
     private var upsellDialog: AlertDialog? = null
+    private val blinkHandler = Handler(Looper.getMainLooper())
+    private var blinkVisible = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,16 +46,24 @@ class MainActivity : AppCompatActivity() {
         )
         billing.connect()
 
-        bindTile(R.id.tileSnake, SnakeActivity::class.java)
-        bindTile(R.id.tilePong, PongActivity::class.java)
-        bindTile(R.id.tileAsteroids, AsteroidsActivity::class.java)
+        bindTile(R.id.tileSnake,       SnakeActivity::class.java)
+        bindTile(R.id.tilePong,        PongActivity::class.java)
+        bindTile(R.id.tileAsteroids,   AsteroidsActivity::class.java)
         bindTile(R.id.tileBrickBreaker, BrickBreakerActivity::class.java)
+
+        applyTileBorders()
 
         findViewById<TextView>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        findViewById<TextView>(R.id.btnCredits).setOnClickListener { showCreditsDialog() }
+
+        // Marquee requires isSelected = true to scroll
+        findViewById<TextView>(R.id.tvMarquee).isSelected = true
 
         updateScores()
+        startBlinkPrompt()
+        IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
     }
 
@@ -57,6 +71,46 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(tileId).setOnClickListener {
             startActivity(Intent(this, activityClass))
         }
+    }
+
+    private fun applyTileBorders() {
+        val d = resources.displayMetrics.density
+        fun border(view: View, color: Int) {
+            val gd = GradientDrawable()
+            gd.setColor(Color.parseColor("#060614"))
+            gd.cornerRadius = 8f * d
+            gd.setStroke((1.5f * d).toInt(), color)
+            view.background = gd
+        }
+        border(findViewById(R.id.tileSnake),        getColor(R.color.accent_blue))
+        border(findViewById(R.id.tilePong),         getColor(R.color.accent_red))
+        border(findViewById(R.id.tileAsteroids),    getColor(R.color.accent_cyan))
+        border(findViewById(R.id.tileBrickBreaker), getColor(R.color.accent_yellow))
+    }
+
+    private fun startBlinkPrompt() {
+        val tv = findViewById<TextView>(R.id.tvSelectGame)
+        val blink = object : Runnable {
+            override fun run() {
+                tv.alpha = if (blinkVisible) 0.9f else 0.15f
+                blinkVisible = !blinkVisible
+                blinkHandler.postDelayed(this, 620)
+            }
+        }
+        blinkHandler.post(blink)
+    }
+
+    private fun showCreditsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("★  CREDITS")
+            .setMessage(
+                "DEVELOPER\n  Michael Kiser\n\n" +
+                "AI PROGRAMMING PARTNER\n  Claude (Anthropic)\n\n" +
+                "LOFTICE PRODUCTIONS\n  2024 – 2026\n\n" +
+                "Thank you for playing!"
+            )
+            .setPositiveButton("CLOSE", null)
+            .show()
     }
 
     override fun onResume() {
@@ -67,6 +121,11 @@ class MainActivity : AppCompatActivity() {
         if (PrefsManager.onSessionStart(this)) {
             showUpsellDialog()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        blinkHandler.removeCallbacksAndMessages(null)
     }
 
     override fun onDestroy() {
@@ -91,13 +150,13 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
 
-        findViewById<TextView>(R.id.tvScoreSnakeDetail).text = topDetail(PrefsManager.GAME_SNAKE)
-        findViewById<TextView>(R.id.tvScorePongDetail).text = topDetail(PrefsManager.GAME_PONG)
+        findViewById<TextView>(R.id.tvScoreSnakeDetail).text    = topDetail(PrefsManager.GAME_SNAKE)
+        findViewById<TextView>(R.id.tvScorePongDetail).text     = topDetail(PrefsManager.GAME_PONG)
         findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
-        findViewById<TextView>(R.id.tvScoreBBDetail).text = topDetail(PrefsManager.GAME_BRICKBREAKER)
+        findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
     }
 
-    // ── Upsell dialog ─────────────────────────────────────────────────────────
+    // ── Upsell dialog ──────────────────────────────────────────────────────────
 
     private fun showUpsellDialog() {
         if (PrefsManager.isAdFree(this)) return

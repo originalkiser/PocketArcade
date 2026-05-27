@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel-art snake icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Snake body segments (S-curve, 10px squares on a 10px grid) -->
+    <!-- Head (brighter green) -->
+    <path android:fillColor="#4ade80"
+        android:pathData="M54,20 h12 v12 h-12 z" />
+    <!-- Body segment 1 -->
+    <path android:fillColor="#22c55e"
+        android:pathData="M54,32 h12 v12 h-12 z" />
+    <!-- Curve right -->
+    <path android:fillColor="#22c55e"
+        android:pathData="M54,44 h12 v12 h-12 z" />
+    <path android:fillColor="#22c55e"
+        android:pathData="M42,44 h12 v12 h-12 z" />
+    <path android:fillColor="#1a9e4a"
+        android:pathData="M30,44 h12 v12 h-12 z" />
+    <!-- Curve down -->
+    <path android:fillColor="#1a9e4a"
+        android:pathData="M30,56 h12 v12 h-12 z" />
+    <path android:fillColor="#1a9e4a"
+        android:pathData="M30,68 h12 v12 h-12 z" />
+    <!-- Curve right again -->
+    <path android:fillColor="#147a38"
+        android:pathData="M42,68 h12 v12 h-12 z" />
+    <path android:fillColor="#147a38"
+        android:pathData="M54,68 h12 v12 h-12 z" />
+    <path android:fillColor="#0f5c2a"
+        android:pathData="M66,68 h12 v12 h-12 z" />
+
+    <!-- Eye on head -->
+    <path android:fillColor="#0f1117"
+        android:pathData="M62,23 h4 v4 h-4 z" />
+    <path android:fillColor="#ffffff"
+        android:pathData="M63,24 h2 v2 h-2 z" />
+
+    <!-- Food (red dot) -->
+    <path android:fillColor="#f87171"
+        android:pathData="M76,28 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+    <path android:fillColor="#fca5a5"
+        android:pathData="M74,26 h3 v3 h-3 z" />
+
+</vector>

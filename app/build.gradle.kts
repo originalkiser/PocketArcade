@@ -48,4 +48,5 @@ dependencies {
     implementation(libs.androidx.cardview)
     implementation(libs.play.services.ads)
     implementation(libs.billing.ktx)
+    implementation(libs.work.runtime.ktx)
 }

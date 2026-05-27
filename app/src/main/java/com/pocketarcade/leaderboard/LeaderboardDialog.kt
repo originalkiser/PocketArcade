@@ -9,6 +9,7 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
+import com.pocketarcade.ShareUtils
 import com.pocketarcade.storage.PrefsManager
 
 private val LETTERS = Array(27) { i -> if (i == 0) " " else ('A' + i - 1).toString() }
@@ -17,6 +18,7 @@ fun showLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
     highlightRank: Int = -1,
+    shareScore: Int = -1,
     onDismiss: () -> Unit = {}
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_leaderboard, null)
@@ -60,6 +62,11 @@ fun showLeaderboardDialog(
     }
     dialog.setOnDismissListener { onDismiss() }
 
+    val topScore = entries.firstOrNull()?.score ?: 0
+    val scoreToShare = if (shareScore >= 0) shareScore else topScore
+    view.findViewById<TextView>(R.id.btnShare).setOnClickListener {
+        ShareUtils.shareScore(activity, game, scoreToShare)
+    }
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
 }
@@ -119,12 +126,12 @@ fun showInitialsThenLeaderboard(
         PrefsManager.setLastInitials(activity, initials)
         val rank = LeaderboardManager.addEntry(activity, game, score, initials)
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game, rank, onDismiss = onDone) }
+        activity.runOnUiThread { showLeaderboardDialog(activity, game, rank, shareScore = score, onDismiss = onDone) }
     }
     view.findViewById<TextView>(R.id.btnSkip).setOnClickListener {
         LeaderboardManager.addEntry(activity, game, score, "   ")
         dialog.dismiss()
-        activity.runOnUiThread { showLeaderboardDialog(activity, game, onDismiss = onDone) }
+        activity.runOnUiThread { showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone) }
     }
 
     dialog.show()
@@ -140,6 +147,6 @@ fun checkAndShowLeaderboard(
         showInitialsThenLeaderboard(activity, game, score, onDone)
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")
-        showLeaderboardDialog(activity, game, onDismiss = onDone)
+        showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
     }
 }
