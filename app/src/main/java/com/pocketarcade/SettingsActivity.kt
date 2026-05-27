@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
 import com.pocketarcade.storage.PrefsManager
+import com.pocketarcade.UpdateChecker
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -59,6 +60,7 @@ class SettingsActivity : AppCompatActivity() {
         val tvAdFreeDesc    = findViewById<TextView>(R.id.tvAdFreeDesc)
         val tvAdFreeChevron = findViewById<TextView>(R.id.tvAdFreeChevron)
         val btnRestore  = findViewById<TextView>(R.id.btnRestore)
+        val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
         val btnReset    = findViewById<TextView>(R.id.btnResetScores)
 
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
@@ -88,6 +90,7 @@ class SettingsActivity : AppCompatActivity() {
             if (!PrefsManager.isAdFree(this)) billing.launchPurchaseFlow()
         }
         btnRestore.setOnClickListener { billing.restorePurchases() }
+        btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_scores_confirm))

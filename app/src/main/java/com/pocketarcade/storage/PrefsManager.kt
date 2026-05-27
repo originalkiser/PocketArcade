@@ -14,6 +14,7 @@ object PrefsManager {
     private const val KEY_SOUND = "sound"
     private const val KEY_THEME_INDEX = "theme_index"
     private const val KEY_LIGHT_MODE = "light_mode"
+    private const val KEY_LAST_UPDATE_CHECK = "last_update_check"
 
     const val GAME_SNAKE = "snake"
     const val GAME_PONG = "pong"
@@ -84,6 +85,12 @@ object PrefsManager {
         prefs(ctx).getBoolean("game_global_$game", true)
     fun setGameUsingGlobalTheme(ctx: Context, game: String, value: Boolean) =
         prefs(ctx).edit { putBoolean("game_global_$game", value) }
+
+    fun getLastUpdateCheck(ctx: Context): Long =
+        prefs(ctx).getLong(KEY_LAST_UPDATE_CHECK, 0L)
+
+    fun setLastUpdateCheck(ctx: Context, time: Long) =
+        prefs(ctx).edit { putLong(KEY_LAST_UPDATE_CHECK, time) }
 
     private fun nextUpsellInterval() = (3..5).random()
 }

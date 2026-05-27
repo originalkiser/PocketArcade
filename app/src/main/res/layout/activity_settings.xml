@@ -226,6 +226,22 @@
                 android:clickable="true"
                 android:focusable="true" />
 
+            <!-- Check for updates -->
+            <TextView
+                android:id="@+id/btnCheckUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="CHECK FOR UPDATES"
+                android:textColor="@color/accent_blue"
+                android:textSize="8sp"
+                android:fontFamily="monospace"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
             <!-- Reset scores -->
             <TextView
                 android:id="@+id/btnResetScores"

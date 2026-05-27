@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateScores()
+        UpdateChecker.check(this)
     }
 
     private fun bindTile(tileId: Int, activityClass: Class<*>) {
