@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/surface">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="&#127942; NEW TOP 10!"
+        android:textColor="@color/accent_yellow"
+        android:textSize="20sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:paddingBottom="4dp" />
+
+    <TextView
+        android:id="@+id/tvInitialsScore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SCORE: 0"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:paddingBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter your initials:"
+        android:textColor="@color/muted"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:paddingBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <NumberPicker
+            android:id="@+id/pickerA"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp" />
+
+        <NumberPicker
+            android:id="@+id/pickerB"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp" />
+
+        <NumberPicker
+            android:id="@+id/pickerC"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvInitialsPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="AAA"
+        android:textColor="@color/accent_blue"
+        android:textSize="28sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:letterSpacing="0.4"
+        android:paddingVertical="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/btnSkip"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="SKIP"
+            android:textColor="@color/muted"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="SAVE"
+            android:textColor="@color/accent_blue"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>

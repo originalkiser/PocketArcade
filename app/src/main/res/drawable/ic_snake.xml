@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Snake body segments (pixel-art style) -->
+    <path android:fillColor="#4f8ef7"
+        android:pathData="M6,18 h6 v6 h-6 z
+                          M12,18 h6 v6 h-6 z
+                          M18,18 h6 v6 h-6 z
+                          M24,18 h6 v6 h-6 z
+                          M24,12 h6 v6 h-6 z
+                          M30,12 h6 v6 h-6 z
+                          M36,12 h6 v6 h-6 z" />
+    <!-- Snake head -->
+    <path android:fillColor="#4f8ef7"
+        android:pathData="M36,18 h6 v12 h-6 z" />
+    <!-- Eyes -->
+    <path android:fillColor="#0f1117"
+        android:pathData="M38,20 h2 v2 h-2 z
+                          M38,26 h2 v2 h-2 z" />
+    <!-- Food dot -->
+    <path android:fillColor="#e74c3c"
+        android:pathData="M8,32 m3,0 a3,3 0 1,0 0,0.001 z" />
+    <path android:fillColor="#e74c3c"
+        android:pathData="M11,32 a3,3 0 1,1 -6,0 a3,3 0 0,1 6,0 z" />
+</vector>

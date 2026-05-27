@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/surface">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SETTINGS"
+        android:textColor="@color/accent_blue"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:paddingBottom="16dp" />
+
+    <!-- Sound row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_game_tile"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="&#128266;  SOUND"
+            android:textColor="@color/text"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+
+        <Switch
+            android:id="@+id/switchSound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Theme row -->
+    <LinearLayout
+        android:id="@+id/rowTheme"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_game_tile"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="&#127912;  THEME"
+            android:textColor="@color/text"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/tvCurrentTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Classic"
+            android:textColor="@color/muted"
+            android:textSize="12sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  ›"
+            android:textColor="@color/muted"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/btnDone"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="DONE"
+        android:textColor="@color/accent_blue"
+        android:textSize="14sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>

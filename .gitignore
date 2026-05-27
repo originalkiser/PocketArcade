@@ -1,0 +1,33 @@
+# Built outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Build directories
+build/
+.gradle/
+captures/
+out/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+
+# Google Services (contains API keys — add your own)
+google-services.json
+
+# Keystore / signing configs (never commit)
+*.jks
+*.keystore
+release.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code session data
+.claude/

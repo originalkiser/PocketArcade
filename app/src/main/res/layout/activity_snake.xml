@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Banner ad -->
+    <FrameLayout
+        android:id="@+id/adContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_ad_banner" />
+
+    <!-- Score bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tvScore"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SCORE: 0"
+            android:textColor="@color/accent_blue"
+            android:textSize="18sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/tvHighScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="High Score: 0"
+            android:textColor="@color/muted"
+            android:textSize="18sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/btnLeaderboard"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:text="&#127942;"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Game area: SnakeView (always square via onMeasure) + restart button overlay -->
+    <FrameLayout
+        android:id="@+id/gameWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.pocketarcade.games.snake.SnakeView
+            android:id="@+id/snakeView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnRestart"
+            android:layout_width="160dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:text="RESTART"
+            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_restart_btn"
+            android:textColor="@android:color/white"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- Control zone — weight=1 fills all space between game and control bar -->
+    <FrameLayout
+        android:id="@+id/controlZone"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Swipe zone (visible in SWIPE mode) -->
+        <FrameLayout
+            android:id="@+id/swipeZoneContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_swipe_zone"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="swipe here or anywhere on screen to control"
+                android:textColor="@color/muted"
+                android:textSize="9sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:alpha="0.7" />
+        </FrameLayout>
+
+        <!-- D-pad (visible in D-PAD mode) — buttons positioned in code via LayoutParams -->
+        <FrameLayout
+            android:id="@+id/dpadContainer"
+            android:layout_width="168dp"
+            android:layout_height="176dp"
+            android:layout_gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/btnUp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="56dp"
+                android:layout_marginTop="0dp"
+                android:gravity="center"
+                android:text="▲"
+                android:textColor="@color/text"
+                android:textSize="20sp"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnLeft"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="60dp"
+                android:gravity="center"
+                android:text="◄"
+                android:textColor="@color/text"
+                android:textSize="20sp"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnRight"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="112dp"
+                android:layout_marginTop="60dp"
+                android:gravity="center"
+                android:text="►"
+                android:textColor="@color/text"
+                android:textSize="20sp"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnDown"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="56dp"
+                android:layout_marginTop="120dp"
+                android:gravity="center"
+                android:text="▼"
+                android:textColor="@color/text"
+                android:textSize="20sp"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
+    </FrameLayout>
+
+    <!-- Bottom control bar: SWIPE | D-PAD | light | settings -->
+    <LinearLayout
+        android:id="@+id/controlBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btnSwipeMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="SWIPE"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:textColor="@color/accent_blue"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnDpadMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="D-PAD"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:textColor="@color/muted"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnLightMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127769;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSound"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128266;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#9881;"
+            android:textColor="@color/muted"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>

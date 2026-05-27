@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Banner ad slot -->
+    <FrameLayout
+        android:id="@+id/adContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_ad_banner" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="SETTINGS"
+                android:textColor="@color/accent_blue"
+                android:textSize="16sp"
+                android:fontFamily="monospace" />
+
+            <!-- Colour Theme -->
+            <LinearLayout
+                android:id="@+id/rowTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="COLOUR THEME"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="9sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_marginBottom="6dp">
+
+                    <View android:id="@+id/swatch0" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch1" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch2" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch3" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch4" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch5" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvThemeName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Classic"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="8sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- Demo Mode row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/demo_mode"
+                        android:textColor="@color/text"
+                        android:textSize="9sp"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/demo_mode_desc"
+                        android:textColor="@color/muted"
+                        android:textSize="7sp"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switchDemoMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <!-- Sound row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sound"
+                        android:textColor="@color/text"
+                        android:textSize="9sp"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/sound_desc"
+                        android:textColor="@color/muted"
+                        android:textSize="7sp"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switchSound"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <!-- Ad-free purchase -->
+            <LinearLayout
+                android:id="@+id/rowAdFree"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAdFreeTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ad_free_title"
+                        android:textColor="@color/accent_yellow"
+                        android:textSize="9sp"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:id="@+id/tvAdFreeDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/ad_free_desc"
+                        android:textColor="@color/muted"
+                        android:textSize="7sp"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvAdFreeChevron"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=">"
+                    android:textColor="@color/accent_yellow"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- Restore purchase -->
+            <TextView
+                android:id="@+id/btnRestore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/restore_purchase"
+                android:textColor="@color/muted"
+                android:textSize="8sp"
+                android:fontFamily="monospace"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- Reset scores -->
+            <TextView
+                android:id="@+id/btnResetScores"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/reset_scores"
+                android:textColor="@color/accent_red"
+                android:textSize="8sp"
+                android:fontFamily="monospace"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

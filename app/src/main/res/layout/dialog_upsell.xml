@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/upsell_title"
+        android:textColor="@color/accent_yellow"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/upsell_body"
+        android:textColor="@color/text"
+        android:textSize="10sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/btnBuy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/upsell_buy"
+        android:textColor="@color/bg"
+        android:textSize="9sp"
+        android:fontFamily="monospace"
+        android:background="@color/accent_yellow"
+        android:gravity="center"
+        android:padding="14dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tvDismiss"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No thanks (3s)"
+        android:textColor="@color/muted"
+        android:textSize="8sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:padding="10dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pocket Arcade</string>
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+
+    <!-- Game names -->
+    <string name="game_snake">SNAKE</string>
+    <string name="game_pong">PONG</string>
+    <string name="game_asteroids">ASTEROIDS</string>
+    <string name="game_brickbreaker">BRICK BREAKER</string>
+
+    <!-- Common -->
+    <string name="high_score">HI: %d</string>
+    <string name="score">SCORE: %d</string>
+    <string name="game_over">GAME OVER</string>
+    <string name="demo">DEMO</string>
+    <string name="tap_to_play">TAP TO PLAY</string>
+    <string name="restart">RESTART</string>
+    <string name="settings">SETTINGS</string>
+    <string name="back">BACK</string>
+
+    <!-- Pong -->
+    <string name="difficulty_easy">EASY</string>
+    <string name="difficulty_medium">MEDIUM</string>
+    <string name="difficulty_hard">HARD</string>
+    <string name="select_difficulty">SELECT DIFFICULTY</string>
+    <string name="you_win">YOU WIN!</string>
+    <string name="game_over_pong">GAME OVER</string>
+
+    <!-- Asteroids -->
+    <string name="wave">WAVE %d</string>
+    <string name="lives">LIVES: %d</string>
+
+    <!-- Brick Breaker -->
+    <string name="level">LEVEL %d</string>
+    <string name="you_beat_it">YOU WIN!</string>
+
+    <!-- Settings -->
+    <string name="demo_mode">Demo Mode</string>
+    <string name="demo_mode_desc">Auto-play after 15s idle</string>
+    <string name="sound">Sound Effects</string>
+    <string name="sound_desc">Enable in-game sounds</string>
+    <string name="ad_free_title">Go Ad-Free</string>
+    <string name="ad_free_desc">Remove all ads — $0.99 one-time</string>
+    <string name="ad_free_purchased">Ad-Free (Purchased!)</string>
+    <string name="restore_purchase">Restore Purchase</string>
+    <string name="reset_scores">Reset High Scores</string>
+    <string name="reset_scores_confirm">Reset all high scores?</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+
+    <!-- Upsell dialog -->
+    <string name="upsell_title">ENJOY THE GAMES?</string>
+    <string name="upsell_body">Remove ALL ads for just $0.99.\nOne-time. Forever. No subscriptions.</string>
+    <string name="upsell_buy">BUY AD-FREE ($0.99)</string>
+    <string name="upsell_dismiss">No thanks (%ds)</string>
+
+    <!-- Fake ad messages -->
+    <string-array name="fake_ads">
+        <item>Snake ate my homework. 10/10 would recommend.</item>
+        <item>Pong: The only sport where the ball is smarter than the players.</item>
+        <item>WARNING: Asteroids may cause sudden bursts of 1983 nostalgia.</item>
+        <item>Brick Breaker support group meets Tuesdays. Free snacks.</item>
+        <item>Ad-free for $0.99. That\'s less than a gas station hot dog.</item>
+        <item>Our snake has eaten 47 programmers. You could be next.</item>
+        <item>Pong AI went to Harvard. Still loses on Easy mode.</item>
+        <item>No internet? No problem. Pixels don\'t need WiFi.</item>
+        <item>Asteroids: Technically a physics simulator. You\'re welcome.</item>
+        <item>High score or it didn\'t happen.</item>
+        <item>This ad space intentionally left funny.</item>
+        <item>Loading ad... Just kidding. Here\'s a joke instead.</item>
+    </string-array>
+</resources>

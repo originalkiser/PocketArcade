@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="&#9889; GAME TUNING &#9889;"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- ═══ COLOUR THEME ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="COLOUR THEME"
+            android:textColor="@color/muted"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="14dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="8dp">
+
+            <View
+                android:id="@+id/swatch0"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/swatch1"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/swatch2"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/swatch3"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/swatch4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/swatch5"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="5dp"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Theme name label -->
+        <TextView
+            android:id="@+id/tvThemeName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Classic"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Apply to all games toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="APPLY TO ALL GAMES"
+                    android:textColor="@color/text"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="off = this game only"
+                    android:textColor="@color/muted"
+                    android:textSize="9sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switchApplyAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ═══ D-PAD BUTTONS ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="D-PAD BUTTONS"
+            android:textColor="@color/muted"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Button Size: smol ←→ chonk -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="smol"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+
+            <SeekBar
+                android:id="@+id/seekBtnSize"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:min="36"
+                android:max="80"
+                android:progress="56" />
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="chonk"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvBtnSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="56dp"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:layout_marginBottom="14dp" />
+
+        <!-- H-Spread: tight ←→ wide -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="tight"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+
+            <SeekBar
+                android:id="@+id/seekHSpread"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:min="0"
+                android:max="40"
+                android:progress="0" />
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="wide"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvHSpread"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0dp"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:layout_marginBottom="14dp" />
+
+        <!-- V-Gap: cozy ←→ airy -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="cozy"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+
+            <SeekBar
+                android:id="@+id/seekVSpacing"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:min="0"
+                android:max="20"
+                android:progress="4" />
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="airy"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvVSpacing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="4dp"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:layout_marginBottom="14dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ═══ SWIPE FEEL ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SWIPE FEEL"
+            android:textColor="@color/muted"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 3-button sensitivity toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/btnSensLazy"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="LAZY"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnSensMed"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="SMOOTH"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnSensZippy"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="ZIPPY"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
