@@ -26,14 +26,22 @@ jobs:
           PATCH=$(git rev-list --count HEAD)
           echo "RELEASE_TAG=v1.3.${PATCH}" >> $GITHUB_ENV
 
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build Release APK
+        run: |
+          ./gradlew assembleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file=$PWD/keystore.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_STORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEYSTORE_KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEYSTORE_KEY_PASSWORD }}
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk PocketArcade.apk
+        run: cp app/build/outputs/apk/release/app-release.apk PocketArcade.apk
 
       - name: Write release notes
         run: |
