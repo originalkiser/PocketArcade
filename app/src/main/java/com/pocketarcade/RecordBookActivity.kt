@@ -2,7 +2,10 @@ package com.pocketarcade
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
+import android.view.ViewTreeObserver
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -43,15 +46,15 @@ class RecordBookActivity : AppCompatActivity() {
         val tabBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(8, 8, 8, 8)
+            setPadding(0, 8, 0, 8)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
 
-        // Two copies side-by-side so scrolling past the end wraps visually back to the start
-        repeat(2) {
+        // 3 copies — seamless infinite scroll via scroll listener repositioning
+        repeat(3) {
             tabs.forEach { tab ->
                 val tv = TextView(this).apply {
                     text = tab
@@ -88,6 +91,33 @@ class RecordBookActivity : AppCompatActivity() {
         }
         tabScroll.addView(tabBar)
 
+        // Scroll to the middle copy once laid out
+        tabScroll.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                tabScroll.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                val setWidth = tabBar.width / 3
+                if (setWidth > 0) tabScroll.scrollTo(setWidth, 0)
+            }
+        })
+
+        // Seamless looping: reposition from edge copies back into the middle copy
+        val mainHandler = Handler(Looper.getMainLooper())
+        var isRepositioning = false
+        tabScroll.setOnScrollChangeListener { _, scrollX, _, _, _ ->
+            if (isRepositioning) return@setOnScrollChangeListener
+            val setWidth = tabBar.width / 3
+            if (setWidth <= 0) return@setOnScrollChangeListener
+            val maxScrollX = tabBar.width - tabScroll.width
+            val newX = when {
+                scrollX < setWidth / 2                    -> scrollX + setWidth
+                scrollX > maxScrollX - setWidth / 2       -> scrollX - setWidth
+                else                                      -> return@setOnScrollChangeListener
+            }
+            isRepositioning = true
+            tabScroll.scrollTo(newX, 0)
+            mainHandler.post { isRepositioning = false }
+        }
+
         val divider = android.view.View(this).apply {
             setBackgroundColor(Color.parseColor("#AA44FF"))
             alpha = 0.3f
@@ -109,11 +139,11 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun renderTab(tab: String) {
         when (tab) {
-            "ALL"          -> renderAll()
-            "SNAKE"        -> renderSnake()
-            "PONG"         -> renderPong()
-            "ASTEROIDS"    -> renderAsteroids()
-            "BRICK BREAKER"-> renderBrickBreaker()
+            "ALL"           -> renderAll()
+            "SNAKE"         -> renderSnake()
+            "PONG"          -> renderPong()
+            "ASTEROIDS"     -> renderAsteroids()
+            "BRICK BREAKER" -> renderBrickBreaker()
         }
     }
 
@@ -141,10 +171,10 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun renderSnake() {
         buildGameSection(contentContainer,
-            game       = PrefsManager.GAME_SNAKE,
-            label      = "SNAKE",
-            accentHex  = "#4f8ef7",
-            modes      = emptyList()
+            game      = PrefsManager.GAME_SNAKE,
+            label     = "SNAKE",
+            accentHex = "#4f8ef7",
+            modes     = emptyList()
         )
         val fruits = PrefsManager.getSnakeFruits(this)
         val snakePlays = PrefsManager.getStatPlays(this, PrefsManager.GAME_SNAKE)
@@ -328,24 +358,27 @@ class RecordBookActivity : AppCompatActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 5, 0, 5)
+            setPadding(0, 6, 0, 6)
         }
-        fun tv(text: String, color: String, size: Float, weight: Float = 0f, g: Int = Gravity.START) =
-            TextView(this).apply {
-                this.text = text
-                setTextColor(Color.parseColor(color))
-                textSize = size
-                gravity = g
-                layoutParams = if (weight > 0f)
-                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
-                else
-                    LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            }
-        row.addView(tv(rank,     accentHex, 20f))
-        row.addView(tv("  ",     "#000000", 20f))
-        row.addView(tv(initials, "#FFFFFF",  20f, 1f))
-        row.addView(tv(score,    accentHex, 20f))
-        row.addView(tv("  $date","#444466", 20f))
+        val nameText = if (initials.isNotEmpty()) "$rank  $initials" else rank
+        val tvLabel = TextView(this).apply {
+            text = nameText
+            setTextColor(Color.parseColor(accentHex))
+            textSize = 22f
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setPadding(0, 0, 16, 0)
+        }
+        val tvValue = TextView(this).apply {
+            text = "$score  $date"
+            setTextColor(Color.parseColor(accentHex))
+            textSize = 22f
+            gravity = Gravity.START
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setPadding(16, 0, 0, 0)
+        }
+        row.addView(tvLabel)
+        row.addView(tvValue)
         container.addView(row)
     }
 

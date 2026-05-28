@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -17,9 +18,6 @@ import java.io.File
 import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 
 object UpdateChecker {
 
@@ -55,7 +53,7 @@ object UpdateChecker {
 
                 PrefsManager.setLastUpdateCheck(activity, System.currentTimeMillis())
 
-                val publishedAt = Regex(""""published_at"\s*:\s*"([^"]+)"""")
+                val tagName = Regex(""""tag_name"\s*:\s*"([^"]+)"""")
                     .find(json)?.groupValues?.get(1)
                     ?: run {
                         if (manual) activity.runOnUiThread {
@@ -64,13 +62,10 @@ object UpdateChecker {
                         return@Thread
                     }
 
-                val fmt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-                fmt.timeZone = TimeZone.getTimeZone("UTC")
-                val releaseTime = fmt.parse(publishedAt)?.time ?: return@Thread
-
                 activity.runOnUiThread {
-                    if (releaseTime > BuildConfig.BUILD_TIME) {
-                        showUpdateDialog(activity)
+                    val currentTag = "v${BuildConfig.VERSION_NAME}"
+                    if (tagName != currentTag) {
+                        showUpdateDialog(activity, tagName)
                     } else if (manual) {
                         toast(activity, "You're up to date!")
                     }
@@ -83,30 +78,58 @@ object UpdateChecker {
         }.start()
     }
 
-    private fun showUpdateDialog(activity: Activity) {
-        AlertDialog.Builder(activity)
-            .setTitle("Update Available")
-            .setMessage("A new version of Pocket Arcade is available.\n\nDownload and install now?")
-            .setPositiveButton("Download") { _, _ -> startDownload(activity) }
-            .setNegativeButton("Later", null)
-            .show()
+    private fun showUpdateDialog(activity: Activity, tagName: String) {
+        showStyledDialog(
+            activity,
+            title    = "UPDATE AVAILABLE",
+            message  = "Version $tagName of Pocket Arcade is ready.\nDownload and install now?",
+            positive = "DOWNLOAD UPDATE",
+            negative = "LATER"
+        ) { startDownload(activity) }
+    }
+
+    private fun showPermissionDialog(activity: Activity) {
+        showStyledDialog(
+            activity,
+            title    = "PERMISSION REQUIRED",
+            message  = "To install updates, enable 'Install unknown apps' for Pocket Arcade in Settings.",
+            positive = "OPEN SETTINGS",
+            negative = "CANCEL"
+        ) {
+            activity.startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${activity.packageName}")
+                )
+            )
+        }
+    }
+
+    private fun showStyledDialog(
+        activity: Activity,
+        title: String,
+        message: String,
+        positive: String,
+        negative: String,
+        onPositive: () -> Unit
+    ) {
+        val view = activity.layoutInflater.inflate(R.layout.dialog_update, null)
+        view.findViewById<TextView>(R.id.tvUpdateTitle).text    = title
+        view.findViewById<TextView>(R.id.tvUpdateMessage).text  = message
+        view.findViewById<TextView>(R.id.btnUpdatePositive).text = positive
+        view.findViewById<TextView>(R.id.btnUpdateNegative).text = negative
+        val dialog = AlertDialog.Builder(activity).setView(view).create()
+        view.findViewById<TextView>(R.id.btnUpdatePositive).setOnClickListener {
+            dialog.dismiss()
+            onPositive()
+        }
+        view.findViewById<TextView>(R.id.btnUpdateNegative).setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     private fun startDownload(activity: Activity) {
         if (!activity.packageManager.canRequestPackageInstalls()) {
-            AlertDialog.Builder(activity)
-                .setTitle("Allow Installation")
-                .setMessage("To install updates, allow Pocket Arcade to install apps in Settings first.")
-                .setPositiveButton("Open Settings") { _, _ ->
-                    activity.startActivity(
-                        Intent(
-                            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                            Uri.parse("package:${activity.packageName}")
-                        )
-                    )
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+            showPermissionDialog(activity)
             return
         }
 

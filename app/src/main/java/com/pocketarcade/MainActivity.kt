@@ -194,8 +194,8 @@ class MainActivity : AppCompatActivity() {
             PrefsManager.GAME_BRICKBREAKER to "BRICK BREAKER"
         )
         val topGame = games.maxByOrNull { PrefsManager.getStatPlays(this, it) }!!
-        val allHi = games.maxOf { PrefsManager.getHighScore(this, it) }
-        tv.text = "$total GAMES  ·  TOP AGENT: ${labels[topGame]}  ·  BEST: $allHi"
+        val topPlays = PrefsManager.getStatPlays(this, topGame)
+        tv.text = "$total GAMES\nMost Played: ${labels[topGame]} - $topPlays games"
     }
 
     private fun buildMarqueeTicker(): String {
