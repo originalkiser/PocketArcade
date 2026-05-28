@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -17,18 +17,18 @@
             android:text="&#9889; GAME TUNING &#9889;"
             android:textColor="@color/accent_blue"
             android:textSize="16sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:layout_marginBottom="20dp" />
 
-        <!-- â•â•â• COLOUR THEME â•â•â• -->
+        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â COLOUR THEME Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="COLOUR THEME"
             android:textColor="@color/muted"
             android:textSize="13sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:letterSpacing="0.1"
             android:layout_marginBottom="14dp" />
 
@@ -96,7 +96,7 @@
             android:text="Classic"
             android:textColor="@color/accent_blue"
             android:textSize="11sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:layout_marginBottom="12dp" />
 
@@ -120,7 +120,7 @@
                     android:text="APPLY TO ALL GAMES"
                     android:textColor="@color/text"
                     android:textSize="11sp"
-                    android:fontFamily="@font/press_start_2p" />
+                    android:fontFamily="monospace" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -129,7 +129,7 @@
                     android:text="off = this game only"
                     android:textColor="@color/muted"
                     android:textSize="9sp"
-                    android:fontFamily="@font/press_start_2p" />
+                    android:fontFamily="monospace" />
             </LinearLayout>
 
             <Switch
@@ -146,18 +146,18 @@
             android:background="@color/border"
             android:layout_marginBottom="16dp" />
 
-        <!-- â•â•â• D-PAD BUTTONS â•â•â• -->
+        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â D-PAD BUTTONS Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="D-PAD BUTTONS"
             android:textColor="@color/muted"
             android:textSize="13sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:letterSpacing="0.1"
             android:layout_marginBottom="16dp" />
 
-        <!-- Button Size: smol â†â†’ chonk -->
+        <!-- Button Size: smol Ã¢â€ ÂÃ¢â€ â€™ chonk -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -171,7 +171,7 @@
                 android:text="Small"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p" />
+                android:fontFamily="monospace" />
 
             <SeekBar
                 android:id="@+id/seekBtnSize"
@@ -188,7 +188,7 @@
                 android:text="Large"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="end" />
         </LinearLayout>
 
@@ -199,11 +199,11 @@
             android:text="56dp"
             android:textColor="@color/accent_blue"
             android:textSize="11sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:layout_marginBottom="14dp" />
 
-        <!-- H-Spread: tight â†â†’ wide -->
+        <!-- H-Spread: tight Ã¢â€ ÂÃ¢â€ â€™ wide -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -217,7 +217,7 @@
                 android:text="tight"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p" />
+                android:fontFamily="monospace" />
 
             <SeekBar
                 android:id="@+id/seekHSpread"
@@ -234,7 +234,7 @@
                 android:text="wide"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="end" />
         </LinearLayout>
 
@@ -245,11 +245,11 @@
             android:text="0dp"
             android:textColor="@color/accent_blue"
             android:textSize="11sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:layout_marginBottom="14dp" />
 
-        <!-- V-Gap: cozy â†â†’ airy -->
+        <!-- V-Gap: cozy Ã¢â€ ÂÃ¢â€ â€™ airy -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -263,7 +263,7 @@
                 android:text="Compact"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p" />
+                android:fontFamily="monospace" />
 
             <SeekBar
                 android:id="@+id/seekVSpacing"
@@ -280,7 +280,7 @@
                 android:text="Spacious"
                 android:textColor="@color/muted"
                 android:textSize="11sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="end" />
         </LinearLayout>
 
@@ -291,7 +291,7 @@
             android:text="4dp"
             android:textColor="@color/accent_blue"
             android:textSize="11sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:layout_marginBottom="14dp" />
 
@@ -302,14 +302,14 @@
             android:background="@color/border"
             android:layout_marginBottom="16dp" />
 
-        <!-- â•â•â• SWIPE FEEL â•â•â• -->
+        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â SWIPE FEEL Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="SWIPE FEEL"
             android:textColor="@color/muted"
             android:textSize="13sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:letterSpacing="0.1"
             android:layout_marginBottom="12dp" />
 
@@ -327,7 +327,7 @@
                 android:layout_weight="1"
                 android:text="LAZY"
                 android:textSize="13sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
@@ -339,7 +339,7 @@
                 android:layout_weight="1"
                 android:text="SMOOTH"
                 android:textSize="13sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
@@ -351,7 +351,7 @@
                 android:layout_weight="1"
                 android:text="ZIPPY"
                 android:textSize="13sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
@@ -359,3 +359,4 @@
 
     </LinearLayout>
 </ScrollView>
+

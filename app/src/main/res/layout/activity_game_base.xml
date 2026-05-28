@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Shared base layout: banner ad at top, game view container fills rest -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Game view container — activities inflate their SurfaceView here -->
+    <!-- Game view container â€” activities inflate their SurfaceView here -->
     <FrameLayout
         android:id="@+id/gameContainer"
         android:layout_width="match_parent"
@@ -21,3 +21,4 @@
         android:layout_weight="1" />
 
 </LinearLayout>
+

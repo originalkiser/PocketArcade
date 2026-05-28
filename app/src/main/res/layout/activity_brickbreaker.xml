@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,7 +28,7 @@
             android:text="SCORE: 0"
             android:textColor="@color/accent_yellow"
             android:textSize="12sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:singleLine="true" />
 
         <TextView
@@ -38,7 +38,7 @@
             android:text="LV:1"
             android:textColor="@color/accent_green"
             android:textSize="11sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:layout_marginEnd="6dp" />
 
         <TextView
@@ -48,7 +48,7 @@
             android:text="Best:0"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:layout_marginEnd="4dp" />
 
         <TextView
@@ -112,10 +112,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="&#9664;  swipe to move paddle  â€¢  tap to launch  &#9654;"
+            android:text="&#9664;  swipe to move paddle  Ã¢â‚¬Â¢  tap to launch  &#9654;"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="@font/press_start_2p" />
+            android:fontFamily="monospace" />
     </FrameLayout>
 
 </LinearLayout>
+

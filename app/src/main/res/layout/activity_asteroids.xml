@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,7 +28,7 @@
             android:text="SCORE: 0"
             android:textColor="@color/accent_cyan"
             android:textSize="12sp"
-            android:fontFamily="@font/press_start_2p" />
+            android:fontFamily="monospace" />
 
         <TextView
             android:id="@+id/tvHighScore"
@@ -37,7 +37,7 @@
             android:text="Best: 0"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:layout_marginEnd="4dp" />
 
         <TextView
@@ -48,7 +48,7 @@
             android:text="AUTO"
             android:textColor="@color/muted"
             android:textSize="9sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center"
             android:background="@drawable/bg_game_tile"
             android:clickable="true"
@@ -115,3 +115,4 @@
         android:focusable="true" />
 
 </LinearLayout>
+

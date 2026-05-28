@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#050510">
 
-    <!-- â”€â”€ Main column â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Main column Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="â‰¡  SELECT YOUR GAME  â‰¡"
+                android:text="Ã¢â€°Â¡  SELECT YOUR GAME  Ã¢â€°Â¡"
                 android:textColor="@color/muted"
                 android:textSize="9sp"
                 android:fontFamily="@font/press_start_2p"
@@ -71,7 +71,7 @@
                 android:orientation="vertical"
                 android:padding="10dp">
 
-                <!-- â”€â”€ SNAKE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ SNAKE Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
                 <LinearLayout
                     android:id="@+id/tileSnake"
                     android:layout_width="match_parent"
@@ -103,7 +103,7 @@
                             android:text="@string/game_snake"
                             android:textColor="@color/accent_blue"
                             android:textSize="19sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:textStyle="bold" />
 
                         <TextView
@@ -114,7 +114,7 @@
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
                             android:textSize="13sp"
-                            android:fontFamily="@font/press_start_2p" />
+                            android:fontFamily="monospace" />
 
                         <TextView
                             android:id="@+id/tvScoreSnakeDetail"
@@ -124,21 +124,21 @@
                             android:text=""
                             android:textColor="@color/accent_blue"
                             android:textSize="11sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="â–¶"
+                        android:text="Ã¢â€“Â¶"
                         android:textColor="@color/accent_blue"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- â”€â”€ PONG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ PONG Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
                 <LinearLayout
                     android:id="@+id/tilePong"
                     android:layout_width="match_parent"
@@ -170,7 +170,7 @@
                             android:text="@string/game_pong"
                             android:textColor="@color/accent_red"
                             android:textSize="19sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:textStyle="bold" />
 
                         <TextView
@@ -181,7 +181,7 @@
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
                             android:textSize="13sp"
-                            android:fontFamily="@font/press_start_2p" />
+                            android:fontFamily="monospace" />
 
                         <TextView
                             android:id="@+id/tvScorePongDetail"
@@ -191,21 +191,21 @@
                             android:text=""
                             android:textColor="@color/accent_red"
                             android:textSize="11sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="â–¶"
+                        android:text="Ã¢â€“Â¶"
                         android:textColor="@color/accent_red"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- â”€â”€ ASTEROIDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ ASTEROIDS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
                 <LinearLayout
                     android:id="@+id/tileAsteroids"
                     android:layout_width="match_parent"
@@ -237,7 +237,7 @@
                             android:text="@string/game_asteroids"
                             android:textColor="@color/accent_cyan"
                             android:textSize="19sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:textStyle="bold" />
 
                         <TextView
@@ -248,7 +248,7 @@
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
                             android:textSize="13sp"
-                            android:fontFamily="@font/press_start_2p" />
+                            android:fontFamily="monospace" />
 
                         <TextView
                             android:id="@+id/tvScoreAsteroidsDetail"
@@ -258,21 +258,21 @@
                             android:text=""
                             android:textColor="@color/accent_cyan"
                             android:textSize="11sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="â–¶"
+                        android:text="Ã¢â€“Â¶"
                         android:textColor="@color/accent_cyan"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- â”€â”€ BRICK BREAKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ BRICK BREAKER Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
                 <LinearLayout
                     android:id="@+id/tileBrickBreaker"
                     android:layout_width="match_parent"
@@ -304,7 +304,7 @@
                             android:text="@string/game_brickbreaker"
                             android:textColor="@color/accent_yellow"
                             android:textSize="19sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:textStyle="bold" />
 
                         <TextView
@@ -315,7 +315,7 @@
                             android:text="High Score: 0"
                             android:textColor="@color/muted"
                             android:textSize="13sp"
-                            android:fontFamily="@font/press_start_2p" />
+                            android:fontFamily="monospace" />
 
                         <TextView
                             android:id="@+id/tvScoreBBDetail"
@@ -325,21 +325,21 @@
                             android:text=""
                             android:textColor="@color/accent_yellow"
                             android:textSize="11sp"
-                            android:fontFamily="@font/press_start_2p"
+                            android:fontFamily="monospace"
                             android:alpha="0.7" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="â–¶"
+                        android:text="Ã¢â€“Â¶"
                         android:textColor="@color/accent_yellow"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- ── RECORD BOOK ──────────────────────────────────────────── -->
+                <!-- â”€â”€ RECORD BOOK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <LinearLayout
                     android:id="@+id/btnRecordBook"
                     android:layout_width="match_parent"
@@ -362,14 +362,14 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="⚡  RECORD BOOK"
+                            android:text="âš¡  RECORD BOOK"
                             android:textColor="#AA44FF"
                             android:textSize="12sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="▶"
+                            android:text="â–¶"
                             android:textColor="#AA44FF"
                             android:textSize="10sp"
                             android:alpha="0.6" />
@@ -410,10 +410,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="âš™  SETTINGS"
+                android:text="Ã¢Å¡â„¢  SETTINGS"
                 android:textColor="@color/muted"
                 android:textSize="24sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
@@ -429,10 +429,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="â˜…  CREDITS"
+                android:text="Ã¢Ëœâ€¦  CREDITS"
                 android:textColor="@color/muted"
                 android:textSize="24sp"
-                android:fontFamily="@font/press_start_2p"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
@@ -443,10 +443,10 @@
             android:id="@+id/tvMarquee"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:text="TOP SCORES  âœ¦  PLAY TO SET RECORDS  âœ¦"
+            android:text="TOP SCORES  Ã¢Å“Â¦  PLAY TO SET RECORDS  Ã¢Å“Â¦"
             android:textColor="@color/accent_yellow"
             android:textSize="20sp"
-            android:fontFamily="@font/press_start_2p"
+            android:fontFamily="monospace"
             android:gravity="center_vertical"
             android:paddingHorizontal="8dp"
             android:background="#03030E"
@@ -466,3 +466,4 @@
         android:focusable="false" />
 
 </FrameLayout>
+
