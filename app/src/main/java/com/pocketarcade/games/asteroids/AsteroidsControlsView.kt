@@ -1,5 +1,7 @@
 package com.pocketarcade.games.asteroids
 
+import androidx.core.content.res.ResourcesCompat
+import com.pocketarcade.R
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -44,13 +46,13 @@ class AsteroidsControlsView @JvmOverloads constructor(
         color = Color.parseColor("#CCe74c3c"); style = Paint.Style.FILL
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE; textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+        color = Color.WHITE; textAlign = Paint.Align.CENTER; typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
     }
     private val hintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#806b7a99"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#806b7a99"); textAlign = Paint.Align.CENTER; typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
     }
     private val autoFirePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#B300d4ff"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#B300d4ff"); textAlign = Paint.Align.CENTER; typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
@@ -124,11 +126,11 @@ class AsteroidsControlsView @JvmOverloads constructor(
         // Right half: fire button
         val fcx = w * 3f / 4f; val fcy = h / 2f
         canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
-        canvas.drawText("●", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
+        canvas.drawText("Ã¢â€”Â", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
 
         if (autoFireEnabled) {
             // Auto-fire tooltip badge above the button
-            canvas.drawText("▸ AUTO FIRE ON ◂", fcx, fcy - fr - 8f, autoFirePaint)
+            canvas.drawText("Ã¢â€“Â¸ AUTO FIRE ON Ã¢â€”â€š", fcx, fcy - fr - 8f, autoFirePaint)
         } else {
             canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
         }

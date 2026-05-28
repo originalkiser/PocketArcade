@@ -28,7 +28,7 @@
             android:text="SCORE: 0"
             android:textColor="@color/accent_cyan"
             android:textSize="12sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
 
         <TextView
             android:id="@+id/tvHighScore"
@@ -37,7 +37,7 @@
             android:text="Best: 0"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:layout_marginEnd="4dp" />
 
         <TextView
@@ -48,7 +48,7 @@
             android:text="AUTO"
             android:textColor="@color/muted"
             android:textSize="9sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:gravity="center"
             android:background="@drawable/bg_game_tile"
             android:clickable="true"

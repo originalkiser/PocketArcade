@@ -1,5 +1,7 @@
 package com.pocketarcade.games.brickbreaker
 
+import androidx.core.content.res.ResourcesCompat
+import com.pocketarcade.R
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -39,9 +41,9 @@ class BrickBreakerView @JvmOverloads constructor(
         const val WIDE_PADDLE_FACTOR = 1.7f
         const val POWERUP_SPEED = 3f
 
-        // 10 levels: each is a BRICK_ROWS×COLS array of HP (0 = empty, 1/2/3 = HP)
+        // 10 levels: each is a BRICK_ROWSÃƒâ€”COLS array of HP (0 = empty, 1/2/3 = HP)
         val LEVELS = arrayOf(
-            // Level 1 – simple row fill
+            // Level 1 Ã¢â‚¬â€œ simple row fill
             arrayOf(intArrayOf(0,0,0,0,0,0,0,0), intArrayOf(0,0,0,0,0,0,0,0),
                     intArrayOf(1,1,1,1,1,1,1,1), intArrayOf(1,1,1,1,1,1,1,1),
                     intArrayOf(0,0,0,0,0,0,0,0), intArrayOf(0,0,0,0,0,0,0,0),
@@ -56,7 +58,7 @@ class BrickBreakerView @JvmOverloads constructor(
                     intArrayOf(1,1,1,1,1,1,1,1), intArrayOf(0,0,0,0,0,0,0,0),
                     intArrayOf(0,0,0,0,0,0,0,0), intArrayOf(0,0,0,0,0,0,0,0),
                     intArrayOf(0,0,0,0,0,0,0,0)),
-            // Level 4 – checkerboard
+            // Level 4 Ã¢â‚¬â€œ checkerboard
             arrayOf(intArrayOf(1,0,1,0,1,0,1,0), intArrayOf(0,1,0,1,0,1,0,1),
                     intArrayOf(1,0,2,0,2,0,1,0), intArrayOf(0,1,0,2,2,0,1,0),
                     intArrayOf(1,0,1,0,1,0,1,0), intArrayOf(0,0,0,0,0,0,0,0),
@@ -86,7 +88,7 @@ class BrickBreakerView @JvmOverloads constructor(
                     intArrayOf(3,2,3,2,3,2,3,3), intArrayOf(2,3,2,3,2,3,2,2),
                     intArrayOf(1,2,3,2,3,2,3,1), intArrayOf(0,0,0,0,0,0,0,0),
                     intArrayOf(0,0,0,0,0,0,0,0)),
-            // Level 10 – fortress
+            // Level 10 Ã¢â‚¬â€œ fortress
             arrayOf(intArrayOf(3,3,3,3,3,3,3,3), intArrayOf(3,0,3,0,0,3,0,3),
                     intArrayOf(3,3,3,3,3,3,3,3), intArrayOf(3,0,0,3,3,0,0,3),
                     intArrayOf(3,3,3,3,3,3,3,3), intArrayOf(3,0,3,0,0,3,0,3),
@@ -121,7 +123,7 @@ class BrickBreakerView @JvmOverloads constructor(
     // Aim mode
     private var aimAngle = -PI.toFloat() / 2f
 
-    // Touch — offset-based paddle control
+    // Touch Ã¢â‚¬â€ offset-based paddle control
     private var touchStartX = 0f
     private var paddleStartX = 0f
     private var touchActive = false
@@ -159,17 +161,17 @@ class BrickBreakerView @JvmOverloads constructor(
     }
     private val overlayPaint = Paint().apply { color = Color.parseColor("#CC0f1117") }
     private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4f8ef7"); typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#4f8ef7"); typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER; isFakeBoldText = true
     }
     private val subPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#6b7a99"); typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER
+        color = Color.parseColor("#6b7a99"); typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE); textAlign = Paint.Align.CENTER
     }
     private val demoWatermark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#80f1c40f"); typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER
+        color = Color.parseColor("#80f1c40f"); typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE); textAlign = Paint.Align.CENTER
     }
 
-    // ── Theme ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Theme Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     fun applyTheme(t: com.pocketarcade.GameTheme) {
         bgPaint.color        = t.bg
@@ -224,7 +226,7 @@ class BrickBreakerView @JvmOverloads constructor(
         paddleX = width / 2f - paddleW / 2f
     }
 
-    // ── Public API ─────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Public API Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     fun isUserPlaying() = (state == BBState.PLAYING || state == BBState.AIM) && !demoMode
     fun isDemoMode() = demoMode
@@ -259,7 +261,7 @@ class BrickBreakerView @JvmOverloads constructor(
         onLevelChanged?.invoke(level)
     }
 
-    // ── Update ─────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Update Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private fun update() {
         val w = width.toFloat(); val h = height.toFloat()
@@ -323,7 +325,7 @@ class BrickBreakerView @JvmOverloads constructor(
             // Ball lost
             if (b.y - b.r > h) { ballIter.remove(); continue }
 
-            // Paddle bounce — swept check prevents tunneling at high speed
+            // Paddle bounce Ã¢â‚¬â€ swept check prevents tunneling at high speed
             if (b.vy > 0 &&
                 prevBy + b.r <= paddleY &&
                 b.y + b.r > paddleY &&
@@ -429,7 +431,7 @@ class BrickBreakerView @JvmOverloads constructor(
         state = BBState.PLAYING
     }
 
-    // ── Touch ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Touch Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     /** Called by both onTouchEvent and the external swipe zone. */
     fun feedTouch(action: Int, x: Float, y: Float) {
@@ -467,7 +469,7 @@ class BrickBreakerView @JvmOverloads constructor(
         return true
     }
 
-    // ── Draw ───────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Draw Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     private fun drawGame(canvas: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
         canvas.drawRect(0f, 0f, w, h, bgPaint)
@@ -554,7 +556,7 @@ class BrickBreakerView @JvmOverloads constructor(
 
         if (demoMode && (state == BBState.PLAYING || state == BBState.AIM)) {
             demoWatermark.textSize = h * 0.035f
-            canvas.drawText("▶ DEMO", w / 2f, h * 0.96f, demoWatermark)
+            canvas.drawText("Ã¢â€“Â¶ DEMO", w / 2f, h * 0.96f, demoWatermark)
         }
     }
 }

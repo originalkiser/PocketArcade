@@ -1,5 +1,7 @@
 package com.pocketarcade.games.asteroids
 
+import androidx.core.content.res.ResourcesCompat
+import com.pocketarcade.R
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -107,31 +109,31 @@ class AsteroidsView @JvmOverloads constructor(
     }
     private val hudPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#e8ecf0")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         isFakeBoldText = true
     }
     private val overlayPaint = Paint().apply { color = Color.parseColor("#CC0f1117") }
     private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#4f8ef7")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val subPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#6b7a99")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
     }
     private val demoWatermark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#80f1c40f")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
     }
 
     // Star field (static)
     private val stars = mutableListOf<PointF>()
 
-    // ── Theme ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Theme Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     fun applyTheme(t: com.pocketarcade.GameTheme) {
         bgPaint.color          = t.bg
@@ -196,7 +198,7 @@ class AsteroidsView @JvmOverloads constructor(
         ship = Ship(width / 2f, height / 2f, -90f * PI.toFloat() / 180f)
     }
 
-    // ── Public API ─────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Public API Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     fun isUserPlaying() = state == AsteroidsState.PLAYING && !demoMode
     fun isDemoMode() = demoMode
@@ -214,7 +216,7 @@ class AsteroidsView @JvmOverloads constructor(
         onScoreChanged?.invoke(0)
     }
 
-    // ── Waves ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Waves Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private fun spawnWave() {
         wave++
@@ -248,7 +250,7 @@ class AsteroidsView @JvmOverloads constructor(
         return Asteroid(x, y, vx, vy, r, shape, 0f, (Random.nextFloat() - 0.5f) * 2f)
     }
 
-    // ── Update ─────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Update Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private fun update() {
         if (state != AsteroidsState.PLAYING) return
@@ -407,7 +409,7 @@ class AsteroidsView @JvmOverloads constructor(
     private fun dist(ax: Float, ay: Float, bx: Float, by: Float) =
         sqrt((ax - bx).pow(2) + (ay - by).pow(2))
 
-    // ── Touch — only handles start/restart; actual controls are in AsteroidsActivity ──
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Touch Ã¢â‚¬â€ only handles start/restart; actual controls are in AsteroidsActivity Ã¢â€â‚¬Ã¢â€â‚¬
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             when {
@@ -419,7 +421,7 @@ class AsteroidsView @JvmOverloads constructor(
         return true
     }
 
-    // ── Draw ───────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Draw Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     private fun drawGame(canvas: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
         if (w == 0f || h == 0f) return
@@ -473,7 +475,7 @@ class AsteroidsView @JvmOverloads constructor(
         canvas.drawText("$score", 20f, h * 0.04f + hudPaint.textSize, hudPaint)
         hudPaint.textSize = h * 0.03f
         canvas.drawText("WAVE $wave", w - 20f - hudPaint.measureText("WAVE $wave"), h * 0.04f + hudPaint.textSize, hudPaint)
-        val livesStr = "♥".repeat(ship.lives.coerceAtLeast(0))
+        val livesStr = "Ã¢â„¢Â¥".repeat(ship.lives.coerceAtLeast(0))
         canvas.drawText(livesStr, 20f, h * 0.09f + hudPaint.textSize, hudPaint)
 
         // Overlays
@@ -499,7 +501,7 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode && state == AsteroidsState.PLAYING) {
             demoWatermark.textSize = h * 0.04f
-            canvas.drawText("▶ DEMO", w / 2f, h * 0.96f, demoWatermark)
+            canvas.drawText("Ã¢â€“Â¶ DEMO", w / 2f, h * 0.96f, demoWatermark)
         }
     }
 }

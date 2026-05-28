@@ -1,5 +1,7 @@
 package com.pocketarcade.games.pong
 
+import androidx.core.content.res.ResourcesCompat
+import com.pocketarcade.R
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -42,7 +44,7 @@ class PongView @JvmOverloads constructor(
     private var volley = 0
     private var countdownValue = 3
 
-    // Touch — offset-based so paddle tracks delta, not absolute position
+    // Touch Ã¢â‚¬â€ offset-based so paddle tracks delta, not absolute position
     private var touchActive = false
     private var touchStartX = 0f
     private var paddleStartX = 0f
@@ -67,37 +69,37 @@ class PongView @JvmOverloads constructor(
     private val aiPaddlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#e74c3c") }
     private val scorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#e8ecf0")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#6b7a99")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
     }
     private val bigTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#4f8ef7")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val overlayPaint = Paint().apply { color = Color.parseColor("#CC0f1117") }
     private val winPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#2ecc71")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val losePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#e74c3c")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val demoWatermark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#80f1c40f")
-        typeface = Typeface.MONOSPACE
+        typeface = (ResourcesCompat.getFont(context, R.font.press_start_2p) ?: Typeface.MONOSPACE)
         textAlign = Paint.Align.CENTER
     }
 
@@ -105,7 +107,7 @@ class PongView @JvmOverloads constructor(
         holder.addCallback(this)
     }
 
-    // ── Surface lifecycle ──────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Surface lifecycle Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     override fun surfaceCreated(h: SurfaceHolder) {
         initGame()
@@ -143,7 +145,7 @@ class PongView @JvmOverloads constructor(
         gameThread?.join(500)
     }
 
-    // ── Theme ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Theme Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     fun applyTheme(t: com.pocketarcade.GameTheme) {
         bgPaint.color          = t.bg
@@ -157,7 +159,7 @@ class PongView @JvmOverloads constructor(
         overlayPaint.color     = t.overlay
     }
 
-    // ── Setup ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Setup Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private fun initGame() {
         val w = width.toFloat()
@@ -213,7 +215,7 @@ class PongView @JvmOverloads constructor(
         }
     }
 
-    // ── Update ─────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Update Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private fun update() {
         if (state != PongState.PLAYING) return
@@ -236,7 +238,7 @@ class PongView @JvmOverloads constructor(
         aiX += (aiTargetX - aiX).coerceIn(-aiSpeed, aiSpeed)
         aiX = aiX.coerceIn(0f, w - paddleW)
 
-        // Move ball — save previous position for swept collision
+        // Move ball Ã¢â‚¬â€ save previous position for swept collision
         val prevBy = by
         bx += bvx; by += bvy
 
@@ -244,7 +246,7 @@ class PongView @JvmOverloads constructor(
         if (bx - BALL_R < 0) { bx = BALL_R; bvx = abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
         if (bx + BALL_R > w) { bx = w - BALL_R; bvx = -abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
 
-        // Player paddle collision (bottom) — swept: check if ball crossed paddle plane this frame
+        // Player paddle collision (bottom) Ã¢â‚¬â€ swept: check if ball crossed paddle plane this frame
         if (bvy > 0 &&
             prevBy + BALL_R <= playerY &&
             by + BALL_R > playerY &&
@@ -262,7 +264,7 @@ class PongView @JvmOverloads constructor(
             }
         }
 
-        // AI paddle collision (top) — swept
+        // AI paddle collision (top) Ã¢â‚¬â€ swept
         if (bvy < 0 &&
             prevBy - BALL_R >= aiY &&
             by - BALL_R < aiY &&
@@ -319,13 +321,13 @@ class PongView @JvmOverloads constructor(
         PongDifficulty.HARD -> ((-2..2).random()).toFloat()
     }
 
-    // ── Touch ──────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Touch Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     override fun onTouchEvent(event: MotionEvent): Boolean {
         feedExternalTouch(event.action, event.x)
         return true
     }
 
-    // ── Draw ───────────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Draw Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     private fun drawGame(canvas: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
         if (w == 0f || h == 0f) return
@@ -369,7 +371,7 @@ class PongView @JvmOverloads constructor(
                 paint.textSize = h * 0.065f
                 canvas.drawText(if (playerWon) "YOU WIN!" else "GAME OVER", w / 2f, h * 0.4f, paint)
                 labelPaint.textSize = h * 0.035f
-                canvas.drawText("$playerScore — $aiScore", w / 2f, h * 0.5f, labelPaint)
+                canvas.drawText("$playerScore Ã¢â‚¬â€ $aiScore", w / 2f, h * 0.5f, labelPaint)
                 if (readyForRestart) canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.6f, labelPaint)
             }
             else -> {}
@@ -378,7 +380,7 @@ class PongView @JvmOverloads constructor(
         // Demo watermark
         if (demoMode && state == PongState.PLAYING) {
             demoWatermark.textSize = h * 0.04f
-            canvas.drawText("▶ DEMO", w / 2f, h * 0.52f, demoWatermark)
+            canvas.drawText("Ã¢â€“Â¶ DEMO", w / 2f, h * 0.52f, demoWatermark)
         }
     }
 }

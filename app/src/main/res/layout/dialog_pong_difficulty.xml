@@ -12,7 +12,7 @@
         android:text="SELECT DIFFICULTY"
         android:textColor="@color/accent_blue"
         android:textSize="16sp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/press_start_2p"
         android:gravity="center"
         android:textStyle="bold"
         android:paddingBottom="16dp" />
@@ -34,16 +34,16 @@
             android:text="EASY"
             android:textColor="@color/accent_green"
             android:textSize="18sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Slower ball · Wide AI margin"
+            android:text="Slower ball Â· Wide AI margin"
             android:textColor="@color/muted"
             android:textSize="11sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
     </LinearLayout>
 
     <LinearLayout
@@ -63,16 +63,16 @@
             android:text="MEDIUM"
             android:textColor="@color/accent_yellow"
             android:textSize="18sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Balanced speed · Smart AI"
+            android:text="Balanced speed Â· Smart AI"
             android:textColor="@color/muted"
             android:textSize="11sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
     </LinearLayout>
 
     <LinearLayout
@@ -91,16 +91,16 @@
             android:text="HARD"
             android:textColor="@color/accent_red"
             android:textSize="18sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fast ball · Near-perfect AI"
+            android:text="Fast ball Â· Near-perfect AI"
             android:textColor="@color/muted"
             android:textSize="11sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
     </LinearLayout>
 
 </LinearLayout>

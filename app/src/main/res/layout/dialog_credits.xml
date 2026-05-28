@@ -28,7 +28,7 @@
             android:text="C R E D I T S"
             android:textColor="@color/accent_yellow"
             android:textSize="13sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold"
             android:letterSpacing="0.2" />
 
@@ -38,7 +38,7 @@
             android:text="LOFTICE PRODUCTIONS"
             android:textColor="@color/muted"
             android:textSize="7sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
     </LinearLayout>
 
     <View
@@ -61,7 +61,7 @@
             android:text="DEVELOPER"
             android:textColor="@color/muted"
             android:textSize="8sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:letterSpacing="0.15" />
 
         <TextView
@@ -71,17 +71,17 @@
             android:text="MICHAEL KISER"
             android:textColor="@color/text"
             android:textSize="17sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
-            android:text="LOFTICE PRODUCTIONS  ·  2024 – 2026"
+            android:text="LOFTICE PRODUCTIONS  Â·  2024 â€“ 2026"
             android:textColor="@color/muted"
             android:textSize="9sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
 
         <View
             android:layout_width="match_parent"
@@ -96,7 +96,7 @@
             android:text="AI PROGRAMMING PARTNER"
             android:textColor="@color/muted"
             android:textSize="8sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:letterSpacing="0.15" />
 
         <TextView
@@ -106,7 +106,7 @@
             android:text="CLAUDE"
             android:textColor="@color/text"
             android:textSize="17sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:textStyle="bold" />
 
         <TextView
@@ -116,7 +116,7 @@
             android:text="ANTHROPIC"
             android:textColor="@color/muted"
             android:textSize="9sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
 
         <View
             android:layout_width="match_parent"
@@ -127,10 +127,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="★  THANK YOU FOR PLAYING  ★"
+            android:text="â˜…  THANK YOU FOR PLAYING  â˜…"
             android:textColor="@color/accent_yellow"
             android:textSize="10sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:gravity="center"
             android:letterSpacing="0.1" />
 
@@ -149,7 +149,7 @@
         android:text="[ CLOSE ]"
         android:textColor="@color/accent_yellow"
         android:textSize="11sp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/press_start_2p"
         android:textStyle="bold"
         android:gravity="center"
         android:letterSpacing="0.12"

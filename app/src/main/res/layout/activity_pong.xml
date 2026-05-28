@@ -28,7 +28,7 @@
             android:text="P:0  AI:0"
             android:textColor="@color/accent_blue"
             android:textSize="12sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
 
         <TextView
             android:id="@+id/tvHighScore"
@@ -37,7 +37,7 @@
             android:text="Best: 0"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="monospace"
+            android:fontFamily="@font/press_start_2p"
             android:layout_marginEnd="4dp" />
 
         <TextView
@@ -104,7 +104,7 @@
             android:text="&#9664;  swipe to move your paddle  &#9654;"
             android:textColor="@color/muted"
             android:textSize="11sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/press_start_2p" />
     </FrameLayout>
 
 </LinearLayout>

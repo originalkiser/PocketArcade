@@ -31,7 +31,7 @@
                 android:text="SETTINGS"
                 android:textColor="@color/accent_blue"
                 android:textSize="16sp"
-                android:fontFamily="monospace" />
+                android:fontFamily="@font/press_start_2p" />
 
             <!-- Colour Theme -->
             <LinearLayout
@@ -51,7 +51,7 @@
                     android:text="COLOUR THEME"
                     android:textColor="@color/accent_blue"
                     android:textSize="27sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/press_start_2p"
                     android:layout_marginBottom="12dp" />
 
                 <LinearLayout
@@ -76,7 +76,7 @@
                     android:text="Classic"
                     android:textColor="@color/accent_blue"
                     android:textSize="24sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/press_start_2p"
                     android:gravity="center" />
             </LinearLayout>
 
@@ -102,7 +102,7 @@
                         android:text="@string/demo_mode"
                         android:textColor="@color/text"
                         android:textSize="27sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -111,7 +111,7 @@
                         android:text="@string/demo_mode_desc"
                         android:textColor="@color/muted"
                         android:textSize="21sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
                 </LinearLayout>
 
                 <Switch
@@ -143,7 +143,7 @@
                         android:text="@string/sound"
                         android:textColor="@color/text"
                         android:textSize="27sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -152,7 +152,7 @@
                         android:text="@string/sound_desc"
                         android:textColor="@color/muted"
                         android:textSize="21sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
                 </LinearLayout>
 
                 <Switch
@@ -184,26 +184,26 @@
                         android:text="LEADERBOARD SIZE"
                         android:textColor="@color/text"
                         android:textSize="27sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Entries saved per game (1–15)"
+                        android:text="Entries saved per game (1â€“15)"
                         android:textColor="@color/muted"
                         android:textSize="21sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/btnLbMinus"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:text="−"
+                    android:text="âˆ’"
                     android:textColor="@color/accent_blue"
                     android:textSize="20sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/press_start_2p"
                     android:gravity="center"
                     android:clickable="true"
                     android:focusable="true" />
@@ -215,7 +215,7 @@
                     android:text="5"
                     android:textColor="@color/accent_blue"
                     android:textSize="16sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/press_start_2p"
                     android:textStyle="bold"
                     android:gravity="center" />
 
@@ -226,7 +226,7 @@
                     android:text="+"
                     android:textColor="@color/accent_blue"
                     android:textSize="20sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/press_start_2p"
                     android:gravity="center"
                     android:clickable="true"
                     android:focusable="true" />
@@ -258,7 +258,7 @@
                         android:text="@string/ad_free_title"
                         android:textColor="@color/accent_yellow"
                         android:textSize="27sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
 
                     <TextView
                         android:id="@+id/tvAdFreeDesc"
@@ -268,7 +268,7 @@
                         android:text="@string/ad_free_desc"
                         android:textColor="@color/muted"
                         android:textSize="21sp"
-                        android:fontFamily="monospace" />
+                        android:fontFamily="@font/press_start_2p" />
                 </LinearLayout>
 
                 <TextView
@@ -278,7 +278,7 @@
                     android:text=">"
                     android:textColor="@color/accent_yellow"
                     android:textSize="12sp"
-                    android:fontFamily="monospace" />
+                    android:fontFamily="@font/press_start_2p" />
             </LinearLayout>
 
             <!-- Restore purchase -->
@@ -290,7 +290,7 @@
                 android:text="@string/restore_purchase"
                 android:textColor="@color/muted"
                 android:textSize="24sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
                 android:gravity="center"
@@ -306,7 +306,7 @@
                 android:text="CHECK FOR UPDATES"
                 android:textColor="@color/accent_blue"
                 android:textSize="24sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
                 android:gravity="center"
@@ -322,7 +322,7 @@
                 android:text="&#128279;  SHARE POCKET ARCADE"
                 android:textColor="@color/accent_green"
                 android:textSize="24sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
                 android:gravity="center"
@@ -335,10 +335,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="★  CREDITS"
+                android:text="â˜…  CREDITS"
                 android:textColor="@color/accent_yellow"
                 android:textSize="24sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
                 android:gravity="center"
@@ -354,7 +354,7 @@
                 android:text="@string/reset_scores"
                 android:textColor="@color/accent_red"
                 android:textSize="24sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
                 android:gravity="center"
@@ -370,7 +370,7 @@
                 android:text="v1.1.0"
                 android:textColor="@color/muted"
                 android:textSize="21sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/press_start_2p"
                 android:gravity="center"
                 android:alpha="0.5" />
 
