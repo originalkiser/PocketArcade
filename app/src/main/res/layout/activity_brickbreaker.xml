@@ -112,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="&#9664;  swipe to move paddle  Ã¢â‚¬Â¢  tap to launch  &#9654;"
+            android:text="&#9664;  swipe to move paddle  *  tap to launch  &#9654;"
             android:textColor="@color/muted"
             android:textSize="10sp"
             android:fontFamily="monospace" />

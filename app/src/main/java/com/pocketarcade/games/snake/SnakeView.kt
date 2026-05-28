@@ -349,7 +349,7 @@ class SnakeView @JvmOverloads constructor(
 
         if (demoMode && started) {
             demoTagPaint.textSize = cs * 0.7f
-            canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¶ DEMO", gridW / 2f, gridH - cs * 0.4f, demoTagPaint)
+            canvas.drawText("~ DEMO", gridW / 2f, gridH - cs * 0.4f, demoTagPaint)
         }
 
         canvas.restore()

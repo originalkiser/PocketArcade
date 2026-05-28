@@ -556,7 +556,7 @@ class BrickBreakerView @JvmOverloads constructor(
 
         if (demoMode && (state == BBState.PLAYING || state == BBState.AIM)) {
             demoWatermark.textSize = h * 0.035f
-            canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¶ DEMO", w / 2f, h * 0.96f, demoWatermark)
+            canvas.drawText("~ DEMO", w / 2f, h * 0.96f, demoWatermark)
         }
     }
 }

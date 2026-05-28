@@ -69,6 +69,7 @@ class PongActivity : AppCompatActivity() {
             pongView.readyForRestart = false
             if (playerWon) {
                 PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, playerScore)
+                PrefsManager.recordPongWin(this)
                 runOnUiThread { updateHighScore() }
             }
             idleHandler.postDelayed({

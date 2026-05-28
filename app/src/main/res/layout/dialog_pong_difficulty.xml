@@ -40,7 +40,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Slower ball Ã‚Â· Wide AI margin"
+            android:text="Slower ball - Wide AI margin"
             android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />
@@ -69,7 +69,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Balanced speed Ã‚Â· Smart AI"
+            android:text="Balanced speed - Smart AI"
             android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />
@@ -97,7 +97,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fast ball Ã‚Â· Near-perfect AI"
+            android:text="Fast ball - Near-perfect AI"
             android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />

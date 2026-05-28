@@ -67,6 +67,14 @@ object PrefsManager {
     fun getSnakeFruits(ctx: Context): Long =
         prefs(ctx).getLong("stat_snake_fruits", 0L)
 
+    fun recordPongWin(ctx: Context) {
+        val key = "stat_pong_wins"
+        prefs(ctx).edit { putInt(key, prefs(ctx).getInt(key, 0) + 1) }
+    }
+
+    fun getPongWins(ctx: Context): Int =
+        prefs(ctx).getInt("stat_pong_wins", 0)
+
     private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun getHighScore(ctx: Context, game: String): Int =

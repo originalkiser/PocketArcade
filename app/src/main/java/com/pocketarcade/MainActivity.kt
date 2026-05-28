@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         if (PrefsManager.checkAndConsumeUpsellTrigger(this)) {
             showUpsellDialog()
         }
+        startBlinkPrompt()
     }
 
     override fun onPause() {
@@ -152,18 +153,20 @@ class MainActivity : AppCompatActivity() {
             return if (initials.isNotEmpty()) "$initials · ${top.formattedDate}" else top.formattedDate
         }
 
-        val pongScore = PrefsManager.getHighScore(this, PrefsManager.GAME_PONG)
+        val pongWins = PrefsManager.getPongWins(this)
+        val pongPlays = PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG)
+        val pongLosses = (pongPlays - pongWins).coerceAtLeast(0)
+        val wlRatio = if (pongLosses > 0) "%.1f".format(pongWins.toFloat() / pongLosses) else if (pongWins > 0) "INF" else "-"
         findViewById<TextView>(R.id.tvScoreSnake).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_SNAKE)}"
-        findViewById<TextView>(R.id.tvScorePong).text =
-            if (pongScore > 0) "WON!" else "High Score: 0"
+        findViewById<TextView>(R.id.tvScorePong).text = "Wins: $pongWins  W/L: $wlRatio"
         findViewById<TextView>(R.id.tvScoreAsteroids).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS)}"
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
 
         findViewById<TextView>(R.id.tvScoreSnakeDetail).text    = topDetail(PrefsManager.GAME_SNAKE)
-        findViewById<TextView>(R.id.tvScorePongDetail).text     = topDetail(PrefsManager.GAME_PONG)
+        findViewById<TextView>(R.id.tvScorePongDetail).text     = ""
         findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
         findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
 
@@ -182,7 +185,7 @@ class MainActivity : AppCompatActivity() {
         val total = games.sumOf { PrefsManager.getStatPlays(this, it) }
         val tv = findViewById<TextView>(R.id.tvRecordBookSummary)
         if (total == 0) {
-            tv.text = "NO MISSIONS LOGGED YET"
+            tv.text = "NO GAMES LOGGED YET"
             return
         }
         val labels = mapOf(
@@ -193,7 +196,7 @@ class MainActivity : AppCompatActivity() {
         )
         val topGame = games.maxByOrNull { PrefsManager.getStatPlays(this, it) }!!
         val allHi = games.maxOf { PrefsManager.getHighScore(this, it) }
-        tv.text = "$total MISSIONS  ·  TOP AGENT: ${labels[topGame]}  ·  BEST: $allHi"
+        tv.text = "$total GAMES  ·  TOP AGENT: ${labels[topGame]}  ·  BEST: $allHi"
     }
 
     private fun buildMarqueeTicker(): String {

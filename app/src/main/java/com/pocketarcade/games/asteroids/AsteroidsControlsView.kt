@@ -124,11 +124,11 @@ class AsteroidsControlsView @JvmOverloads constructor(
         // Right half: fire button
         val fcx = w * 3f / 4f; val fcy = h / 2f
         canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
-        canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€Ã‚Â", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
+        canvas.drawText("!", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
 
         if (autoFireEnabled) {
             // Auto-fire tooltip badge above the button
-            canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¸ AUTO FIRE ON ÃƒÂ¢Ã¢â‚¬â€Ã¢â‚¬Å¡", fcx, fcy - fr - 8f, autoFirePaint)
+            canvas.drawText("[ AUTO FIRE ON ]", fcx, fcy - fr - 8f, autoFirePaint)
         } else {
             canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
         }

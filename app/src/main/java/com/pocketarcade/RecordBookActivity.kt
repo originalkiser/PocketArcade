@@ -1,5 +1,6 @@
 package com.pocketarcade
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -10,6 +11,9 @@ import com.pocketarcade.storage.PrefsManager
 
 class RecordBookActivity : AppCompatActivity() {
 
+    private lateinit var contentContainer: LinearLayout
+    private var activeTab = "ALL"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record_book)
@@ -17,27 +21,116 @@ class RecordBookActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
 
-        val totalMissions = listOf(
+        val totalGames = listOf(
             PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
             PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
         ).sumOf { PrefsManager.getStatPlays(this, it) }
-        findViewById<TextView>(R.id.tvTotalMissions).text = "$totalMissions TOTAL MISSIONS"
+        findViewById<TextView>(R.id.tvTotalMissions).text = "$totalGames TOTAL GAMES"
 
-        val container = findViewById<LinearLayout>(R.id.contentContainer)
+        contentContainer = findViewById(R.id.contentContainer)
 
-        // ── Overall summary ───────────────────────────────────────────────────────
-        addSection(container, "OVERALL")
-        addMostPlayed(container)
-        addRow(container, "TOTAL MISSIONS", totalMissions.toString())
+        // Build tab bar programmatically at the top of contentContainer
+        buildTabBar()
+
+        // Render ALL by default
+        renderTab("ALL")
+    }
+
+    private fun buildTabBar() {
+        val tabBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 8, 0, 8)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val tabs = listOf("ALL", "SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
+        val accentBlue = Color.parseColor("#4f8ef7")
+        val mutedColor = Color.parseColor("#666688")
+
+        tabs.forEach { tab ->
+            val tv = TextView(this).apply {
+                text = tab
+                textSize = 9f
+                gravity = Gravity.CENTER
+                setPadding(8, 6, 8, 6)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                setTextColor(if (tab == "ALL") accentBlue else mutedColor)
+                isClickable = true
+                isFocusable = true
+                tag = tab
+            }
+            tv.setOnClickListener {
+                // Update tab colors
+                for (i in 0 until tabBar.childCount) {
+                    val child = tabBar.getChildAt(i) as? TextView
+                    child?.setTextColor(if (child.tag == it.tag) accentBlue else mutedColor)
+                }
+                activeTab = tab
+                // Rebuild content below the tab bar
+                rebuildContent()
+            }
+            tabBar.addView(tv)
+        }
+
+        // Divider below tabs
+        val divider = android.view.View(this).apply {
+            setBackgroundColor(Color.parseColor("#AA44FF"))
+            alpha = 0.3f
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 1
+            ).also { it.setMargins(0, 2, 0, 8) }
+        }
+
+        contentContainer.addView(tabBar)
+        contentContainer.addView(divider)
+    }
+
+    private fun rebuildContent() {
+        // Remove all views after the first two (tab bar + divider)
+        while (contentContainer.childCount > 2) {
+            contentContainer.removeViewAt(2)
+        }
+        renderTab(activeTab)
+    }
+
+    private fun renderTab(tab: String) {
+        when (tab) {
+            "ALL" -> renderAll()
+            "SNAKE" -> renderSnake()
+            "PONG" -> renderPong()
+            "ASTEROIDS" -> renderAsteroids()
+            "BRICK BREAKER" -> renderBrickBreaker()
+        }
+    }
+
+    private fun renderAll() {
+        val totalGames = listOf(
+            PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
+            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
+        ).sumOf { PrefsManager.getStatPlays(this, it) }
+
+        addSection(contentContainer, "OVERALL")
+        addMostPlayed(contentContainer)
+        addRow(contentContainer, "TOTAL GAMES", fmtNum(totalGames))
         val totalMs = listOf(
             PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
             PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
         ).sumOf { PrefsManager.getStatTotalTimeMs(this, it) }
-        addRow(container, "TIME IN FIELD", formatDuration(totalMs))
-        addSpacer(container)
+        addRow(contentContainer, "TIME IN FIELD", formatDuration(totalMs))
+        addSpacer(contentContainer)
 
-        // ── Snake ─────────────────────────────────────────────────────────────────
-        buildGameSection(container,
+        renderSnake()
+        renderPong()
+        renderAsteroids()
+        renderBrickBreaker()
+    }
+
+    private fun renderSnake() {
+        buildGameSection(contentContainer,
             game       = PrefsManager.GAME_SNAKE,
             label      = "SNAKE",
             accentHex  = "#4f8ef7",
@@ -46,44 +139,47 @@ class RecordBookActivity : AppCompatActivity() {
         val fruits = PrefsManager.getSnakeFruits(this)
         val snakePlays = PrefsManager.getStatPlays(this, PrefsManager.GAME_SNAKE)
         val ratio = if (snakePlays > 0) "%.1f".format(fruits.toFloat() / snakePlays) else "-"
-        addRow(container, "FRUITS CONSUMED", fruits.toString(), "#4f8ef7")
-        addRow(container, "FRUITS/MISSION",  ratio,             "#4f8ef7")
-        addSpacer(container)
-        buildLeaderboard(container, PrefsManager.GAME_SNAKE, "#4f8ef7")
-        addSpacer(container)
+        addRow(contentContainer, "FRUITS CONSUMED", fmtNum(fruits), "#4f8ef7")
+        addRow(contentContainer, "FRUITS/GAME",     ratio,          "#4f8ef7")
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, PrefsManager.GAME_SNAKE, "#4f8ef7")
+        addSpacer(contentContainer)
+    }
 
-        // ── Pong ──────────────────────────────────────────────────────────────────
-        buildGameSection(container,
+    private fun renderPong() {
+        buildGameSection(contentContainer,
             game      = PrefsManager.GAME_PONG,
             label     = "PONG",
             accentHex = "#ef5350",
             modes     = listOf("easy", "medium", "hard")
         )
-        addSpacer(container)
-        buildLeaderboard(container, PrefsManager.GAME_PONG, "#ef5350")
-        addSpacer(container)
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, PrefsManager.GAME_PONG, "#ef5350")
+        addSpacer(contentContainer)
+    }
 
-        // ── Asteroids ─────────────────────────────────────────────────────────────
-        buildGameSection(container,
+    private fun renderAsteroids() {
+        buildGameSection(contentContainer,
             game      = PrefsManager.GAME_ASTEROIDS,
             label     = "ASTEROIDS",
             accentHex = "#00d4ff",
             modes     = emptyList()
         )
-        addSpacer(container)
-        buildLeaderboard(container, PrefsManager.GAME_ASTEROIDS, "#00d4ff")
-        addSpacer(container)
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, PrefsManager.GAME_ASTEROIDS, "#00d4ff")
+        addSpacer(contentContainer)
+    }
 
-        // ── Brick Breaker ─────────────────────────────────────────────────────────
-        buildGameSection(container,
+    private fun renderBrickBreaker() {
+        buildGameSection(contentContainer,
             game      = PrefsManager.GAME_BRICKBREAKER,
             label     = "BRICK BREAKER",
             accentHex = "#f1c40f",
             modes     = listOf("easy", "medium", "hard")
         )
-        addSpacer(container)
-        buildLeaderboard(container, PrefsManager.GAME_BRICKBREAKER, "#f1c40f")
-        addSpacer(container)
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, PrefsManager.GAME_BRICKBREAKER, "#f1c40f")
+        addSpacer(contentContainer)
     }
 
     // ── Section builders ──────────────────────────────────────────────────────────
@@ -101,24 +197,23 @@ class RecordBookActivity : AppCompatActivity() {
         val avg      = if (plays > 0) total / plays else 0L
         val avgTime  = if (plays > 0) timeMs / plays else 0L
 
-        addRow(container, "MISSIONS LOGGED", plays.toString(), accentHex)
-        addRow(container, "TOP SCORE",       hi.toString(),   accentHex)
-        addRow(container, "AVG SCORE",       avg.toString(),  accentHex)
-        addRow(container, "TOTAL TIME",      formatDuration(timeMs))
-        addRow(container, "AVG SESSION",     formatDuration(avgTime))
+        addRow(container, "GAMES LOGGED", fmtNum(plays), accentHex)
+        addRow(container, "TOP SCORE",    fmtNum(hi),    accentHex)
+        addRow(container, "AVG SCORE",    fmtNum(avg),   accentHex)
+        addRow(container, "TOTAL TIME",   formatDuration(timeMs))
+        addRow(container, "AVG SESSION",  formatDuration(avgTime))
 
         if (modes.isNotEmpty()) {
             addDivider(container, "#333344")
-            // Mode breakdown
             val mostPlayedMode = modes.maxByOrNull { PrefsManager.getStatPlays(this, game, it) }
             modes.forEach { mode ->
                 val mp = PrefsManager.getStatPlays(this, game, mode)
                 val mt = PrefsManager.getStatTotalScore(this, game, mode)
                 val ma = if (mp > 0) mt / mp else 0L
-                val star = if (mode == mostPlayedMode && mp > 0) " ★" else ""
+                val star = if (mode == mostPlayedMode && mp > 0) " *" else ""
                 addSubHeader(container, mode.uppercase() + star)
-                addRow(container, "  MISSIONS",  mp.toString(),  accentHex)
-                addRow(container, "  AVG SCORE", ma.toString(),  accentHex)
+                addRow(container, "  GAMES",     fmtNum(mp), accentHex)
+                addRow(container, "  AVG SCORE", fmtNum(ma), accentHex)
                 addRow(container, "  TIME",      formatDuration(PrefsManager.getStatTotalTimeMs(this, game, mode)))
             }
         }
@@ -130,7 +225,7 @@ class RecordBookActivity : AppCompatActivity() {
         addSubHeader(container, "TOP SCORES")
         entries.forEachIndexed { i, e ->
             val rank = "#${i + 1}"
-            addLeaderboardRow(container, rank, e.initials.trim(), e.score.toString(), e.formattedDate, accentHex)
+            addLeaderboardRow(container, rank, e.initials.trim(), fmtNum(e.score), e.formattedDate, accentHex)
         }
     }
 
@@ -150,7 +245,6 @@ class RecordBookActivity : AppCompatActivity() {
             addRow(container, "MOST PLAYED", top.label, top.accent)
         }
 
-        // Mode favorites within Pong and BB
         val pongModes = listOf("easy", "medium", "hard")
         val topPongMode = pongModes.maxByOrNull { PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG, it) }
         val topPongPlays = if (topPongMode != null) PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG, topPongMode) else 0
@@ -166,9 +260,9 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun addSection(container: LinearLayout, title: String, accentHex: String = "#AA44FF") {
         val tv = TextView(this).apply {
-            text = "═══  $title  ═══"
-            setTextColor(android.graphics.Color.parseColor(accentHex))
-            textSize = 9f
+            text = "===  $title  ==="
+            setTextColor(Color.parseColor(accentHex))
+            textSize = 14f
             gravity = Gravity.CENTER
             setPadding(0, 20, 0, 8)
         }
@@ -179,8 +273,8 @@ class RecordBookActivity : AppCompatActivity() {
     private fun addSubHeader(container: LinearLayout, title: String) {
         val tv = TextView(this).apply {
             text = title
-            setTextColor(android.graphics.Color.parseColor("#AA44FF"))
-            textSize = 7f
+            setTextColor(Color.parseColor("#AA44FF"))
+            textSize = 10f
             setPadding(0, 12, 0, 4)
         }
         container.addView(tv)
@@ -199,14 +293,14 @@ class RecordBookActivity : AppCompatActivity() {
         }
         val tvLabel = TextView(this).apply {
             text = label
-            setTextColor(android.graphics.Color.parseColor("#666688"))
-            textSize = 6f
+            setTextColor(Color.parseColor("#666688"))
+            textSize = 11f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         val tvValue = TextView(this).apply {
             text = value
-            setTextColor(android.graphics.Color.parseColor(valueColorHex))
-            textSize = 6f
+            setTextColor(Color.parseColor(valueColorHex))
+            textSize = 11f
             gravity = Gravity.END
         }
         row.addView(tvLabel)
@@ -225,24 +319,24 @@ class RecordBookActivity : AppCompatActivity() {
         }
         fun tv(text: String, color: String, size: Float, weight: Float = 0f) = TextView(this).apply {
             this.text = text
-            setTextColor(android.graphics.Color.parseColor(color))
+            setTextColor(Color.parseColor(color))
             textSize = size
             layoutParams = if (weight > 0f)
                 LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
             else
                 LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
-        row.addView(tv(rank,     accentHex, 5f))
-        row.addView(tv("  ",     "#000000", 5f))
-        row.addView(tv(initials, "#FFFFFF",  5f, 1f))
-        row.addView(tv(score,    accentHex, 5f))
-        row.addView(tv("  $date","#444466", 5f))
+        row.addView(tv(rank,     accentHex, 10f))
+        row.addView(tv("  ",     "#000000", 10f))
+        row.addView(tv(initials, "#FFFFFF",  10f, 1f))
+        row.addView(tv(score,    accentHex, 10f))
+        row.addView(tv("  $date","#444466", 10f))
         container.addView(row)
     }
 
     private fun addDivider(container: LinearLayout, colorHex: String) {
         val v = android.view.View(this).apply {
-            setBackgroundColor(android.graphics.Color.parseColor(colorHex))
+            setBackgroundColor(Color.parseColor(colorHex))
             alpha = 0.3f
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1
@@ -259,6 +353,9 @@ class RecordBookActivity : AppCompatActivity() {
     }
 
     // ── Formatting ────────────────────────────────────────────────────────────────
+
+    private fun fmtNum(n: Long): String = "%,d".format(n)
+    private fun fmtNum(n: Int): String = "%,d".format(n)
 
     private fun formatDuration(ms: Long): String {
         if (ms <= 0L) return "0s"

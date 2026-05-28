@@ -475,7 +475,7 @@ class AsteroidsView @JvmOverloads constructor(
         canvas.drawText("$score", 20f, h * 0.04f + hudPaint.textSize, hudPaint)
         hudPaint.textSize = h * 0.03f
         canvas.drawText("WAVE $wave", w - 20f - hudPaint.measureText("WAVE $wave"), h * 0.04f + hudPaint.textSize, hudPaint)
-        val livesStr = "ÃƒÂ¢Ã¢â€žÂ¢Ã‚Â¥".repeat(ship.lives.coerceAtLeast(0))
+        val livesStr = "* ".repeat(ship.lives.coerceAtLeast(0)).trim()
         canvas.drawText(livesStr, 20f, h * 0.09f + hudPaint.textSize, hudPaint)
 
         // Overlays
@@ -501,7 +501,7 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode && state == AsteroidsState.PLAYING) {
             demoWatermark.textSize = h * 0.04f
-            canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¶ DEMO", w / 2f, h * 0.96f, demoWatermark)
+            canvas.drawText("~ DEMO", w / 2f, h * 0.96f, demoWatermark)
         }
     }
 }

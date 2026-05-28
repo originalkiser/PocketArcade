@@ -371,7 +371,7 @@ class PongView @JvmOverloads constructor(
                 paint.textSize = h * 0.065f
                 canvas.drawText(if (playerWon) "YOU WIN!" else "GAME OVER", w / 2f, h * 0.4f, paint)
                 labelPaint.textSize = h * 0.035f
-                canvas.drawText("$playerScore ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â $aiScore", w / 2f, h * 0.5f, labelPaint)
+                canvas.drawText("$playerScore - $aiScore", w / 2f, h * 0.5f, labelPaint)
                 if (readyForRestart) canvas.drawText("TAP TO PLAY AGAIN", w / 2f, h * 0.6f, labelPaint)
             }
             else -> {}
@@ -380,7 +380,7 @@ class PongView @JvmOverloads constructor(
         // Demo watermark
         if (demoMode && state == PongState.PLAYING) {
             demoWatermark.textSize = h * 0.04f
-            canvas.drawText("ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¶ DEMO", w / 2f, h * 0.52f, demoWatermark)
+            canvas.drawText("~ DEMO", w / 2f, h * 0.52f, demoWatermark)
         }
     }
 }

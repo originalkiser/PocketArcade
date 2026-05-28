@@ -61,12 +61,12 @@
                     android:gravity="center_horizontal"
                     android:layout_marginBottom="6dp">
 
-                    <View android:id="@+id/swatch0" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
-                    <View android:id="@+id/swatch1" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
-                    <View android:id="@+id/swatch2" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
-                    <View android:id="@+id/swatch3" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
-                    <View android:id="@+id/swatch4" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
-                    <View android:id="@+id/swatch5" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="4dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch0" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch1" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch2" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch3" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch4" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch5" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
                 </LinearLayout>
 
                 <TextView
@@ -319,7 +319,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="&#128279;  SHARE POCKET ARCADE"
+                android:text="&#128279;  SHARE POCKET ARCADE  &#128279;"
                 android:textColor="@color/accent_green"
                 android:textSize="17sp"
                 android:fontFamily="monospace"
@@ -335,7 +335,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="&#9733;  CREDITS"
+                android:text="&#9733;  CREDITS  &#9733;"
                 android:textColor="@color/accent_yellow"
                 android:textSize="17sp"
                 android:fontFamily="monospace"

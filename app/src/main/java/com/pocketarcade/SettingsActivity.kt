@@ -175,7 +175,10 @@ class SettingsActivity : AppCompatActivity() {
                 val r = RectF(bounds)
                 canvas.drawArc(r, 90f, 180f, true, p1)
                 canvas.drawArc(r, 270f, 180f, true, p2)
-                if (strokePx > 0) canvas.drawOval(r, ps)
+                if (strokePx > 0) {
+                    val inset = strokePx / 2f
+                    canvas.drawOval(RectF(r.left + inset, r.top + inset, r.right - inset, r.bottom - inset), ps)
+                }
             }
             override fun setAlpha(a: Int) {}
             override fun setColorFilter(cf: ColorFilter?) {}
