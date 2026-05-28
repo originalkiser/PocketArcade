@@ -86,6 +86,7 @@ class AsteroidsActivity : AppCompatActivity() {
         btnSound.setOnClickListener { toggleSound() }
         btnLightMode.setOnClickListener { toggleLightMode() }
 
+        astView.autoFire = true
         updateAutoFireButton()
         updateSoundButton()
         updateLightModeButton()

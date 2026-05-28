@@ -19,8 +19,8 @@ object ShareUtils {
         )
     }
 
-    fun shareScore(activity: Activity, game: String, score: Int, date: String = "") {
-        val text = buildShareText(game, score, date)
+    fun shareScore(activity: Activity, game: String, score: Int, date: String = "", mode: String? = null) {
+        val text = buildShareText(game, score, date, mode)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
@@ -28,7 +28,7 @@ object ShareUtils {
         activity.startActivity(Intent.createChooser(intent, "Share your score"))
     }
 
-    private fun buildShareText(game: String, score: Int, date: String): String {
+    private fun buildShareText(game: String, score: Int, date: String, mode: String? = null): String {
         val (emoji, label) = when (game) {
             PrefsManager.GAME_SNAKE        -> "🐍" to "SNAKE"
             PrefsManager.GAME_PONG         -> "🏓" to "PONG"
@@ -37,9 +37,16 @@ object ShareUtils {
             else                           -> "🕹️" to game.uppercase()
         }
 
+        val modeLabel = if (mode != null) " [${mode.uppercase()}]" else ""
+
         val scoreText = when (game) {
-            PrefsManager.GAME_PONG -> "Beat the AI!"
-            else                   -> "$score pts"
+            PrefsManager.GAME_PONG -> {
+                if (score >= 10) {
+                    val ps = score / 10; val ai = score % 10
+                    if (ps >= 7) "Won $ps-$ai vs the AI!" else "Lost $ps-$ai to the AI"
+                } else "$score pts"
+            }
+            else -> "$score pts"
         }
 
         val dateSuffix = if (date.isNotEmpty()) "  ·  $date" else ""
@@ -47,7 +54,7 @@ object ShareUtils {
         return buildString {
             appendLine("🕹️ POCKET ARCADE")
             appendLine()
-            appendLine("$emoji $label")
+            appendLine("$emoji $label$modeLabel")
             appendLine("$scoreText$dateSuffix")
             appendLine()
             appendLine("Think you can beat me? 👾")

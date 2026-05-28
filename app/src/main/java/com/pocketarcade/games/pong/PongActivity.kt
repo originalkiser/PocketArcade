@@ -61,7 +61,8 @@ class PongActivity : AppCompatActivity() {
             runOnUiThread { tvScore.text = "P:$p  AI:$ai" }
         }
         pongView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
-        pongView.onMatchEnd = { playerWon, playerScore ->
+        pongView.onMatchEnd = { playerWon, playerScore, aiScore ->
+            val encodedScore = playerScore * 10 + aiScore
             val duration = System.currentTimeMillis() - gameStartTime
             val mode = pongView.difficulty.name.lowercase()
             PrefsManager.recordGamePlayed(this)
@@ -74,7 +75,7 @@ class PongActivity : AppCompatActivity() {
             }
             idleHandler.postDelayed({
                 runOnUiThread {
-                    checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, playerScore, mode = mode) {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, encodedScore, mode = mode) {
                         pongView.readyForRestart = true
                     }
                 }

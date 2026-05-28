@@ -14,19 +14,23 @@ object SoundManager {
     private const val RATE = 22050
 
     enum class SFX {
-        PONG_BOUNCE, PONG_SCORE, PONG_WIN, PONG_LOSE,
+        PONG_BOUNCE, PONG_BOUNCE_AI, PONG_SCORE, PONG_WIN, PONG_LOSE,
         ASTEROID_SHOOT, ASTEROID_EXPLODE, ASTEROID_WAVE_CLEAR, ASTEROID_GAME_OVER,
         BB_BRICK, BB_PADDLE, BB_POWERUP, BB_LEVEL_CLEAR, BB_GAME_OVER,
         SNAKE_EAT, SNAKE_DIE
     }
 
+    private val cache = java.util.concurrent.ConcurrentHashMap<SFX, ShortArray>()
+
     fun play(sfx: SFX, ctx: Context) {
         if (!PrefsManager.isSoundEnabled(ctx)) return
-        pool.submit { runCatching { emit(build(sfx)) } }
+        val samples = cache.getOrPut(sfx) { build(sfx) }
+        pool.submit { runCatching { emit(samples) } }
     }
 
     private fun build(sfx: SFX): ShortArray = when (sfx) {
         SFX.PONG_BOUNCE         -> square(440f, 45)
+        SFX.PONG_BOUNCE_AI      -> square(200f, 65, vol = 0.55f, decay = 0.7f)
         SFX.PONG_SCORE          -> melody(listOf(659f to 80, 784f to 80, 1047f to 120))
         SFX.PONG_WIN            -> melody(listOf(523f to 100, 659f to 100, 784f to 100, 1047f to 250))
         SFX.PONG_LOSE           -> sweep(440f, 150f, 600)

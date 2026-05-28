@@ -44,7 +44,7 @@ class AsteroidsControlsView @JvmOverloads constructor(
         color = Color.parseColor("#CCe74c3c"); style = Paint.Style.FILL
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE; textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#80e74c3c"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
     private val hintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#806b7a99"); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
@@ -65,7 +65,7 @@ class AsteroidsControlsView @JvmOverloads constructor(
                 val idx = event.actionIndex
                 val px = event.getX(idx); val py = event.getY(idx)
                 val pid = event.getPointerId(idx)
-                if (px < w / 2f) {
+                if (autoFireEnabled || px < w / 2f) {
                     joystickId = pid
                     joystickCenterX = px; joystickCenterY = py
                     joystickDX = 0f; joystickDY = 0f
@@ -105,8 +105,8 @@ class AsteroidsControlsView @JvmOverloads constructor(
         hintPaint.textSize  = h * 0.18f
         autoFirePaint.textSize = h * 0.15f
 
-        // Left half: joystick
-        val jcx = if (joystickId >= 0) joystickCenterX else w / 4f
+        val defaultJcx = if (autoFireEnabled) w / 2f else w / 4f
+        val jcx = if (joystickId >= 0) joystickCenterX else defaultJcx
         val jcy = if (joystickId >= 0) joystickCenterY else h / 2f
         canvas.drawCircle(jcx, jcy, r, ringPaint)
         canvas.drawCircle(jcx, jcy, r, ringStrokePaint)
@@ -114,22 +114,17 @@ class AsteroidsControlsView @JvmOverloads constructor(
         val ky = if (joystickId >= 0) (jcy + joystickDY.coerceIn(-r, r)) else jcy
         canvas.drawCircle(kx, ky, kr, knobPaint)
         if (joystickId < 0) {
-            canvas.drawText("STEER", w / 4f, h * 0.88f, hintPaint)
+            canvas.drawText("STEER", defaultJcx, h * 0.88f, hintPaint)
         }
 
-        // Divider
-        val divPaint = Paint().apply { color = Color.parseColor("#1a3a4a6e"); strokeWidth = 1f }
-        canvas.drawLine(w / 2f, 8f, w / 2f, h - 8f, divPaint)
-
-        // Right half: fire button
-        val fcx = w * 3f / 4f; val fcy = h / 2f
-        canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
-        canvas.drawText("!", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
-
         if (autoFireEnabled) {
-            // Auto-fire tooltip badge above the button
-            canvas.drawText("[ AUTO FIRE ON ]", fcx, fcy - fr - 8f, autoFirePaint)
+            canvas.drawText("[ AUTO FIRE ON ]", defaultJcx, h * 0.12f, autoFirePaint)
         } else {
+            val divPaint = Paint().apply { color = Color.parseColor("#1a3a4a6e"); strokeWidth = 1f }
+            canvas.drawLine(w / 2f, 8f, w / 2f, h - 8f, divPaint)
+            val fcx = w * 3f / 4f; val fcy = h / 2f
+            canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
+            canvas.drawText("!", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
             canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
         }
     }

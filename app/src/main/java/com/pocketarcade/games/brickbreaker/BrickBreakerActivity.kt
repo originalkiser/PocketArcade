@@ -113,6 +113,30 @@ class BrickBreakerActivity : AppCompatActivity() {
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()
+        showDifficultyDialog(cancelable = false)
+    }
+
+    private fun showDifficultyDialog(cancelable: Boolean = true) {
+        val view = layoutInflater.inflate(R.layout.dialog_bb_difficulty, null)
+        val dialog = android.app.Dialog(this)
+        dialog.setContentView(view)
+        dialog.setCancelable(cancelable)
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+
+        fun pick(diff: BBDifficulty, index: Int) {
+            PrefsManager.setBBDifficulty(this, index)
+            bbView.difficulty = diff
+            bbView.startGame(demo = false)
+            dialog.dismiss()
+        }
+
+        view.findViewById<android.widget.LinearLayout>(R.id.btnEasy).setOnClickListener { pick(BBDifficulty.EASY, 0) }
+        view.findViewById<android.widget.LinearLayout>(R.id.btnMedium).setOnClickListener { pick(BBDifficulty.MEDIUM, 1) }
+        view.findViewById<android.widget.LinearLayout>(R.id.btnHard).setOnClickListener { pick(BBDifficulty.HARD, 2) }
+        dialog.show()
     }
 
     private fun indexToDifficulty(i: Int) = when (i) {

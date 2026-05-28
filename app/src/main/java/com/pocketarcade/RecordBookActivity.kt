@@ -192,9 +192,17 @@ class RecordBookActivity : AppCompatActivity() {
             modes     = listOf("easy", "medium", "hard")
         )
         addSpacer(contentContainer)
-        buildLeaderboard(contentContainer, PrefsManager.GAME_PONG, "#ef5350")
+        val pongFmt: (Int) -> Pair<String, Int> = { enc ->
+            if (enc >= 10) {
+                val ps = enc / 10; val ai = enc % 10
+                Pair("$ps-$ai", if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c"))
+            } else {
+                Pair(fmtNum(enc), Color.parseColor("#ef5350"))
+            }
+        }
+        buildLeaderboard(contentContainer, PrefsManager.GAME_PONG, "#ef5350", scoreFormatter = pongFmt)
         listOf("EASY", "MEDIUM", "HARD").forEach { mode ->
-            buildLeaderboard(contentContainer, "${PrefsManager.GAME_PONG}_${mode.lowercase()}", "#ef5350", mode)
+            buildLeaderboard(contentContainer, "${PrefsManager.GAME_PONG}_${mode.lowercase()}", "#ef5350", mode, pongFmt)
         }
         addSpacer(contentContainer)
     }
@@ -267,14 +275,17 @@ class RecordBookActivity : AppCompatActivity() {
         container: LinearLayout,
         game: String,
         accentHex: String,
-        header: String = "TOP SCORES"
+        header: String = "TOP SCORES",
+        scoreFormatter: ((Int) -> Pair<String, Int>)? = null
     ) {
         val entries = LeaderboardManager.getEntries(this, game)
         if (entries.isEmpty()) return
         addSubHeader(container, header)
         addLeaderboardHeader(container, accentHex)
         entries.forEachIndexed { i, e ->
-            addLeaderboardRow(container, "#${i + 1}", e.initials.trim(), fmtNum(e.score), e.formattedDate, accentHex)
+            val (scoreText, scoreColor) = scoreFormatter?.invoke(e.score)
+                ?: Pair(fmtNum(e.score), Color.parseColor(accentHex))
+            addLeaderboardRow(container, "#${i + 1}", e.initials.trim(), scoreText, e.formattedDate, accentHex, scoreColor)
         }
     }
 
@@ -386,7 +397,8 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun addLeaderboardRow(
         container: LinearLayout,
-        rank: String, initials: String, score: String, date: String, accentHex: String
+        rank: String, initials: String, score: String, date: String,
+        accentHex: String, scoreColor: Int = -1
     ) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -400,10 +412,18 @@ class RecordBookActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
-        row.addView(col(rank,                                  accentHex))
-        row.addView(col(initials.ifEmpty { "-" },              "#FFFFFF"))
-        row.addView(col(score,                                 accentHex))
-        row.addView(col(date,                                  "#444466"))
+        fun colInt(text: String, color: Int) = TextView(this).apply {
+            this.text = text
+            setTextColor(color)
+            textSize = 22f
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val sc = if (scoreColor == -1) Color.parseColor(accentHex) else scoreColor
+        row.addView(col(rank,                     accentHex))
+        row.addView(col(initials.ifEmpty { "-" }, "#FFFFFF"))
+        row.addView(colInt(score,                 sc))
+        row.addView(col(date,                     "#444466"))
         container.addView(row)
     }
 

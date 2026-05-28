@@ -27,7 +27,7 @@ class PongView @JvmOverloads constructor(
 
     var difficulty = PongDifficulty.MEDIUM
     var onScoreUpdate: ((player: Int, ai: Int) -> Unit)? = null
-    var onMatchEnd: ((playerWon: Boolean, playerScore: Int) -> Unit)? = null
+    var onMatchEnd: ((playerWon: Boolean, playerScore: Int, aiScore: Int) -> Unit)? = null
     var onGameStarted: (() -> Unit)? = null
 
     private var state = PongState.IDLE
@@ -252,12 +252,14 @@ class PongView @JvmOverloads constructor(
             by + BALL_R > playerY &&
             bx + BALL_R > playerX && bx - BALL_R < playerX + paddleW
         ) {
-            bvy = -abs(bvy)
             by = playerY - BALL_R
             volley++
-            val maxSpd = baseSpeed() * 2.5f
-            val spd = sqrt(bvx * bvx + bvy * bvy)
-            if (spd < maxSpd) { bvx *= 1.03f; bvy *= 1.03f }
+            val curSpd = sqrt(bvx * bvx + bvy * bvy)
+            val newSpd = if (curSpd < baseSpeed() * 2.5f) curSpd * 1.03f else curSpd
+            val rel = ((bx - playerX) / paddleW - 0.5f).coerceIn(-0.5f, 0.5f)
+            val angle = rel * PI.toFloat() * 0.7f - PI.toFloat() / 2f
+            bvx = newSpd * cos(angle.toDouble()).toFloat()
+            bvy = -abs(newSpd * sin(angle.toDouble()).toFloat())
             if (!demoMode) {
                 SoundManager.play(SoundManager.SFX.PONG_BOUNCE, context)
                 post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
@@ -277,7 +279,7 @@ class PongView @JvmOverloads constructor(
             val spd = sqrt(bvx * bvx + bvy * bvy)
             if (spd < maxSpd) { bvx *= 1.03f; bvy *= 1.03f }
             if (!demoMode) {
-                SoundManager.play(SoundManager.SFX.PONG_BOUNCE, context)
+                SoundManager.play(SoundManager.SFX.PONG_BOUNCE_AI, context)
                 post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
             }
         }
@@ -301,11 +303,11 @@ class PongView @JvmOverloads constructor(
         if (playerScore >= WIN_SCORE) {
             state = PongState.GAME_OVER
             if (!demoMode) SoundManager.play(SoundManager.SFX.PONG_WIN, context)
-            onMatchEnd?.invoke(true, playerScore)
+            onMatchEnd?.invoke(true, playerScore, aiScore)
         } else if (aiScore >= WIN_SCORE) {
             state = PongState.GAME_OVER
             if (!demoMode) SoundManager.play(SoundManager.SFX.PONG_LOSE, context)
-            onMatchEnd?.invoke(false, playerScore)
+            onMatchEnd?.invoke(false, playerScore, aiScore)
         }
     }
 

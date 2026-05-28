@@ -259,14 +259,16 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode) demoAI()
 
-        // Omnidirectional thrust: joystick direction = movement direction
+        // Turn with small joystick movement; thrust only with larger movement
         val jMag = sqrt(joystickDX * joystickDX + joystickDY * joystickDY)
-        if (jMag > 20f) {
+        if (jMag > 10f) {
+            ship.angle = atan2(joystickDY, joystickDX)
+        }
+        if (jMag > 36f) {
             val nx = joystickDX / jMag
             val ny = joystickDY / jMag
             ship.vx += nx * THRUST
             ship.vy += ny * THRUST
-            ship.angle = atan2(joystickDY, joystickDX)
             thrusting = true
         } else {
             thrusting = false
