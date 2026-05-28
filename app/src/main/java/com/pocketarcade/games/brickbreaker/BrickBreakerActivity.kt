@@ -75,7 +75,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({
                 runOnUiThread {
-                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
                     }
                 }
@@ -92,7 +92,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({
                 runOnUiThread {
-                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score) {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
                     }
                 }

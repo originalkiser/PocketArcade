@@ -53,7 +53,7 @@ class RecordBookActivity : AppCompatActivity() {
             )
         }
 
-        // 3 copies — seamless infinite scroll via scroll listener repositioning
+        // 3 copies — seamless infinite scroll via repositioning at the edges
         repeat(3) {
             tabs.forEach { tab ->
                 val tv = TextView(this).apply {
@@ -91,7 +91,6 @@ class RecordBookActivity : AppCompatActivity() {
         }
         tabScroll.addView(tabBar)
 
-        // Scroll to the middle copy once laid out
         tabScroll.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 tabScroll.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -100,7 +99,6 @@ class RecordBookActivity : AppCompatActivity() {
             }
         })
 
-        // Seamless looping: reposition from edge copies back into the middle copy
         val mainHandler = Handler(Looper.getMainLooper())
         var isRepositioning = false
         tabScroll.setOnScrollChangeListener { _, scrollX, _, _, _ ->
@@ -109,9 +107,9 @@ class RecordBookActivity : AppCompatActivity() {
             if (setWidth <= 0) return@setOnScrollChangeListener
             val maxScrollX = tabBar.width - tabScroll.width
             val newX = when {
-                scrollX < setWidth / 2                    -> scrollX + setWidth
-                scrollX > maxScrollX - setWidth / 2       -> scrollX - setWidth
-                else                                      -> return@setOnScrollChangeListener
+                scrollX < setWidth / 2              -> scrollX + setWidth
+                scrollX > maxScrollX - setWidth / 2 -> scrollX - setWidth
+                else                                -> return@setOnScrollChangeListener
             }
             isRepositioning = true
             tabScroll.scrollTo(newX, 0)
@@ -195,6 +193,9 @@ class RecordBookActivity : AppCompatActivity() {
         )
         addSpacer(contentContainer)
         buildLeaderboard(contentContainer, PrefsManager.GAME_PONG, "#ef5350")
+        listOf("EASY", "MEDIUM", "HARD").forEach { mode ->
+            buildLeaderboard(contentContainer, "${PrefsManager.GAME_PONG}_${mode.lowercase()}", "#ef5350", mode)
+        }
         addSpacer(contentContainer)
     }
 
@@ -219,6 +220,9 @@ class RecordBookActivity : AppCompatActivity() {
         )
         addSpacer(contentContainer)
         buildLeaderboard(contentContainer, PrefsManager.GAME_BRICKBREAKER, "#f1c40f")
+        listOf("EASY", "MEDIUM", "HARD").forEach { mode ->
+            buildLeaderboard(contentContainer, "${PrefsManager.GAME_BRICKBREAKER}_${mode.lowercase()}", "#f1c40f", mode)
+        }
         addSpacer(contentContainer)
     }
 
@@ -259,10 +263,16 @@ class RecordBookActivity : AppCompatActivity() {
         }
     }
 
-    private fun buildLeaderboard(container: LinearLayout, game: String, accentHex: String) {
+    private fun buildLeaderboard(
+        container: LinearLayout,
+        game: String,
+        accentHex: String,
+        header: String = "TOP SCORES"
+    ) {
         val entries = LeaderboardManager.getEntries(this, game)
         if (entries.isEmpty()) return
-        addSubHeader(container, "TOP SCORES")
+        addSubHeader(container, header)
+        addLeaderboardHeader(container, accentHex)
         entries.forEachIndexed { i, e ->
             addLeaderboardRow(container, "#${i + 1}", e.initials.trim(), fmtNum(e.score), e.formattedDate, accentHex)
         }
@@ -314,6 +324,7 @@ class RecordBookActivity : AppCompatActivity() {
             text = title
             setTextColor(Color.parseColor("#AA44FF"))
             textSize = 20f
+            gravity = Gravity.CENTER
             setPadding(0, 16, 0, 6)
         }
         container.addView(tv)
@@ -351,6 +362,28 @@ class RecordBookActivity : AppCompatActivity() {
         container.addView(row)
     }
 
+    private fun addLeaderboardHeader(container: LinearLayout, accentHex: String) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 2, 0, 4)
+        }
+        fun col(text: String) = TextView(this).apply {
+            this.text = text
+            setTextColor(Color.parseColor(accentHex))
+            textSize = 16f
+            gravity = Gravity.CENTER
+            alpha = 0.55f
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        row.addView(col("RANK"))
+        row.addView(col("NAME"))
+        row.addView(col("SCORE"))
+        row.addView(col("DATE"))
+        container.addView(row)
+        addDivider(container, accentHex)
+    }
+
     private fun addLeaderboardRow(
         container: LinearLayout,
         rank: String, initials: String, score: String, date: String, accentHex: String
@@ -360,25 +393,17 @@ class RecordBookActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 6, 0, 6)
         }
-        val nameText = if (initials.isNotEmpty()) "$rank  $initials" else rank
-        val tvLabel = TextView(this).apply {
-            text = nameText
-            setTextColor(Color.parseColor(accentHex))
+        fun col(text: String, color: String) = TextView(this).apply {
+            this.text = text
+            setTextColor(Color.parseColor(color))
             textSize = 22f
-            gravity = Gravity.END
+            gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setPadding(0, 0, 16, 0)
         }
-        val tvValue = TextView(this).apply {
-            text = "$score  $date"
-            setTextColor(Color.parseColor(accentHex))
-            textSize = 22f
-            gravity = Gravity.START
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setPadding(16, 0, 0, 0)
-        }
-        row.addView(tvLabel)
-        row.addView(tvValue)
+        row.addView(col(rank,                                  accentHex))
+        row.addView(col(initials.ifEmpty { "-" },              "#FFFFFF"))
+        row.addView(col(score,                                 accentHex))
+        row.addView(col(date,                                  "#444466"))
         container.addView(row)
     }
 

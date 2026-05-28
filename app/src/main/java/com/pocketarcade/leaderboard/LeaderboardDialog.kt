@@ -77,6 +77,7 @@ fun showInitialsThenLeaderboard(
     activity: AppCompatActivity,
     game: String,
     score: Int,
+    mode: String? = null,
     onDone: () -> Unit = {}
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_initials, null)
@@ -86,7 +87,6 @@ fun showInitialsThenLeaderboard(
     val preview = view.findViewById<TextView>(R.id.tvInitialsPreview)
     view.findViewById<TextView>(R.id.tvInitialsScore).text = "SCORE: $score"
 
-    // Dynamic "NEW TOP N" label
     val lbSize = PrefsManager.getLeaderboardSize(activity)
     view.findViewById<TextView>(R.id.tvNewTop).text = "🏆 NEW TOP $lbSize!"
 
@@ -131,6 +131,7 @@ fun showInitialsThenLeaderboard(
         val initials = "${LETTERS[pickerA.value]}${LETTERS[pickerB.value]}${LETTERS[pickerC.value]}"
         PrefsManager.setLastInitials(activity, initials)
         val rank = LeaderboardManager.addEntry(activity, game, score, initials)
+        if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, initials)
         dialog.dismiss()
         activity.runOnUiThread {
             showLeaderboardDialog(activity, game, rank, shareScore = score, onDismiss = onDone)
@@ -139,6 +140,7 @@ fun showInitialsThenLeaderboard(
 
     view.findViewById<TextView>(R.id.btnSkip).setOnClickListener {
         LeaderboardManager.addEntry(activity, game, score, "   ")
+        if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, "   ")
         dialog.dismiss()
         activity.runOnUiThread {
             showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
@@ -175,12 +177,14 @@ fun checkAndShowLeaderboard(
     activity: AppCompatActivity,
     game: String,
     score: Int,
+    mode: String? = null,
     onDone: () -> Unit = {}
 ) {
     if (LeaderboardManager.qualifies(activity, game, score)) {
-        showInitialsThenLeaderboard(activity, game, score, onDone)
+        showInitialsThenLeaderboard(activity, game, score, mode, onDone)
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")
+        if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, "   ")
         showLeaderboardDialog(activity, game, shareScore = score, onDismiss = onDone)
     }
 }

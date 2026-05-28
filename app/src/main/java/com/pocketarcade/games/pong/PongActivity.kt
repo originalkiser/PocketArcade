@@ -74,7 +74,7 @@ class PongActivity : AppCompatActivity() {
             }
             idleHandler.postDelayed({
                 runOnUiThread {
-                    checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, playerScore) {
+                    checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, playerScore, mode = mode) {
                         pongView.readyForRestart = true
                     }
                 }

@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
-            android:text="LOFTICE PRODUCTIONS  Ã‚Â·  2024 Ã¢â‚¬â€œ 2026"
+            android:text="LOFTICE PRODUCTIONS  &#183;  2024&#8211;2026"
             android:textColor="@color/muted"
             android:textSize="9sp"
             android:fontFamily="monospace" />
@@ -127,7 +127,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ã¢Ëœâ€¦  THANK YOU FOR PLAYING  Ã¢Ëœâ€¦"
+            android:text="&#9733;  THANK YOU FOR PLAYING  &#9733;"
             android:textColor="@color/accent_yellow"
             android:textSize="10sp"
             android:fontFamily="monospace"
@@ -158,4 +158,3 @@
         android:focusable="true" />
 
 </LinearLayout>
-
