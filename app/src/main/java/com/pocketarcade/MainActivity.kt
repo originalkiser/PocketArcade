@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvMarquee).isSelected = true
 
         updateScores()
-        startBlinkPrompt()
         IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
 

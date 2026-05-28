@@ -369,7 +369,7 @@
                             android:layout_height="wrap_content"
                             android:text="[ RECORD BOOK ]"
                             android:textColor="#AA44FF"
-                            android:textSize="11sp"
+                            android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:gravity="center"
                             android:textStyle="bold" />
@@ -381,7 +381,7 @@
                             android:layout_marginTop="6dp"
                             android:text="NO MISSIONS LOGGED YET"
                             android:textColor="#666688"
-                            android:textSize="7sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace"
                             android:gravity="center" />
 

@@ -3,6 +3,7 @@ package com.pocketarcade
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -29,68 +30,77 @@ class RecordBookActivity : AppCompatActivity() {
 
         contentContainer = findViewById(R.id.contentContainer)
 
-        // Build tab bar programmatically at the top of contentContainer
         buildTabBar()
-
-        // Render ALL by default
         renderTab("ALL")
     }
 
     private fun buildTabBar() {
+        val accentBlue = Color.parseColor("#4f8ef7")
+        val mutedColor = Color.parseColor("#666688")
+        val tabs = listOf("ALL", "SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
+        val allTabViews = mutableListOf<TextView>()
+
         val tabBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 8, 0, 8)
+            setPadding(8, 8, 8, 8)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // Two copies side-by-side so scrolling past the end wraps visually back to the start
+        repeat(2) {
+            tabs.forEach { tab ->
+                val tv = TextView(this).apply {
+                    text = tab
+                    textSize = 18f
+                    gravity = Gravity.CENTER
+                    setPadding(28, 10, 28, 10)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    setTextColor(if (tab == activeTab) accentBlue else mutedColor)
+                    isClickable = true
+                    isFocusable = true
+                    tag = tab
+                }
+                tv.setOnClickListener {
+                    activeTab = tab
+                    allTabViews.forEach { v ->
+                        v.setTextColor(if (v.tag == tab) accentBlue else mutedColor)
+                    }
+                    rebuildContent()
+                }
+                tabBar.addView(tv)
+                allTabViews.add(tv)
+            }
+        }
+
+        val tabScroll = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
+        tabScroll.addView(tabBar)
 
-        val tabs = listOf("ALL", "SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
-        val accentBlue = Color.parseColor("#4f8ef7")
-        val mutedColor = Color.parseColor("#666688")
-
-        tabs.forEach { tab ->
-            val tv = TextView(this).apply {
-                text = tab
-                textSize = 9f
-                gravity = Gravity.CENTER
-                setPadding(8, 6, 8, 6)
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                setTextColor(if (tab == "ALL") accentBlue else mutedColor)
-                isClickable = true
-                isFocusable = true
-                tag = tab
-            }
-            tv.setOnClickListener {
-                // Update tab colors
-                for (i in 0 until tabBar.childCount) {
-                    val child = tabBar.getChildAt(i) as? TextView
-                    child?.setTextColor(if (child.tag == it.tag) accentBlue else mutedColor)
-                }
-                activeTab = tab
-                // Rebuild content below the tab bar
-                rebuildContent()
-            }
-            tabBar.addView(tv)
-        }
-
-        // Divider below tabs
         val divider = android.view.View(this).apply {
             setBackgroundColor(Color.parseColor("#AA44FF"))
             alpha = 0.3f
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1
-            ).also { it.setMargins(0, 2, 0, 8) }
+            ).also { it.setMargins(0, 2, 0, 10) }
         }
 
-        contentContainer.addView(tabBar)
+        contentContainer.addView(tabScroll)
         contentContainer.addView(divider)
     }
 
     private fun rebuildContent() {
-        // Remove all views after the first two (tab bar + divider)
         while (contentContainer.childCount > 2) {
             contentContainer.removeViewAt(2)
         }
@@ -99,11 +109,11 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun renderTab(tab: String) {
         when (tab) {
-            "ALL" -> renderAll()
-            "SNAKE" -> renderSnake()
-            "PONG" -> renderPong()
-            "ASTEROIDS" -> renderAsteroids()
-            "BRICK BREAKER" -> renderBrickBreaker()
+            "ALL"          -> renderAll()
+            "SNAKE"        -> renderSnake()
+            "PONG"         -> renderPong()
+            "ASTEROIDS"    -> renderAsteroids()
+            "BRICK BREAKER"-> renderBrickBreaker()
         }
     }
 
@@ -190,12 +200,12 @@ class RecordBookActivity : AppCompatActivity() {
     ) {
         addSection(container, label, accentHex)
 
-        val plays    = PrefsManager.getStatPlays(this, game)
-        val total    = PrefsManager.getStatTotalScore(this, game)
-        val timeMs   = PrefsManager.getStatTotalTimeMs(this, game)
-        val hi       = PrefsManager.getHighScore(this, game)
-        val avg      = if (plays > 0) total / plays else 0L
-        val avgTime  = if (plays > 0) timeMs / plays else 0L
+        val plays   = PrefsManager.getStatPlays(this, game)
+        val total   = PrefsManager.getStatTotalScore(this, game)
+        val timeMs  = PrefsManager.getStatTotalTimeMs(this, game)
+        val hi      = PrefsManager.getHighScore(this, game)
+        val avg     = if (plays > 0) total / plays else 0L
+        val avgTime = if (plays > 0) timeMs / plays else 0L
 
         addRow(container, "GAMES LOGGED", fmtNum(plays), accentHex)
         addRow(container, "TOP SCORE",    fmtNum(hi),    accentHex)
@@ -212,9 +222,9 @@ class RecordBookActivity : AppCompatActivity() {
                 val ma = if (mp > 0) mt / mp else 0L
                 val star = if (mode == mostPlayedMode && mp > 0) " *" else ""
                 addSubHeader(container, mode.uppercase() + star)
-                addRow(container, "  GAMES",     fmtNum(mp), accentHex)
-                addRow(container, "  AVG SCORE", fmtNum(ma), accentHex)
-                addRow(container, "  TIME",      formatDuration(PrefsManager.getStatTotalTimeMs(this, game, mode)))
+                addRow(container, "GAMES",     fmtNum(mp), accentHex)
+                addRow(container, "AVG SCORE", fmtNum(ma), accentHex)
+                addRow(container, "TIME",      formatDuration(PrefsManager.getStatTotalTimeMs(this, game, mode)))
             }
         }
     }
@@ -224,8 +234,7 @@ class RecordBookActivity : AppCompatActivity() {
         if (entries.isEmpty()) return
         addSubHeader(container, "TOP SCORES")
         entries.forEachIndexed { i, e ->
-            val rank = "#${i + 1}"
-            addLeaderboardRow(container, rank, e.initials.trim(), fmtNum(e.score), e.formattedDate, accentHex)
+            addLeaderboardRow(container, "#${i + 1}", e.initials.trim(), fmtNum(e.score), e.formattedDate, accentHex)
         }
     }
 
@@ -235,10 +244,10 @@ class RecordBookActivity : AppCompatActivity() {
         data class Candidate(val label: String, val plays: Int, val accent: String)
 
         val candidates = listOf(
-            Candidate("SNAKE",        PrefsManager.getStatPlays(this, PrefsManager.GAME_SNAKE),        "#4f8ef7"),
-            Candidate("PONG",         PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG),         "#ef5350"),
-            Candidate("ASTEROIDS",    PrefsManager.getStatPlays(this, PrefsManager.GAME_ASTEROIDS),    "#00d4ff"),
-            Candidate("BRICK BREAKER",PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER),"#f1c40f")
+            Candidate("SNAKE",         PrefsManager.getStatPlays(this, PrefsManager.GAME_SNAKE),        "#4f8ef7"),
+            Candidate("PONG",          PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG),         "#ef5350"),
+            Candidate("ASTEROIDS",     PrefsManager.getStatPlays(this, PrefsManager.GAME_ASTEROIDS),    "#00d4ff"),
+            Candidate("BRICK BREAKER", PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER), "#f1c40f")
         )
         val top = candidates.maxByOrNull { it.plays }
         if (top != null && top.plays > 0) {
@@ -262,9 +271,9 @@ class RecordBookActivity : AppCompatActivity() {
         val tv = TextView(this).apply {
             text = "===  $title  ==="
             setTextColor(Color.parseColor(accentHex))
-            textSize = 14f
+            textSize = 28f
             gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 8)
+            setPadding(0, 24, 0, 10)
         }
         container.addView(tv)
         addDivider(container, accentHex)
@@ -274,8 +283,8 @@ class RecordBookActivity : AppCompatActivity() {
         val tv = TextView(this).apply {
             text = title
             setTextColor(Color.parseColor("#AA44FF"))
-            textSize = 10f
-            setPadding(0, 12, 0, 4)
+            textSize = 20f
+            setPadding(0, 16, 0, 6)
         }
         container.addView(tv)
     }
@@ -289,19 +298,23 @@ class RecordBookActivity : AppCompatActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 4, 0, 4)
+            setPadding(0, 6, 0, 6)
         }
         val tvLabel = TextView(this).apply {
             text = label
             setTextColor(Color.parseColor("#666688"))
-            textSize = 11f
+            textSize = 22f
+            gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setPadding(0, 0, 16, 0)
         }
         val tvValue = TextView(this).apply {
             text = value
             setTextColor(Color.parseColor(valueColorHex))
-            textSize = 11f
-            gravity = Gravity.END
+            textSize = 22f
+            gravity = Gravity.START
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setPadding(16, 0, 0, 0)
         }
         row.addView(tvLabel)
         row.addView(tvValue)
@@ -315,22 +328,24 @@ class RecordBookActivity : AppCompatActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 3, 0, 3)
+            setPadding(0, 5, 0, 5)
         }
-        fun tv(text: String, color: String, size: Float, weight: Float = 0f) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor(color))
-            textSize = size
-            layoutParams = if (weight > 0f)
-                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
-            else
-                LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-        row.addView(tv(rank,     accentHex, 10f))
-        row.addView(tv("  ",     "#000000", 10f))
-        row.addView(tv(initials, "#FFFFFF",  10f, 1f))
-        row.addView(tv(score,    accentHex, 10f))
-        row.addView(tv("  $date","#444466", 10f))
+        fun tv(text: String, color: String, size: Float, weight: Float = 0f, g: Int = Gravity.START) =
+            TextView(this).apply {
+                this.text = text
+                setTextColor(Color.parseColor(color))
+                textSize = size
+                gravity = g
+                layoutParams = if (weight > 0f)
+                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
+                else
+                    LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            }
+        row.addView(tv(rank,     accentHex, 20f))
+        row.addView(tv("  ",     "#000000", 20f))
+        row.addView(tv(initials, "#FFFFFF",  20f, 1f))
+        row.addView(tv(score,    accentHex, 20f))
+        row.addView(tv("  $date","#444466", 20f))
         container.addView(row)
     }
 
@@ -340,14 +355,14 @@ class RecordBookActivity : AppCompatActivity() {
             alpha = 0.3f
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1
-            ).also { it.setMargins(0, 4, 0, 4) }
+            ).also { it.setMargins(0, 6, 0, 6) }
         }
         container.addView(v)
     }
 
     private fun addSpacer(container: LinearLayout) {
         val v = android.view.View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 16)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 24)
         }
         container.addView(v)
     }
