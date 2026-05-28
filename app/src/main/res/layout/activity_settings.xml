@@ -30,7 +30,7 @@
                 android:layout_marginBottom="20dp"
                 android:text="SETTINGS"
                 android:textColor="@color/accent_blue"
-                android:textSize="16sp"
+                android:textSize="11sp"
                 android:fontFamily="monospace" />
 
             <!-- Colour Theme -->
@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:text="COLOUR THEME"
                     android:textColor="@color/accent_blue"
-                    android:textSize="27sp"
+                    android:textSize="19sp"
                     android:fontFamily="monospace"
                     android:layout_marginBottom="12dp" />
 
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:text="Classic"
                     android:textColor="@color/accent_blue"
-                    android:textSize="24sp"
+                    android:textSize="17sp"
                     android:fontFamily="monospace"
                     android:gravity="center" />
             </LinearLayout>
@@ -101,7 +101,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/demo_mode"
                         android:textColor="@color/text"
-                        android:textSize="27sp"
+                        android:textSize="19sp"
                         android:fontFamily="monospace" />
 
                     <TextView
@@ -110,7 +110,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/demo_mode_desc"
                         android:textColor="@color/muted"
-                        android:textSize="21sp"
+                        android:textSize="15sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -142,7 +142,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/sound"
                         android:textColor="@color/text"
-                        android:textSize="27sp"
+                        android:textSize="19sp"
                         android:fontFamily="monospace" />
 
                     <TextView
@@ -151,7 +151,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/sound_desc"
                         android:textColor="@color/muted"
-                        android:textSize="21sp"
+                        android:textSize="15sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -183,16 +183,16 @@
                         android:layout_height="wrap_content"
                         android:text="LEADERBOARD SIZE"
                         android:textColor="@color/text"
-                        android:textSize="27sp"
+                        android:textSize="19sp"
                         android:fontFamily="monospace" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Entries saved per game (1Ã¢â‚¬â€œ15)"
+                        android:text="Entries saved per game (1-15)"
                         android:textColor="@color/muted"
-                        android:textSize="21sp"
+                        android:textSize="15sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -200,9 +200,9 @@
                     android:id="@+id/btnLbMinus"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:text="Ã¢Ë†â€™"
+                    android:text="-"
                     android:textColor="@color/accent_blue"
-                    android:textSize="20sp"
+                    android:textSize="14sp"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:clickable="true"
@@ -214,7 +214,7 @@
                     android:layout_height="wrap_content"
                     android:text="5"
                     android:textColor="@color/accent_blue"
-                    android:textSize="16sp"
+                    android:textSize="11sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold"
                     android:gravity="center" />
@@ -225,7 +225,7 @@
                     android:layout_height="32dp"
                     android:text="+"
                     android:textColor="@color/accent_blue"
-                    android:textSize="20sp"
+                    android:textSize="14sp"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:clickable="true"
@@ -257,7 +257,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/ad_free_title"
                         android:textColor="@color/accent_yellow"
-                        android:textSize="27sp"
+                        android:textSize="19sp"
                         android:fontFamily="monospace" />
 
                     <TextView
@@ -267,7 +267,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/ad_free_desc"
                         android:textColor="@color/muted"
-                        android:textSize="21sp"
+                        android:textSize="15sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -277,7 +277,7 @@
                     android:layout_height="wrap_content"
                     android:text=">"
                     android:textColor="@color/accent_yellow"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     android:fontFamily="monospace" />
             </LinearLayout>
 
@@ -289,7 +289,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="@string/restore_purchase"
                 android:textColor="@color/muted"
-                android:textSize="24sp"
+                android:textSize="17sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
@@ -305,7 +305,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="CHECK FOR UPDATES"
                 android:textColor="@color/accent_blue"
-                android:textSize="24sp"
+                android:textSize="17sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
@@ -321,7 +321,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="&#128279;  SHARE POCKET ARCADE"
                 android:textColor="@color/accent_green"
-                android:textSize="24sp"
+                android:textSize="17sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
@@ -335,9 +335,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Ã¢Ëœâ€¦  CREDITS"
+                android:text="&#9733;  CREDITS"
                 android:textColor="@color/accent_yellow"
-                android:textSize="24sp"
+                android:textSize="17sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
@@ -353,7 +353,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="@string/reset_scores"
                 android:textColor="@color/accent_red"
-                android:textSize="24sp"
+                android:textSize="17sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/bg_game_tile"
                 android:padding="16dp"
@@ -369,7 +369,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="v1.1.0"
                 android:textColor="@color/muted"
-                android:textSize="21sp"
+                android:textSize="15sp"
                 android:fontFamily="monospace"
                 android:gravity="center"
                 android:alpha="0.5" />
@@ -377,4 +377,3 @@
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
-

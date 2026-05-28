@@ -73,7 +73,7 @@
         android:id="@+id/tvEmpty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No scores yet Ã¢â‚¬â€ play to get on the board!"
+        android:text="No scores yet - play to get on the board!"
         android:textColor="@color/muted"
         android:textSize="12sp"
         android:fontFamily="monospace"
@@ -119,4 +119,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
