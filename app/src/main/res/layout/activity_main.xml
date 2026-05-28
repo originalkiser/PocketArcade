@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#050510">
 
-    <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Main column Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+    <!-- Main column -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Ã¢â€°Â¡  SELECT YOUR GAME  Ã¢â€°Â¡"
+                android:text="=  SELECT YOUR GAME  ="
                 android:textColor="@color/muted"
                 android:textSize="9sp"
                 android:fontFamily="@font/press_start_2p"
@@ -71,7 +71,7 @@
                 android:orientation="vertical"
                 android:padding="10dp">
 
-                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ SNAKE Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+                <!-- SNAKE -->
                 <LinearLayout
                     android:id="@+id/tileSnake"
                     android:layout_width="match_parent"
@@ -131,14 +131,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ã¢â€“Â¶"
+                        android:text="&#x25B6;"
                         android:textColor="@color/accent_blue"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ PONG Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+                <!-- PONG -->
                 <LinearLayout
                     android:id="@+id/tilePong"
                     android:layout_width="match_parent"
@@ -198,14 +198,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ã¢â€“Â¶"
+                        android:text="&#x25B6;"
                         android:textColor="@color/accent_red"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ ASTEROIDS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+                <!-- ASTEROIDS -->
                 <LinearLayout
                     android:id="@+id/tileAsteroids"
                     android:layout_width="match_parent"
@@ -265,14 +265,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ã¢â€“Â¶"
+                        android:text="&#x25B6;"
                         android:textColor="@color/accent_cyan"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- Ã¢â€â‚¬Ã¢â€â‚¬ BRICK BREAKER Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+                <!-- BRICK BREAKER -->
                 <LinearLayout
                     android:id="@+id/tileBrickBreaker"
                     android:layout_width="match_parent"
@@ -332,57 +332,65 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ã¢â€“Â¶"
+                        android:text="&#x25B6;"
                         android:textColor="@color/accent_yellow"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- â”€â”€ RECORD BOOK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- RECORD BOOK: 70% width, centered -->
                 <LinearLayout
-                    android:id="@+id/btnRecordBook"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="4dp"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_record_book"
-                    android:padding="16dp"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1.5" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnRecordBook"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="âš¡  RECORD BOOK"
-                            android:textColor="#AA44FF"
-                            android:textSize="12sp" />
+                        android:layout_weight="7"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_record_book"
+                        android:padding="14dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="â–¶"
+                            android:text="[ RECORD BOOK ]"
                             android:textColor="#AA44FF"
-                            android:textSize="10sp"
-                            android:alpha="0.6" />
+                            android:textSize="11sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvRecordBookSummary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="NO MISSIONS LOGGED YET"
+                            android:textColor="#666688"
+                            android:textSize="7sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center" />
+
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tvRecordBookSummary"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="NO MISSIONS LOGGED YET"
-                        android:textColor="#666688"
-                        android:textSize="6sp" />
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1.5" />
 
                 </LinearLayout>
 
@@ -397,43 +405,42 @@
             android:background="@color/muted"
             android:alpha="0.2" />
 
-        <!-- Bottom control bar: Settings | Credits -->
+        <!-- Bottom buttons: Settings and Credits as separate cards -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="84dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="#07071A"
-            android:gravity="center_vertical">
+            android:padding="10dp"
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/btnSettings"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="52dp"
                 android:layout_weight="1"
-                android:text="Ã¢Å¡â„¢  SETTINGS"
+                android:layout_marginEnd="6dp"
+                android:text="SETTINGS"
                 android:textColor="@color/muted"
-                android:textSize="24sp"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:gravity="center"
+                android:background="@drawable/bg_btn_bottom"
                 android:clickable="true"
                 android:focusable="true" />
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:background="@color/muted"
-                android:alpha="0.3" />
 
             <TextView
                 android:id="@+id/btnCredits"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="52dp"
                 android:layout_weight="1"
-                android:text="Ã¢Ëœâ€¦  CREDITS"
+                android:layout_marginStart="6dp"
+                android:text="CREDITS"
                 android:textColor="@color/muted"
-                android:textSize="24sp"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:gravity="center"
+                android:background="@drawable/bg_btn_bottom"
                 android:clickable="true"
                 android:focusable="true" />
         </LinearLayout>
@@ -443,7 +450,7 @@
             android:id="@+id/tvMarquee"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:text="TOP SCORES  Ã¢Å“Â¦  PLAY TO SET RECORDS  Ã¢Å“Â¦"
+            android:text="TOP SCORES  *  PLAY TO SET RECORDS  *"
             android:textColor="@color/accent_yellow"
             android:textSize="20sp"
             android:fontFamily="monospace"
@@ -466,4 +473,3 @@
         android:focusable="false" />
 
 </FrameLayout>
-
