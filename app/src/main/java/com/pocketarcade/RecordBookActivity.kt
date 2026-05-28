@@ -185,13 +185,6 @@ class RecordBookActivity : AppCompatActivity() {
     }
 
     private fun renderPong() {
-        buildGameSection(contentContainer,
-            game      = PrefsManager.GAME_PONG,
-            label     = "PONG",
-            accentHex = "#ef5350",
-            modes     = listOf("easy", "medium", "hard")
-        )
-        addSpacer(contentContainer)
         val pongFmt: (Int) -> Pair<String, Int> = { enc ->
             if (enc >= 10) {
                 val ps = enc / 10; val ai = enc % 10
@@ -200,10 +193,15 @@ class RecordBookActivity : AppCompatActivity() {
                 Pair(fmtNum(enc), Color.parseColor("#ef5350"))
             }
         }
+        buildGameSection(contentContainer,
+            game           = PrefsManager.GAME_PONG,
+            label          = "PONG",
+            accentHex      = "#ef5350",
+            modes          = listOf("easy", "medium", "hard"),
+            scoreFormatter = pongFmt
+        )
+        addSpacer(contentContainer)
         buildLeaderboard(contentContainer, PrefsManager.GAME_PONG, "#ef5350", scoreFormatter = pongFmt)
-        listOf("EASY", "MEDIUM", "HARD").forEach { mode ->
-            buildLeaderboard(contentContainer, "${PrefsManager.GAME_PONG}_${mode.lowercase()}", "#ef5350", mode, pongFmt)
-        }
         addSpacer(contentContainer)
     }
 
@@ -228,9 +226,6 @@ class RecordBookActivity : AppCompatActivity() {
         )
         addSpacer(contentContainer)
         buildLeaderboard(contentContainer, PrefsManager.GAME_BRICKBREAKER, "#f1c40f")
-        listOf("EASY", "MEDIUM", "HARD").forEach { mode ->
-            buildLeaderboard(contentContainer, "${PrefsManager.GAME_BRICKBREAKER}_${mode.lowercase()}", "#f1c40f", mode)
-        }
         addSpacer(contentContainer)
     }
 
@@ -238,7 +233,8 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun buildGameSection(
         container: LinearLayout, game: String, label: String,
-        accentHex: String, modes: List<String>
+        accentHex: String, modes: List<String>,
+        scoreFormatter: ((Int) -> Pair<String, Int>)? = null
     ) {
         addSection(container, label, accentHex)
 
@@ -267,6 +263,7 @@ class RecordBookActivity : AppCompatActivity() {
                 addRow(container, "GAMES",     fmtNum(mp), accentHex)
                 addRow(container, "AVG SCORE", fmtNum(ma), accentHex)
                 addRow(container, "TIME",      formatDuration(PrefsManager.getStatTotalTimeMs(this, game, mode)))
+                buildLeaderboard(container, "${game}_${mode}", accentHex, showHeader = false, scoreFormatter = scoreFormatter)
             }
         }
     }
@@ -276,11 +273,12 @@ class RecordBookActivity : AppCompatActivity() {
         game: String,
         accentHex: String,
         header: String = "TOP SCORES",
+        showHeader: Boolean = true,
         scoreFormatter: ((Int) -> Pair<String, Int>)? = null
     ) {
         val entries = LeaderboardManager.getEntries(this, game)
         if (entries.isEmpty()) return
-        addSubHeader(container, header)
+        if (showHeader) addSubHeader(container, header)
         addLeaderboardHeader(container, accentHex)
         entries.forEachIndexed { i, e ->
             val (scoreText, scoreColor) = scoreFormatter?.invoke(e.score)
