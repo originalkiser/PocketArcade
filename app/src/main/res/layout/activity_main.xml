@@ -339,52 +339,52 @@
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-            </LinearLayout>
-
-            <!-- ── RECORD BOOK ──────────────────────────────────────────────── -->
-            <LinearLayout
-                android:id="@+id/btnRecordBook"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:orientation="vertical"
-                android:background="@drawable/bg_record_book"
-                android:padding="16dp"
-                android:clickable="true"
-                android:focusable="true">
-
+                <!-- ── RECORD BOOK ──────────────────────────────────────────── -->
                 <LinearLayout
+                    android:id="@+id/btnRecordBook"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_record_book"
+                    android:padding="16dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="⚡  RECORD BOOK"
+                            android:textColor="#AA44FF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="▶"
+                            android:textColor="#AA44FF"
+                            android:textSize="10sp"
+                            android:alpha="0.6" />
+                    </LinearLayout>
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:id="@+id/tvRecordBookSummary"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="⚡  RECORD BOOK"
-                        android:textColor="#AA44FF"
-                        android:textSize="12sp" />
+                        android:layout_marginTop="6dp"
+                        android:text="NO MISSIONS LOGGED YET"
+                        android:textColor="#666688"
+                        android:textSize="6sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="▶"
-                        android:textColor="#AA44FF"
-                        android:textSize="10sp"
-                        android:alpha="0.6" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvRecordBookSummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="NO MISSIONS LOGGED YET"
-                    android:textColor="#666688"
-                    android:textSize="6sp" />
 
             </LinearLayout>
 
