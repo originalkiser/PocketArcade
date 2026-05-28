@@ -14,6 +14,18 @@ import com.pocketarcade.storage.PrefsManager
 
 private val LETTERS = Array(27) { i -> if (i == 0) " " else ('A' + i - 1).toString() }
 
+private fun isPongGame(game: String) = game == "pong" || game.startsWith("pong_")
+
+private fun decodePongScore(enc: Int): String {
+    val ps: Int; val ai: Int
+    when {
+        enc >= 100 -> { ps = enc / 100; ai = 99 - enc % 100 }
+        enc >= 10  -> { ps = enc / 10;  ai = enc % 10 }
+        else       -> { ps = 0;         ai = enc }
+    }
+    return "$ps-$ai"
+}
+
 fun showLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
@@ -36,7 +48,8 @@ fun showLeaderboardDialog(
             val row = LayoutInflater.from(activity).inflate(R.layout.item_leaderboard, container, false)
             row.findViewById<TextView>(R.id.tvRank).text = "#${index + 1}"
             row.findViewById<TextView>(R.id.tvInitials).text = entry.initials.trim().ifEmpty { "---" }
-            row.findViewById<TextView>(R.id.tvScore).text = entry.score.toString()
+            row.findViewById<TextView>(R.id.tvScore).text =
+                if (isPongGame(game)) decodePongScore(entry.score) else entry.score.toString()
             row.findViewById<TextView>(R.id.tvDate).text = entry.formattedDate
             container.addView(row)
 
@@ -86,7 +99,8 @@ fun showInitialsThenLeaderboard(
     val pickerB = view.findViewById<NumberPicker>(R.id.pickerB)
     val pickerC = view.findViewById<NumberPicker>(R.id.pickerC)
     val preview = view.findViewById<TextView>(R.id.tvInitialsPreview)
-    view.findViewById<TextView>(R.id.tvInitialsScore).text = "SCORE: $score"
+    view.findViewById<TextView>(R.id.tvInitialsScore).text =
+        "SCORE: ${if (isPongGame(game)) decodePongScore(score) else score}"
 
     val lbSize = PrefsManager.getLeaderboardSize(activity)
     view.findViewById<TextView>(R.id.tvNewTop).text = "🏆 NEW TOP $lbSize!"

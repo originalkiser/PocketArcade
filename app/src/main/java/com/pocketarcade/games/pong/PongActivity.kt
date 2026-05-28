@@ -62,7 +62,7 @@ class PongActivity : AppCompatActivity() {
         }
         pongView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         pongView.onMatchEnd = { playerWon, playerScore, aiScore ->
-            val encodedScore = playerScore * 10 + aiScore
+            val encodedScore = playerScore * 100 + (99 - aiScore)
             val duration = System.currentTimeMillis() - gameStartTime
             val mode = pongView.difficulty.name.lowercase()
             PrefsManager.recordGamePlayed(this)

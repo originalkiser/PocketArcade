@@ -186,12 +186,13 @@ class RecordBookActivity : AppCompatActivity() {
 
     private fun renderPong() {
         val pongFmt: (Int) -> Pair<String, Int> = { enc ->
-            if (enc >= 10) {
-                val ps = enc / 10; val ai = enc % 10
-                Pair("$ps-$ai", if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c"))
-            } else {
-                Pair(fmtNum(enc), Color.parseColor("#ef5350"))
+            val ps: Int; val ai: Int
+            when {
+                enc >= 100 -> { ps = enc / 100; ai = 99 - enc % 100 }  // new encoding
+                enc >= 10  -> { ps = enc / 10;  ai = enc % 10 }         // legacy
+                else       -> { ps = 0;         ai = enc }               // very old
             }
+            Pair("$ps-$ai", if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c"))
         }
         buildGameSection(contentContainer,
             game           = PrefsManager.GAME_PONG,
