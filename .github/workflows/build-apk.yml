@@ -21,6 +21,11 @@ jobs:
           sudo update-java-alternatives -s "$(update-java-alternatives -l | grep '17' | awk '{print $1}')"
           java -version
 
+      - name: Compute version tag
+        run: |
+          PATCH=$(git rev-list --count HEAD)
+          echo "RELEASE_TAG=v1.3.${PATCH}" >> $GITHUB_ENV
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
@@ -33,7 +38,7 @@ jobs:
       - name: Write release notes
         run: |
           cat > notes.md << 'EOF'
-          ## Pocket Arcade - Latest Build
+          ## Pocket Arcade - ${{ env.RELEASE_TAG }}
 
           ### Install on Android (API 26+)
           1. Download PocketArcade.apk below
@@ -43,12 +48,7 @@ jobs:
           Includes: Snake, Pong, Asteroids, Brick Breaker
           EOF
 
-      - name: Delete existing latest release
-        run: gh release delete latest --yes || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create release
-        run: gh release create latest PocketArcade.apk --title "Pocket Arcade - Latest Build" --notes-file notes.md --latest
+        run: gh release create "$RELEASE_TAG" PocketArcade.apk --title "Pocket Arcade $RELEASE_TAG" --notes-file notes.md --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
