@@ -31,6 +31,7 @@ class PongActivity : AppCompatActivity() {
     private lateinit var btnLightMode: TextView
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
+    private var gameStartTime = 0L
 
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !pongView.isUserPlaying()) {
@@ -59,8 +60,12 @@ class PongActivity : AppCompatActivity() {
         pongView.onScoreUpdate = { p, ai ->
             runOnUiThread { tvScore.text = "P:$p  AI:$ai" }
         }
+        pongView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         pongView.onMatchEnd = { playerWon, playerScore ->
+            val duration = System.currentTimeMillis() - gameStartTime
+            val mode = pongView.difficulty.name.lowercase()
             PrefsManager.recordGamePlayed(this)
+            PrefsManager.recordGameStat(this, PrefsManager.GAME_PONG, playerScore, duration, mode)
             pongView.readyForRestart = false
             if (playerWon) {
                 PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, playerScore)

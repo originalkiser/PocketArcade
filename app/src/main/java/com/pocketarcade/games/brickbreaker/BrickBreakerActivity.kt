@@ -32,6 +32,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var btnLightMode: TextView
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
+    private var gameStartTime = 0L
 
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !bbView.isUserPlaying()) {
@@ -63,8 +64,12 @@ class BrickBreakerActivity : AppCompatActivity() {
         bbView.onLevelChanged = { level ->
             runOnUiThread { tvLevel.text = "LV:$level" }
         }
+        bbView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         bbView.onGameOver = { score ->
+            val duration = System.currentTimeMillis() - gameStartTime
+            val mode = bbView.difficulty.name.lowercase()
             PrefsManager.recordGamePlayed(this)
+            PrefsManager.recordGameStat(this, PrefsManager.GAME_BRICKBREAKER, score, duration, mode)
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
@@ -78,7 +83,10 @@ class BrickBreakerActivity : AppCompatActivity() {
             idleHandler.postDelayed(idleRunnable, 15_000L)
         }
         bbView.onWin = { score ->
+            val duration = System.currentTimeMillis() - gameStartTime
+            val mode = bbView.difficulty.name.lowercase()
             PrefsManager.recordGamePlayed(this)
+            PrefsManager.recordGameStat(this, PrefsManager.GAME_BRICKBREAKER, score, duration, mode)
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }

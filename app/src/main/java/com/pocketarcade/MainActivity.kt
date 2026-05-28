@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -59,6 +60,9 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<TextView>(R.id.btnCredits).setOnClickListener {
             showCreditsDialog(this)
+        }
+        findViewById<LinearLayout>(R.id.btnRecordBook).setOnClickListener {
+            startActivity(Intent(this, RecordBookActivity::class.java))
         }
 
         // Marquee requires isSelected = true to scroll
@@ -163,10 +167,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
         findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
 
+        // Record Book summary card
+        updateRecordBookSummary()
+
         // Update score ticker
         val tvMarquee = findViewById<TextView>(R.id.tvMarquee)
         tvMarquee.text = buildMarqueeTicker()
         tvMarquee.isSelected = true
+    }
+
+    private fun updateRecordBookSummary() {
+        val games = listOf(PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
+            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER)
+        val total = games.sumOf { PrefsManager.getStatPlays(this, it) }
+        val tv = findViewById<TextView>(R.id.tvRecordBookSummary)
+        if (total == 0) {
+            tv.text = "NO MISSIONS LOGGED YET"
+            return
+        }
+        val labels = mapOf(
+            PrefsManager.GAME_SNAKE        to "SNAKE",
+            PrefsManager.GAME_PONG         to "PONG",
+            PrefsManager.GAME_ASTEROIDS    to "ASTEROIDS",
+            PrefsManager.GAME_BRICKBREAKER to "BRICK BREAKER"
+        )
+        val topGame = games.maxByOrNull { PrefsManager.getStatPlays(this, it) }!!
+        val allHi = games.maxOf { PrefsManager.getHighScore(this, it) }
+        tv.text = "$total MISSIONS  ·  TOP AGENT: ${labels[topGame]}  ·  BEST: $allHi"
     }
 
     private fun buildMarqueeTicker(): String {

@@ -102,6 +102,7 @@ class BrickBreakerView @JvmOverloads constructor(
     var onLevelChanged: ((Int) -> Unit)? = null
     var onGameOver: ((Int) -> Unit)? = null
     var onWin: ((Int) -> Unit)? = null
+    var onGameStarted: (() -> Unit)? = null
 
     private var state = BBState.IDLE
     private var demoMode = false
@@ -240,6 +241,7 @@ class BrickBreakerView @JvmOverloads constructor(
         loadLevel()
         onScoreChanged?.invoke(0)
         onLevelChanged?.invoke(1)
+        if (!demo) onGameStarted?.invoke()
     }
 
     private fun loadLevel() {

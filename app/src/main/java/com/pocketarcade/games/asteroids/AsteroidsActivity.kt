@@ -30,6 +30,7 @@ class AsteroidsActivity : AppCompatActivity() {
     private lateinit var btnSound: TextView
     private lateinit var btnLightMode: TextView
     private val idleHandler = Handler(Looper.getMainLooper())
+    private var gameStartTime = 0L
 
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !astView.isUserPlaying()) {
@@ -61,8 +62,11 @@ class AsteroidsActivity : AppCompatActivity() {
         astView.onScoreChanged = { score ->
             runOnUiThread { tvScore.text = "SCORE: $score" }
         }
+        astView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         astView.onGameOver = { score ->
+            val duration = System.currentTimeMillis() - gameStartTime
             PrefsManager.recordGamePlayed(this)
+            PrefsManager.recordGameStat(this, PrefsManager.GAME_ASTEROIDS, score, duration)
             astView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_ASTEROIDS, score)
             runOnUiThread { updateHighScore() }

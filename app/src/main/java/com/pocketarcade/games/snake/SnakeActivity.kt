@@ -48,6 +48,8 @@ class SnakeActivity : AppCompatActivity() {
     private lateinit var btnLeaderboard: TextView
 
     private var isDpadMode = false
+    private var gameStartTime = 0L
+    private var fruitsThisGame = 0
 
     private var dpadButtonSizeDp = 56f
     private var dpadHSpreadDp = 0f
@@ -96,11 +98,19 @@ class SnakeActivity : AppCompatActivity() {
         updateHighScore()
         applyThemeToUi()
 
-        snakeView.onGameStarted  = { runOnUiThread { btnRestart.visibility = View.GONE } }
+        snakeView.onGameStarted  = {
+            gameStartTime = System.currentTimeMillis()
+            fruitsThisGame = 0
+            runOnUiThread { btnRestart.visibility = View.GONE }
+        }
+        snakeView.onFruitEaten   = { fruitsThisGame++ }
         snakeView.onDemoStopped  = { runOnUiThread { btnRestart.visibility = View.VISIBLE } }
         snakeView.onScoreChanged = { score -> runOnUiThread { tvScore.text = "SCORE: $score" } }
         snakeView.onGameOver = { score ->
+            val duration = System.currentTimeMillis() - gameStartTime
             PrefsManager.recordGamePlayed(this)
+            PrefsManager.recordGameStat(this, PrefsManager.GAME_SNAKE, score, duration)
+            PrefsManager.addSnakeFruits(this, fruitsThisGame)
             PrefsManager.setHighScore(this, PrefsManager.GAME_SNAKE, score)
             runOnUiThread { updateHighScore() }
             idleHandler.postDelayed({

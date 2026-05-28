@@ -41,6 +41,7 @@ class SnakeView @JvmOverloads constructor(
     var onGameOver: ((Int) -> Unit)? = null
     var onGameStarted: (() -> Unit)? = null
     var onDemoStopped: (() -> Unit)? = null
+    var onFruitEaten: (() -> Unit)? = null
 
     var swipeThresholdDp: Float = 20f
     private var swipeEnabled = false
@@ -197,7 +198,7 @@ class SnakeView @JvmOverloads constructor(
         if (!ate) snake.removeAt(snake.size - 1)
         else {
             score++; food = randomFood(); onScoreChanged?.invoke(score)
-            if (!demoMode) {
+            if (!demoMode) { onFruitEaten?.invoke()
                 SoundManager.play(SoundManager.SFX.SNAKE_EAT, context)
                 performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             }

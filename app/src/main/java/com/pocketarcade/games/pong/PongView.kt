@@ -30,6 +30,7 @@ class PongView @JvmOverloads constructor(
     var difficulty = PongDifficulty.MEDIUM
     var onScoreUpdate: ((player: Int, ai: Int) -> Unit)? = null
     var onMatchEnd: ((playerWon: Boolean, playerScore: Int) -> Unit)? = null
+    var onGameStarted: (() -> Unit)? = null
 
     private var state = PongState.IDLE
     private var demoMode = false
@@ -197,6 +198,7 @@ class PongView @JvmOverloads constructor(
         state = PongState.PLAYING
         initGame()
         onScoreUpdate?.invoke(0, 0)
+        if (!demo) onGameStarted?.invoke()
     }
 
     fun setIdle() { state = PongState.IDLE }

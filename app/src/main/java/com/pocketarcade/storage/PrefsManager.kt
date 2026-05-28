@@ -27,6 +27,46 @@ object PrefsManager {
     const val GAME_ASTEROIDS = "asteroids"
     const val GAME_BRICKBREAKER = "brickbreaker"
 
+    // ── Stats ─────────────────────────────────────────────────────────────────
+    private fun statKey(metric: String, game: String, mode: String? = null) =
+        if (mode != null) "stat_${metric}_${game}_$mode" else "stat_${metric}_$game"
+
+    fun recordGameStat(ctx: Context, game: String, score: Int, durationMs: Long, mode: String? = null) {
+        prefs(ctx).edit {
+            putInt(statKey("plays", game),
+                prefs(ctx).getInt(statKey("plays", game), 0) + 1)
+            putLong(statKey("score_total", game),
+                prefs(ctx).getLong(statKey("score_total", game), 0L) + score)
+            putLong(statKey("time_ms", game),
+                prefs(ctx).getLong(statKey("time_ms", game), 0L) + durationMs)
+            if (mode != null) {
+                putInt(statKey("plays", game, mode),
+                    prefs(ctx).getInt(statKey("plays", game, mode), 0) + 1)
+                putLong(statKey("score_total", game, mode),
+                    prefs(ctx).getLong(statKey("score_total", game, mode), 0L) + score)
+                putLong(statKey("time_ms", game, mode),
+                    prefs(ctx).getLong(statKey("time_ms", game, mode), 0L) + durationMs)
+            }
+        }
+    }
+
+    fun getStatPlays(ctx: Context, game: String, mode: String? = null): Int =
+        prefs(ctx).getInt(statKey("plays", game, mode), 0)
+
+    fun getStatTotalScore(ctx: Context, game: String, mode: String? = null): Long =
+        prefs(ctx).getLong(statKey("score_total", game, mode), 0L)
+
+    fun getStatTotalTimeMs(ctx: Context, game: String, mode: String? = null): Long =
+        prefs(ctx).getLong(statKey("time_ms", game, mode), 0L)
+
+    fun addSnakeFruits(ctx: Context, count: Int) {
+        val key = "stat_snake_fruits"
+        prefs(ctx).edit { putLong(key, prefs(ctx).getLong(key, 0L) + count) }
+    }
+
+    fun getSnakeFruits(ctx: Context): Long =
+        prefs(ctx).getLong("stat_snake_fruits", 0L)
+
     private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun getHighScore(ctx: Context, game: String): Int =
