@@ -120,6 +120,7 @@ class BrickBreakerView @JvmOverloads constructor(
     private var slowBallTimer = 0
     private var laserTimer = 0
     private var lives = 3
+    private var extraLivesDroppedThisRound = 0
 
     // Aim mode
     private var aimAngle = -PI.toFloat() / 2f
@@ -239,9 +240,9 @@ class BrickBreakerView @JvmOverloads constructor(
         ballSpeed = speedForDifficulty(difficulty)
         widePaddleTimer = 0; slowBallTimer = 0; laserTimer = 0
         lives = when (difficulty) {
-            BBDifficulty.EASY -> 3
-            BBDifficulty.MEDIUM -> 2
-            BBDifficulty.HARD -> 3
+            BBDifficulty.EASY -> 5
+            BBDifficulty.MEDIUM -> 3
+            BBDifficulty.HARD -> 1
         }
         computeLayout(); initPaddle()
         loadLevel()
@@ -256,6 +257,7 @@ class BrickBreakerView @JvmOverloads constructor(
         if (level > LEVELS.size) { state = BBState.WIN; onWin?.invoke(score); return }
         computeLayout(); initPaddle()
         bricks.clear(); powerUps.clear()
+        extraLivesDroppedThisRound = 0
         val grid = LEVELS[level - 1]
         for (r in 0 until BRICK_ROWS) {
             for (c in 0 until COLS) {
@@ -382,11 +384,18 @@ class BrickBreakerView @JvmOverloads constructor(
                         brickIter.remove()
                         score += (4 - min(brick.hp, 0)) * 10
                         onScoreChanged?.invoke(score)
-                        // Chance to drop power-up
-                        if ((0 until 5).random() == 0) {
-                            val eligible = if (level >= 3) PowerUpType.values().toList()
-                                           else PowerUpType.values().filter { it != PowerUpType.EXTRA_LIFE }
-                            powerUps.add(PowerUp(bx + brickW / 2f, by_ + brickH / 2f, eligible.random()))
+                        // Chance to drop power-up (reduced frequency: ~1 in 8)
+                        if ((0 until 8).random() == 0) {
+                            val maxExtraLives = if (level >= 10) 2 else 1
+                            val eligible = PowerUpType.values().filter { type ->
+                                type != PowerUpType.EXTRA_LIFE ||
+                                    (level >= 5 && extraLivesDroppedThisRound < maxExtraLives)
+                            }
+                            if (eligible.isNotEmpty()) {
+                                val picked = eligible.random()
+                                powerUps.add(PowerUp(bx + brickW / 2f, by_ + brickH / 2f, picked))
+                                if (picked == PowerUpType.EXTRA_LIFE) extraLivesDroppedThisRound++
+                            }
                         }
                     }
                     break

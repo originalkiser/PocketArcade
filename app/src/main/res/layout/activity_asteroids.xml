@@ -21,6 +21,20 @@
         android:background="@color/surface">
 
         <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="&#8592;"
+            android:textColor="@color/muted"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
             android:id="@+id/tvScore"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -28,7 +42,7 @@
             android:text="SCORE: 0"
             android:textColor="@color/accent_cyan"
             android:textSize="12sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="sans-serif" />
 
         <TextView
             android:id="@+id/tvHighScore"

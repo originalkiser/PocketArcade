@@ -25,6 +25,7 @@ class PongActivity : AppCompatActivity() {
     private lateinit var pongView: PongView
     private lateinit var tvScore: TextView
     private lateinit var tvHighScore: TextView
+    private lateinit var btnBack: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
     private lateinit var btnSound: TextView
@@ -48,6 +49,8 @@ class PongActivity : AppCompatActivity() {
         pongView       = findViewById(R.id.pongView)
         tvScore        = findViewById(R.id.tvScore)
         tvHighScore    = findViewById(R.id.tvHighScore)
+        btnBack        = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener { finish() }
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
         btnSound       = findViewById(R.id.btnSound)
@@ -113,6 +116,10 @@ class PongActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener {
+            dialog.dismiss()
+            if (!cancelable) finish()
+        }
         view.findViewById<LinearLayout>(R.id.btnEasy).setOnClickListener { pick(PongDifficulty.EASY) }
         view.findViewById<LinearLayout>(R.id.btnMedium).setOnClickListener { pick(PongDifficulty.MEDIUM) }
         view.findViewById<LinearLayout>(R.id.btnHard).setOnClickListener { pick(PongDifficulty.HARD) }

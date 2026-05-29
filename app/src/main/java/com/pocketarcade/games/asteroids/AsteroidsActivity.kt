@@ -24,6 +24,7 @@ class AsteroidsActivity : AppCompatActivity() {
     private lateinit var controlsPanel: AsteroidsControlsView
     private lateinit var tvScore: TextView
     private lateinit var tvHighScore: TextView
+    private lateinit var btnBack: TextView
     private lateinit var btnAutoFire: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
@@ -48,6 +49,8 @@ class AsteroidsActivity : AppCompatActivity() {
         controlsPanel  = findViewById(R.id.controlsPanel)
         tvScore        = findViewById(R.id.tvScore)
         tvHighScore    = findViewById(R.id.tvHighScore)
+        btnBack        = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener { finish() }
         btnAutoFire    = findViewById(R.id.btnAutoFire)
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)

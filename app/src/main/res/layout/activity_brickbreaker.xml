@@ -11,106 +11,124 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Controls bar (above game, below ad) -->
+    <!-- Two-row header (controls + hearts/high score) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:paddingHorizontal="12dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:background="@color/surface">
 
-        <TextView
-            android:id="@+id/btnBack"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#8592;"
-            android:textColor="@color/muted"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
+        <!-- Row 1: back, score, level, buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:paddingHorizontal="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvScore"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="SCORE: 0"
-            android:textColor="@color/accent_yellow"
-            android:textSize="12sp"
-            android:fontFamily="monospace"
-            android:singleLine="true" />
+            <TextView
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="&#8592;"
+                android:textColor="@color/muted"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:paddingHorizontal="10dp"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="8dp" />
 
-        <TextView
-            android:id="@+id/tvLives"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="♥♥♥"
-            android:textColor="#e74c3c"
-            android:textSize="13sp"
-            android:layout_marginEnd="6dp" />
+            <TextView
+                android:id="@+id/tvScore"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="SCORE: 0"
+                android:textColor="@color/accent_yellow"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:singleLine="true" />
 
-        <TextView
-            android:id="@+id/tvLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LV:1"
-            android:textColor="@color/accent_green"
-            android:textSize="11sp"
-            android:fontFamily="monospace"
-            android:layout_marginEnd="6dp" />
+            <TextView
+                android:id="@+id/tvLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LV:1"
+                android:textColor="@color/accent_green"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginEnd="4dp" />
 
-        <TextView
-            android:id="@+id/tvHighScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Best:0"
-            android:textColor="@color/muted"
-            android:textSize="10sp"
-            android:fontFamily="monospace"
-            android:layout_marginEnd="4dp" />
+            <TextView
+                android:id="@+id/btnSound"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#128266;"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
 
-        <TextView
-            android:id="@+id/btnSound"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#128266;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
+            <TextView
+                android:id="@+id/btnLightMode"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#127769;"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
 
-        <TextView
-            android:id="@+id/btnLightMode"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#127769;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
+            <TextView
+                android:id="@+id/btnLeaderboard"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#127942;"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
 
-        <TextView
-            android:id="@+id/btnLeaderboard"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#127942;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
+            <TextView
+                android:id="@+id/btnSettings"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#9881;"
+                android:textColor="@color/muted"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/btnSettings"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#9881;"
-            android:textColor="@color/muted"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
+        <!-- Row 2: hearts (left) + high score (right) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:paddingHorizontal="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvLives"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="&#9829;&#9829;&#9829;"
+                android:textColor="#e74c3c"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvHighScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HIGH SCORE: 0"
+                android:textColor="@color/muted"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif" />
+        </LinearLayout>
     </LinearLayout>
 
     <com.pocketarcade.games.brickbreaker.BrickBreakerView
@@ -139,4 +157,3 @@
     </FrameLayout>
 
 </LinearLayout>
-

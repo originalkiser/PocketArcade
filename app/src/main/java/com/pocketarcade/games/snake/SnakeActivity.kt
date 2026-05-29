@@ -32,6 +32,7 @@ class SnakeActivity : AppCompatActivity() {
     private lateinit var snakeView: SnakeView
     private lateinit var tvScore: TextView
     private lateinit var tvHighScore: TextView
+    private lateinit var btnBack: TextView
     private lateinit var controlZone: FrameLayout
     private lateinit var swipeZoneContainer: FrameLayout
     private lateinit var dpadContainer: FrameLayout
@@ -79,6 +80,8 @@ class SnakeActivity : AppCompatActivity() {
         snakeView          = findViewById(R.id.snakeView)
         tvScore            = findViewById(R.id.tvScore)
         tvHighScore        = findViewById(R.id.tvHighScore)
+        btnBack            = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener { finish() }
         controlZone        = findViewById(R.id.controlZone)
         swipeZoneContainer = findViewById(R.id.swipeZoneContainer)
         dpadContainer      = findViewById(R.id.dpadContainer)

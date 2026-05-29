@@ -219,7 +219,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     }
 
     private fun updateHighScore() {
-        tvHighScore.text = "Best:${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
+        tvHighScore.text = "HIGH SCORE: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
     }
 
     private fun toggleSound() {
