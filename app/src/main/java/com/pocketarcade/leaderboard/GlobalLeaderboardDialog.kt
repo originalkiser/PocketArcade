@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.AvatarUtils
 import com.pocketarcade.R
@@ -24,7 +25,8 @@ data class PendingGlobalScore(
 fun showGlobalLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
-    mode: String? = null
+    mode: String? = null,
+    pendingScore: PendingGlobalScore? = null
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_global_leaderboard, null)
     val dialog = Dialog(activity)
@@ -49,7 +51,13 @@ fun showGlobalLeaderboardDialog(
     val country = PrefsManager.getGlobalCountry(activity)
     val state   = PrefsManager.getGlobalState(activity)
     if (country.isNotEmpty()) tabLocal.visibility = View.VISIBLE
-    if (PrefsManager.getGlobalUsername(activity) != null) tabFriends.visibility = View.VISIBLE
+
+    // Third tab: always visible — shows REGISTER when unregistered, FRIENDS when registered
+    tabFriends.visibility = View.VISIBLE
+    fun refreshThirdTab() {
+        tabFriends.text = if (PrefsManager.getGlobalUsername(activity) != null) "FRIENDS" else "REGISTER"
+    }
+    refreshThirdTab()
 
     val accentBlue = activity.getColor(R.color.accent_blue)
     val muted      = activity.getColor(R.color.muted)
@@ -118,7 +126,27 @@ fun showGlobalLeaderboardDialog(
 
     tabWorld.setOnClickListener { setActive("WORLD"); load("WORLD") }
     tabLocal.setOnClickListener { setActive("LOCAL"); load("LOCAL") }
-    tabFriends.setOnClickListener { setActive("FRIENDS"); load("FRIENDS") }
+    tabFriends.setOnClickListener {
+        if (PrefsManager.getGlobalUsername(activity) != null) {
+            setActive("FRIENDS"); load("FRIENDS")
+        } else {
+            GlobalLeaderboard.ensureSignedIn(
+                onReady = { uid ->
+                    activity.runOnUiThread {
+                        showUsernameSetupDialog(activity, uid, pendingScore, onSuccess = {
+                            refreshThirdTab()
+                            setActive("FRIENDS"); load("FRIENDS")
+                        })
+                    }
+                },
+                onError = {
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "No internet connection", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        }
+    }
 
     tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     load("FRIENDS") }
     tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    load("FRIENDS") }
@@ -227,6 +255,50 @@ private fun pongScoreColor(game: String, score: Int): Int? {
         else        -> 0
     }
     return if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c")
+}
+
+fun showRegistrationPromptIfNeeded(activity: AppCompatActivity) {
+    if (PrefsManager.getGlobalUsername(activity) != null) return
+    if (PrefsManager.isRegPromptDismissed(activity)) return
+
+    val view = activity.layoutInflater.inflate(R.layout.dialog_registration_prompt, null)
+    val dialog = Dialog(activity)
+    dialog.setContentView(view)
+    dialog.window?.apply {
+        setBackgroundDrawableResource(android.R.color.transparent)
+        setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    view.findViewById<TextView>(R.id.btnRegisterNow).setOnClickListener {
+        dialog.dismiss()
+        GlobalLeaderboard.ensureSignedIn(
+            onReady = { uid ->
+                activity.runOnUiThread {
+                    showUsernameSetupDialog(activity, uid, pendingScore = null, onSuccess = {})
+                }
+            },
+            onError = {
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "No internet connection", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+    view.findViewById<TextView>(R.id.btnRemindLater).setOnClickListener { dialog.dismiss() }
+    view.findViewById<TextView>(R.id.btnDontShowAgain).setOnClickListener {
+        PrefsManager.setRegPromptDismissed(activity)
+        dialog.dismiss()
+    }
+    dialog.show()
+}
+
+fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
+    val labels = arrayOf("SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
+    val keys   = arrayOf("snake", "pong", "asteroids", "brickbreaker")
+    AlertDialog.Builder(activity)
+        .setTitle("Global Leaderboard")
+        .setItems(labels) { _, i -> showGlobalLeaderboardDialog(activity, keys[i]) }
+        .show()
 }
 
 fun showUsernameSetupDialog(

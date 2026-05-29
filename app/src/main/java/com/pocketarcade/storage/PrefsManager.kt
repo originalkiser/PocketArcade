@@ -22,8 +22,9 @@ object PrefsManager {
     private const val KEY_GLOBAL_USERNAME  = "global_username"
     private const val KEY_GLOBAL_COUNTRY   = "global_country"
     private const val KEY_GLOBAL_STATE     = "global_state"
-    private const val KEY_AVATAR_INDEX     = "avatar_index"
-    private const val KEY_AVATAR_COLOR     = "avatar_color"
+    private const val KEY_AVATAR_INDEX          = "avatar_index"
+    private const val KEY_AVATAR_COLOR          = "avatar_color"
+    private const val KEY_REG_PROMPT_DISMISSED  = "reg_prompt_dismissed"
     private const val KEY_GAMES_PLAYED = "games_played"
     private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
@@ -180,6 +181,11 @@ object PrefsManager {
     fun setAvatarIndex(ctx: Context, v: Int) = prefs(ctx).edit { putInt(KEY_AVATAR_INDEX, v) }
     fun getAvatarColor(ctx: Context): Int = prefs(ctx).getInt(KEY_AVATAR_COLOR, 0)
     fun setAvatarColor(ctx: Context, v: Int) = prefs(ctx).edit { putInt(KEY_AVATAR_COLOR, v) }
+
+    fun isRegPromptDismissed(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_REG_PROMPT_DISMISSED, false)
+    fun setRegPromptDismissed(ctx: Context) =
+        prefs(ctx).edit { putBoolean(KEY_REG_PROMPT_DISMISSED, true) }
 
     private fun nextUpsellInterval() = (3..5).random()
 

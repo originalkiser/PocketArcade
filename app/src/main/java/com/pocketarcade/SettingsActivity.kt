@@ -18,6 +18,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
+import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
+import com.pocketarcade.leaderboard.showUsernameSetupDialog
 import com.pocketarcade.storage.PrefsManager
 import com.pocketarcade.UpdateChecker
 
@@ -79,6 +82,35 @@ class SettingsActivity : AppCompatActivity() {
             val n = PrefsManager.getLeaderboardSize(this)
             if (n < 15) PrefsManager.setLeaderboardSize(this, n + 1)
             refreshLbSize()
+        }
+
+        // Global leaderboard row
+        val rowGlobal   = findViewById<LinearLayout>(R.id.rowGlobalLeaderboard)
+        val tvGlobalDesc = findViewById<TextView>(R.id.tvGlobalLeaderboardDesc)
+        fun refreshGlobalRow() {
+            val username = PrefsManager.getGlobalUsername(this)
+            tvGlobalDesc.text = if (username != null) "@$username" else "Tap to register"
+        }
+        refreshGlobalRow()
+        rowGlobal.setOnClickListener {
+            if (PrefsManager.getGlobalUsername(this) != null) {
+                showGlobalLeaderboardPicker(this)
+            } else {
+                GlobalLeaderboard.ensureSignedIn(
+                    onReady = { uid ->
+                        runOnUiThread {
+                            showUsernameSetupDialog(this, uid, pendingScore = null, onSuccess = {
+                                refreshGlobalRow()
+                            })
+                        }
+                    },
+                    onError = {
+                        runOnUiThread {
+                            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+            }
         }
 
         val rowAdFree   = findViewById<LinearLayout>(R.id.rowAdFree)

@@ -21,6 +21,8 @@ import com.pocketarcade.games.brickbreaker.BrickBreakerActivity
 import com.pocketarcade.games.pong.PongActivity
 import com.pocketarcade.games.snake.SnakeActivity
 import com.pocketarcade.leaderboard.LeaderboardManager
+import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
+import com.pocketarcade.leaderboard.showRegistrationPromptIfNeeded
 import com.pocketarcade.storage.PrefsManager
 
 class MainActivity : AppCompatActivity() {
@@ -72,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         IconRotationWorker.schedule(this)
         UpdateChecker.check(this)
 
-        // Show splash curtain — changelog appears only after curtain lifts
+        // Show splash curtain — changelog then registration prompt after curtain lifts
         if (savedInstanceState == null) {
             val root = findViewById<FrameLayout>(R.id.rootFrame)
             val splash = SplashView(this)
@@ -82,10 +84,16 @@ class MainActivity : AppCompatActivity() {
             )
             splash.onDone = {
                 root.removeView(splash)
-                showChangelogIfNeeded(this)
+                showChangelogIfNeeded(this) {
+                    showRegistrationPromptIfNeeded(this)
+                }
             }
             root.addView(splash)
             splash.post { splash.start() }
+        }
+
+        findViewById<TextView>(R.id.btnGlobalScores).setOnClickListener {
+            showGlobalLeaderboardPicker(this)
         }
     }
 

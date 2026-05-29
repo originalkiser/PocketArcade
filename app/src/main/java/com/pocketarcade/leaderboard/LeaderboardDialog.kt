@@ -84,28 +84,10 @@ fun showLeaderboardDialog(
         ShareUtils.shareScore(activity, game, scoreToShare, scoreDate, mode)
     }
     view.findViewById<TextView>(R.id.btnWorld).setOnClickListener {
-        val username = PrefsManager.getGlobalUsername(activity)
-        if (username != null) {
-            showGlobalLeaderboardDialog(activity, game, mode)
-        } else {
-            GlobalLeaderboard.ensureSignedIn(
-                onReady = { uid ->
-                    activity.runOnUiThread {
-                        val avatarIndex = PrefsManager.getAvatarIndex(activity)
-                        val avatarColor = PrefsManager.getAvatarColor(activity)
-                        val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode, avatarIndex, avatarColor) else null
-                        showUsernameSetupDialog(activity, uid, pending, onSuccess = {
-                            showGlobalLeaderboardDialog(activity, game, mode)
-                        })
-                    }
-                },
-                onError = {
-                    activity.runOnUiThread {
-                        Toast.makeText(activity, "No connection - try again", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
-        }
+        val avatarIndex = PrefsManager.getAvatarIndex(activity)
+        val avatarColor = PrefsManager.getAvatarColor(activity)
+        val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode, avatarIndex, avatarColor) else null
+        showGlobalLeaderboardDialog(activity, game, mode, pending)
     }
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()

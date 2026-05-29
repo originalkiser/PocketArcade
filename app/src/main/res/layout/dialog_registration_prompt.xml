@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/surface">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="&#127758; GLOBAL LEADERBOARD"
+        android:textColor="@color/accent_blue"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:paddingBottom="12dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register your device to compete with players worldwide, compare scores with friends, and appear on the global leaderboard."
+        android:textColor="@color/text"
+        android:textSize="13sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:paddingBottom="20dp" />
+
+    <TextView
+        android:id="@+id/btnRegisterNow"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="REGISTER NOW"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:background="@color/accent_blue"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        android:id="@+id/btnRemindLater"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="REMIND ME LATER"
+        android:textColor="@color/muted"
+        android:textSize="13sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/btnDontShowAgain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="no thanks, don&#39;t show again"
+        android:textColor="@color/muted"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:alpha="0.6"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>

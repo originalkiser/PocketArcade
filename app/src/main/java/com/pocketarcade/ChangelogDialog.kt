@@ -60,14 +60,14 @@ private val CHANGELOG = mapOf(
   View this changelog any time"""
 )
 
-fun showChangelogIfNeeded(activity: AppCompatActivity) {
+fun showChangelogIfNeeded(activity: AppCompatActivity, onDone: () -> Unit = {}) {
     val lastCode = PrefsManager.getLastVersionCode(activity)
     val current  = BuildConfig.VERSION_CODE
-    if (lastCode == current) return
+    if (lastCode == current) { onDone(); return }
     PrefsManager.setLastVersionCode(activity, current)
 
-    val log = CHANGELOG[current] ?: return  // no entry = no popup
-    showChangelogDialog(activity, log)
+    val log = CHANGELOG[current] ?: run { onDone(); return }
+    showChangelogDialog(activity, log, onDone)
 }
 
 fun showChangelogDialog(activity: AppCompatActivity) {
@@ -75,7 +75,7 @@ fun showChangelogDialog(activity: AppCompatActivity) {
     showChangelogDialog(activity, log)
 }
 
-private fun showChangelogDialog(activity: AppCompatActivity, log: String) {
+private fun showChangelogDialog(activity: AppCompatActivity, log: String, onDone: () -> Unit = {}) {
     val view = activity.layoutInflater.inflate(R.layout.dialog_changelog, null)
     view.findViewById<TextView>(R.id.tvChangelogVersion).text = "v${BuildConfig.VERSION_NAME}"
     view.findViewById<TextView>(R.id.tvChangelog).text = log
@@ -86,6 +86,7 @@ private fun showChangelogDialog(activity: AppCompatActivity, log: String) {
         setBackgroundDrawableResource(android.R.color.transparent)
         setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
     }
+    dialog.setOnDismissListener { onDone() }
     view.findViewById<TextView>(R.id.btnChangelogClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
 }
