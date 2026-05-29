@@ -69,6 +69,6 @@ dependencies {
     implementation(libs.billing.ktx)
     implementation(libs.work.runtime.ktx)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
 }
