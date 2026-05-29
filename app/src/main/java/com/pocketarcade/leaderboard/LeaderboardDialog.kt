@@ -91,7 +91,9 @@ fun showLeaderboardDialog(
             GlobalLeaderboard.ensureSignedIn(
                 onReady = { uid ->
                     activity.runOnUiThread {
-                        val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode) else null
+                        val avatarIndex = PrefsManager.getAvatarIndex(activity)
+                        val avatarColor = PrefsManager.getAvatarColor(activity)
+                        val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode, avatarIndex, avatarColor) else null
                         showUsernameSetupDialog(activity, uid, pending, onSuccess = {
                             showGlobalLeaderboardDialog(activity, game, mode)
                         })
@@ -172,10 +174,12 @@ fun showInitialsThenLeaderboard(
         dialog.dismiss()
         val globalUsername = PrefsManager.getGlobalUsername(activity)
         if (globalUsername != null) {
-            val country = PrefsManager.getGlobalCountry(activity)
-            val state   = PrefsManager.getGlobalState(activity)
+            val country     = PrefsManager.getGlobalCountry(activity)
+            val state       = PrefsManager.getGlobalState(activity)
+            val avatarIndex = PrefsManager.getAvatarIndex(activity)
+            val avatarColor = PrefsManager.getAvatarColor(activity)
             GlobalLeaderboard.ensureSignedIn { uid ->
-                GlobalLeaderboard.submitScore(uid, globalUsername, game, score, country, state, mode)
+                GlobalLeaderboard.submitScore(uid, globalUsername, game, score, country, state, mode, avatarIndex, avatarColor)
             }
         }
         activity.runOnUiThread {

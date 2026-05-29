@@ -56,6 +56,25 @@
         { "fieldPath": "mode",    "order": "ASCENDING" },
         { "fieldPath": "score",   "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",  "order": "ASCENDING" },
+        { "fieldPath": "uid",   "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",  "order": "ASCENDING" },
+        { "fieldPath": "uid",   "order": "ASCENDING" },
+        { "fieldPath": "mode",  "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

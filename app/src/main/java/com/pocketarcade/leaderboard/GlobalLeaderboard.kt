@@ -10,7 +10,10 @@ data class GlobalEntry(
     val country: String = "",
     val state: String = "",
     val mode: String? = null,
-    val timestamp: Long = 0L
+    val timestamp: Long = 0L,
+    val avatarIndex: Int = 0,
+    val avatarColor: Int = 0,
+    val uid: String = ""
 )
 
 object LocationData {
@@ -60,6 +63,8 @@ object GlobalLeaderboard {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val db   by lazy { FirebaseFirestore.getInstance() }
 
+    val currentUid: String? get() = auth.currentUser?.uid
+
     fun ensureSignedIn(onReady: (uid: String) -> Unit, onError: () -> Unit = {}) {
         val user = auth.currentUser
         if (user != null) { onReady(user.uid); return }
@@ -73,6 +78,8 @@ object GlobalLeaderboard {
         uid: String,
         country: String,
         state: String,
+        avatarIndex: Int,
+        avatarColor: Int,
         onSuccess: () -> Unit,
         onTaken: () -> Unit,
         onError: () -> Unit
@@ -83,15 +90,22 @@ object GlobalLeaderboard {
             if (tx.get(usernameRef).exists()) throw Exception("taken")
             tx.set(usernameRef, mapOf("uid" to uid))
             tx.set(userRef, mapOf(
-                "username"  to username,
-                "country"   to country,
-                "state"     to state,
-                "createdAt" to System.currentTimeMillis()
+                "username"    to username,
+                "country"     to country,
+                "state"       to state,
+                "avatarIndex" to avatarIndex,
+                "avatarColor" to avatarColor,
+                "createdAt"   to System.currentTimeMillis()
             ))
         }.addOnSuccessListener { onSuccess() }
          .addOnFailureListener { e ->
              if (e.message == "taken") onTaken() else onError()
          }
+    }
+
+    fun updateUserAvatar(uid: String, avatarIndex: Int, avatarColor: Int) {
+        db.collection("users").document(uid)
+            .update(mapOf("avatarIndex" to avatarIndex, "avatarColor" to avatarColor))
     }
 
     fun submitScore(
@@ -101,16 +115,20 @@ object GlobalLeaderboard {
         score: Int,
         country: String,
         state: String,
-        mode: String? = null
+        mode: String? = null,
+        avatarIndex: Int = 0,
+        avatarColor: Int = 0
     ) {
         val data = hashMapOf<String, Any>(
-            "uid"       to uid,
-            "username"  to username,
-            "game"      to game,
-            "score"     to score,
-            "country"   to country,
-            "state"     to state,
-            "timestamp" to System.currentTimeMillis()
+            "uid"         to uid,
+            "username"    to username,
+            "game"        to game,
+            "score"       to score,
+            "country"     to country,
+            "state"       to state,
+            "avatarIndex" to avatarIndex,
+            "avatarColor" to avatarColor,
+            "timestamp"   to System.currentTimeMillis()
         )
         if (mode != null) data["mode"] = mode
         db.collection("globalScores").add(data)
@@ -127,20 +145,7 @@ object GlobalLeaderboard {
         q.orderBy("score", Query.Direction.DESCENDING)
             .limit(limit)
             .get()
-            .addOnSuccessListener { snap ->
-                onResult(snap.documents.mapNotNull { doc ->
-                    runCatching {
-                        GlobalEntry(
-                            username  = doc.getString("username") ?: "???",
-                            score     = (doc.getLong("score") ?: 0L).toInt(),
-                            country   = doc.getString("country") ?: "",
-                            state     = doc.getString("state") ?: "",
-                            mode      = doc.getString("mode"),
-                            timestamp = doc.getLong("timestamp") ?: 0L
-                        )
-                    }.getOrNull()
-                })
-            }
+            .addOnSuccessListener { snap -> onResult(snap.documents.mapNotNull { it.toEntry() }) }
             .addOnFailureListener { onResult(emptyList()) }
     }
 
@@ -160,20 +165,22 @@ object GlobalLeaderboard {
         q.orderBy("score", Query.Direction.DESCENDING)
             .limit(limit)
             .get()
-            .addOnSuccessListener { snap ->
-                onResult(snap.documents.mapNotNull { doc ->
-                    runCatching {
-                        GlobalEntry(
-                            username  = doc.getString("username") ?: "???",
-                            score     = (doc.getLong("score") ?: 0L).toInt(),
-                            country   = doc.getString("country") ?: "",
-                            state     = doc.getString("state") ?: "",
-                            mode      = doc.getString("mode"),
-                            timestamp = doc.getLong("timestamp") ?: 0L
-                        )
-                    }.getOrNull()
-                })
-            }
+            .addOnSuccessListener { snap -> onResult(snap.documents.mapNotNull { it.toEntry() }) }
             .addOnFailureListener { onResult(emptyList()) }
     }
+
+    private fun com.google.firebase.firestore.DocumentSnapshot.toEntry(): GlobalEntry? =
+        runCatching {
+            GlobalEntry(
+                uid         = getString("uid") ?: "",
+                username    = getString("username") ?: "???",
+                score       = (getLong("score") ?: 0L).toInt(),
+                country     = getString("country") ?: "",
+                state       = getString("state") ?: "",
+                mode        = getString("mode"),
+                timestamp   = getLong("timestamp") ?: 0L,
+                avatarIndex = (getLong("avatarIndex") ?: 0L).toInt(),
+                avatarColor = (getLong("avatarColor") ?: 0L).toInt()
+            )
+        }.getOrNull()
 }

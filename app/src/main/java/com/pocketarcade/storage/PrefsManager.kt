@@ -22,6 +22,8 @@ object PrefsManager {
     private const val KEY_GLOBAL_USERNAME  = "global_username"
     private const val KEY_GLOBAL_COUNTRY   = "global_country"
     private const val KEY_GLOBAL_STATE     = "global_state"
+    private const val KEY_AVATAR_INDEX     = "avatar_index"
+    private const val KEY_AVATAR_COLOR     = "avatar_color"
     private const val KEY_GAMES_PLAYED = "games_played"
     private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
@@ -174,6 +176,10 @@ object PrefsManager {
     fun setGlobalCountry(ctx: Context, v: String) = prefs(ctx).edit { putString(KEY_GLOBAL_COUNTRY, v) }
     fun getGlobalState(ctx: Context): String = prefs(ctx).getString(KEY_GLOBAL_STATE, "") ?: ""
     fun setGlobalState(ctx: Context, v: String) = prefs(ctx).edit { putString(KEY_GLOBAL_STATE, v) }
+    fun getAvatarIndex(ctx: Context): Int = prefs(ctx).getInt(KEY_AVATAR_INDEX, 0)
+    fun setAvatarIndex(ctx: Context, v: Int) = prefs(ctx).edit { putInt(KEY_AVATAR_INDEX, v) }
+    fun getAvatarColor(ctx: Context): Int = prefs(ctx).getInt(KEY_AVATAR_COLOR, 0)
+    fun setAvatarColor(ctx: Context, v: Int) = prefs(ctx).edit { putInt(KEY_AVATAR_COLOR, v) }
 
     private fun nextUpsellInterval() = (3..5).random()
 

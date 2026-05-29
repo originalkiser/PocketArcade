@@ -9,10 +9,17 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.pocketarcade.AvatarUtils
 import com.pocketarcade.R
 import com.pocketarcade.storage.PrefsManager
 
-data class PendingGlobalScore(val game: String, val score: Int, val mode: String?)
+data class PendingGlobalScore(
+    val game: String,
+    val score: Int,
+    val mode: String?,
+    val avatarIndex: Int = 0,
+    val avatarColor: Int = 0
+)
 
 fun showGlobalLeaderboardDialog(
     activity: AppCompatActivity,
@@ -27,34 +34,56 @@ fun showGlobalLeaderboardDialog(
         setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
     }
 
-    val tabWorld   = view.findViewById<TextView>(R.id.tabWorld)
-    val tabLocal   = view.findViewById<TextView>(R.id.tabLocal)
-    val container  = view.findViewById<LinearLayout>(R.id.globalContainer)
-    val progress   = view.findViewById<ProgressBar>(R.id.progressGlobal)
-    val tvEmpty    = view.findViewById<TextView>(R.id.tvGlobalEmpty)
+    val tabWorld        = view.findViewById<TextView>(R.id.tabWorld)
+    val tabLocal        = view.findViewById<TextView>(R.id.tabLocal)
+    val tabFriends      = view.findViewById<TextView>(R.id.tabFriends)
+    val container       = view.findViewById<LinearLayout>(R.id.globalContainer)
+    val progress        = view.findViewById<ProgressBar>(R.id.progressGlobal)
+    val tvEmpty         = view.findViewById<TextView>(R.id.tvGlobalEmpty)
+    val friendsBar      = view.findViewById<LinearLayout>(R.id.friendsBar)
+    val tabFriendsWeek  = view.findViewById<TextView>(R.id.tabFriendsWeek)
+    val tabFriendsMonth = view.findViewById<TextView>(R.id.tabFriendsMonth)
+    val tabFriendsAll   = view.findViewById<TextView>(R.id.tabFriendsAll)
+    val btnManageFriends = view.findViewById<TextView>(R.id.btnManageFriends)
 
     val country = PrefsManager.getGlobalCountry(activity)
     val state   = PrefsManager.getGlobalState(activity)
     if (country.isNotEmpty()) tabLocal.visibility = View.VISIBLE
+    if (PrefsManager.getGlobalUsername(activity) != null) tabFriends.visibility = View.VISIBLE
 
     val accentBlue = activity.getColor(R.color.accent_blue)
     val muted      = activity.getColor(R.color.muted)
 
-    fun setActive(tab: String) {
-        tabWorld.setTextColor(if (tab == "WORLD") accentBlue else muted)
-        tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else muted)
+    var currentTab       = "WORLD"
+    var friendsTimeRange = TimeRange.ALL_TIME
+
+    fun setFriendsTimeActive(range: TimeRange) {
+        friendsTimeRange = range
+        tabFriendsWeek.setTextColor(if (range == TimeRange.WEEK) accentBlue else muted)
+        tabFriendsMonth.setTextColor(if (range == TimeRange.MONTH) accentBlue else muted)
+        tabFriendsAll.setTextColor(if (range == TimeRange.ALL_TIME) accentBlue else muted)
     }
 
-    fun populate(entries: List<GlobalEntry>) {
+    fun setActive(tab: String) {
+        currentTab = tab
+        tabWorld.setTextColor(if (tab == "WORLD") accentBlue else muted)
+        tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else muted)
+        tabFriends.setTextColor(if (tab == "FRIENDS") accentBlue else muted)
+        friendsBar.visibility = if (tab == "FRIENDS") View.VISIBLE else View.GONE
+    }
+
+    fun populate(entries: List<GlobalEntry>, showAvatar: Boolean = false) {
         activity.runOnUiThread {
             progress.visibility = View.GONE
             container.removeAllViews()
             if (entries.isEmpty()) {
                 tvEmpty.visibility = View.VISIBLE
+                tvEmpty.text = if (currentTab == "FRIENDS")
+                    "Add friends to see their scores!" else "No scores yet - be the first!"
             } else {
                 tvEmpty.visibility = View.GONE
                 entries.forEachIndexed { i, e ->
-                    container.addView(buildGlobalRow(activity, i + 1, e, game))
+                    container.addView(buildGlobalRow(activity, i + 1, e, game, showAvatar))
                 }
             }
         }
@@ -64,15 +93,47 @@ fun showGlobalLeaderboardDialog(
         container.removeAllViews()
         tvEmpty.visibility = View.GONE
         progress.visibility = View.VISIBLE
-        if (tab == "WORLD") {
-            GlobalLeaderboard.fetchGlobal(game, mode, onResult = ::populate)
-        } else {
-            GlobalLeaderboard.fetchLocal(game, country, state, mode, onResult = ::populate)
+        when (tab) {
+            "WORLD"   -> GlobalLeaderboard.fetchGlobal(game, mode, onResult = { populate(it) })
+            "LOCAL"   -> GlobalLeaderboard.fetchLocal(game, country, state, mode, onResult = { populate(it) })
+            "FRIENDS" -> {
+                GlobalLeaderboard.ensureSignedIn(
+                    onReady = { myUid ->
+                        FriendsManager.getFollowing(myUid) { following ->
+                            if (following.isEmpty()) { populate(emptyList(), showAvatar = true); return@getFollowing }
+                            FriendsManager.fetchFriendsScores(
+                                uids = following.map { it.uid },
+                                game = game,
+                                timeRange = friendsTimeRange,
+                                mode = mode,
+                                onResult = { populate(it, showAvatar = true) }
+                            )
+                        }
+                    },
+                    onError = { populate(emptyList()) }
+                )
+            }
         }
     }
 
     tabWorld.setOnClickListener { setActive("WORLD"); load("WORLD") }
     tabLocal.setOnClickListener { setActive("LOCAL"); load("LOCAL") }
+    tabFriends.setOnClickListener { setActive("FRIENDS"); load("FRIENDS") }
+
+    tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     load("FRIENDS") }
+    tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    load("FRIENDS") }
+    tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); load("FRIENDS") }
+    setFriendsTimeActive(TimeRange.ALL_TIME)
+
+    btnManageFriends.setOnClickListener {
+        val myUsername = PrefsManager.getGlobalUsername(activity) ?: return@setOnClickListener
+        GlobalLeaderboard.ensureSignedIn { myUid ->
+            activity.runOnUiThread {
+                showFriendsDialog(activity, myUid, myUsername,
+                    PrefsManager.getAvatarIndex(activity), PrefsManager.getAvatarColor(activity))
+            }
+        }
+    }
 
     setActive("WORLD")
     load("WORLD")
@@ -85,7 +146,8 @@ private fun buildGlobalRow(
     activity: AppCompatActivity,
     rank: Int,
     entry: GlobalEntry,
-    game: String
+    game: String,
+    showAvatar: Boolean = false
 ): View {
     val dp = activity.resources.displayMetrics.density
     fun Int.px() = (this * dp).toInt()
@@ -100,10 +162,11 @@ private fun buildGlobalRow(
     val row = LinearLayout(activity).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        setPadding(4.px(), 8.px(), 4.px(), 8.px())
+        setPadding(4.px(), 7.px(), 4.px(), 7.px())
     }
 
-    fun tv(text: String, color: Int, widthDp: Int = -1, weight: Float = 0f, grav: Int = Gravity.START, sizeSp: Float = 14f) =
+    fun tv(text: String, color: Int, widthDp: Int = -1, weight: Float = 0f,
+           grav: Int = Gravity.START, sizeSp: Float = 14f) =
         TextView(activity).apply {
             this.text = text
             setTextColor(color)
@@ -116,10 +179,32 @@ private fun buildGlobalRow(
                 LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
         }
 
-    row.addView(tv("#$rank",    accentBlue, widthDp = 28, grav = Gravity.CENTER))
-    row.addView(tv(entry.username, Color.WHITE, weight = 1f))
-    row.addView(tv(scoreText,   scoreColor,  widthDp = 52, grav = Gravity.END))
-    row.addView(tv(location,    muted,       widthDp = 88, grav = Gravity.END, sizeSp = 11f))
+    row.addView(tv("#$rank", accentBlue, widthDp = 28, grav = Gravity.CENTER))
+
+    val userRow = LinearLayout(activity).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+    }
+    if (showAvatar) {
+        userRow.addView(AvatarUtils.buildView(activity, entry.avatarIndex, entry.avatarColor, 20))
+        userRow.addView(View(activity).apply { layoutParams = LinearLayout.LayoutParams(4.px(), 1) })
+    }
+    val nameTV = TextView(activity).apply {
+        text = entry.username
+        setTextColor(Color.WHITE)
+        textSize = if (showAvatar) 13f else 14f
+        typeface = Typeface.MONOSPACE
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+    }
+    userRow.addView(nameTV)
+    row.addView(userRow)
+
+    row.addView(tv(scoreText, scoreColor, widthDp = 52, grav = Gravity.END))
+    row.addView(tv(location,  muted,      widthDp = 88, grav = Gravity.END, sizeSp = 10f))
     return row
 }
 
@@ -151,6 +236,9 @@ fun showUsernameSetupDialog(
     onSuccess: () -> Unit,
     onDismiss: () -> Unit = {}
 ) {
+    var selAvatarEmoji = PrefsManager.getAvatarIndex(activity)
+    var selAvatarColor = PrefsManager.getAvatarColor(activity)
+
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_username_setup, null)
     val dialog = Dialog(activity)
     dialog.setContentView(view)
@@ -160,13 +248,29 @@ fun showUsernameSetupDialog(
         setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
     }
 
-    val etUsername     = view.findViewById<EditText>(R.id.etUsername)
-    val tvError        = view.findViewById<TextView>(R.id.tvUsernameError)
-    val spinnerCountry = view.findViewById<Spinner>(R.id.spinnerCountry)
-    val layoutState    = view.findViewById<View>(R.id.layoutState)
-    val spinnerState   = view.findViewById<Spinner>(R.id.spinnerState)
-    val btnClaim       = view.findViewById<TextView>(R.id.btnClaim)
-    val btnLater       = view.findViewById<TextView>(R.id.btnLater)
+    val avatarContainer = view.findViewById<FrameLayout>(R.id.avatarPreviewSetup)
+    val btnChangeAvatar = view.findViewById<TextView>(R.id.btnChangeAvatar)
+    val etUsername      = view.findViewById<EditText>(R.id.etUsername)
+    val tvError         = view.findViewById<TextView>(R.id.tvUsernameError)
+    val spinnerCountry  = view.findViewById<Spinner>(R.id.spinnerCountry)
+    val layoutState     = view.findViewById<View>(R.id.layoutState)
+    val spinnerState    = view.findViewById<Spinner>(R.id.spinnerState)
+    val btnClaim        = view.findViewById<TextView>(R.id.btnClaim)
+    val btnLater        = view.findViewById<TextView>(R.id.btnLater)
+
+    fun refreshAvatar() {
+        avatarContainer.removeAllViews()
+        avatarContainer.addView(AvatarUtils.buildView(activity, selAvatarEmoji, selAvatarColor, 52))
+    }
+    refreshAvatar()
+
+    btnChangeAvatar.setOnClickListener {
+        AvatarUtils.showAvatarPickerDialog(activity, selAvatarEmoji, selAvatarColor) { emojiIdx, colorIdx ->
+            selAvatarEmoji = emojiIdx
+            selAvatarColor = colorIdx
+            refreshAvatar()
+        }
+    }
 
     val countryAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, LocationData.countries)
     countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -174,13 +278,13 @@ fun showUsernameSetupDialog(
     spinnerCountry.setSelection(LocationData.countries.indexOf("United States").coerceAtLeast(0))
 
     fun updateStateSpinner() {
-        val country = LocationData.countries[spinnerCountry.selectedItemPosition]
-        val regions = LocationData.subregions(country)
+        val c = LocationData.countries[spinnerCountry.selectedItemPosition]
+        val regions = LocationData.subregions(c)
         layoutState.visibility = if (regions.isNotEmpty()) View.VISIBLE else View.GONE
         if (regions.isNotEmpty()) {
-            val sa = ArrayAdapter(activity, android.R.layout.simple_spinner_item, regions)
-            sa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerState.adapter = sa
+            spinnerState.adapter = ArrayAdapter(
+                activity, android.R.layout.simple_spinner_item, regions
+            ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
         }
     }
     updateStateSpinner()
@@ -199,25 +303,33 @@ fun showUsernameSetupDialog(
             tvError.visibility = View.VISIBLE
             return@setOnClickListener
         }
-        val country = LocationData.countries[spinnerCountry.selectedItemPosition]
-        val state   = if (layoutState.visibility == View.VISIBLE)
-            LocationData.subregions(country)[spinnerState.selectedItemPosition] else ""
+        val chosenCountry = LocationData.countries[spinnerCountry.selectedItemPosition]
+        val chosenState   = if (layoutState.visibility == View.VISIBLE)
+            LocationData.subregions(chosenCountry)[spinnerState.selectedItemPosition] else ""
 
         btnClaim.isEnabled = false
         tvError.text = "Checking availability..."
         tvError.visibility = View.VISIBLE
 
         GlobalLeaderboard.claimUsername(
-            username  = username,
-            uid       = uid,
-            country   = country,
-            state     = state,
+            username    = username,
+            uid         = uid,
+            country     = chosenCountry,
+            state       = chosenState,
+            avatarIndex = selAvatarEmoji,
+            avatarColor = selAvatarColor,
             onSuccess = {
                 PrefsManager.setGlobalUsername(activity, username)
-                PrefsManager.setGlobalCountry(activity, country)
-                PrefsManager.setGlobalState(activity, state)
+                PrefsManager.setGlobalCountry(activity, chosenCountry)
+                PrefsManager.setGlobalState(activity, chosenState)
+                PrefsManager.setAvatarIndex(activity, selAvatarEmoji)
+                PrefsManager.setAvatarColor(activity, selAvatarColor)
                 pendingScore?.let { ps ->
-                    GlobalLeaderboard.submitScore(uid, username, ps.game, ps.score, country, state, ps.mode)
+                    GlobalLeaderboard.submitScore(
+                        uid, username, ps.game, ps.score,
+                        chosenCountry, chosenState, ps.mode,
+                        selAvatarEmoji, selAvatarColor
+                    )
                 }
                 dialog.dismiss()
                 activity.runOnUiThread { onSuccess() }
