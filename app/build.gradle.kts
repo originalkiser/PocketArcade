@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.services)
 }
 
 val keystoreProps = Properties().also { props ->
@@ -67,4 +68,7 @@ dependencies {
     implementation(libs.play.services.ads)
     implementation(libs.billing.ktx)
     implementation(libs.work.runtime.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
 }

@@ -1,0 +1,62 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "mode",    "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "country", "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "country", "order": "ASCENDING" },
+        { "fieldPath": "state",   "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "country", "order": "ASCENDING" },
+        { "fieldPath": "mode",    "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "globalScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game",    "order": "ASCENDING" },
+        { "fieldPath": "country", "order": "ASCENDING" },
+        { "fieldPath": "state",   "order": "ASCENDING" },
+        { "fieldPath": "mode",    "order": "ASCENDING" },
+        { "fieldPath": "score",   "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

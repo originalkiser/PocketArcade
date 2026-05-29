@@ -19,7 +19,7 @@ private fun isPongGame(game: String) = game == "pong" || game.startsWith("pong_"
 private fun decodePongScore(enc: Int): String {
     val ps: Int; val ai: Int
     when {
-        enc >= 100 -> { ps = enc / 100; ai = 99 - enc % 100 }
+        enc >= 80  -> { ps = enc / 100; ai = 99 - enc % 100 }
         enc >= 10  -> { ps = enc / 10;  ai = enc % 10 }
         else       -> { ps = 0;         ai = enc }
     }
@@ -82,6 +82,28 @@ fun showLeaderboardDialog(
 
     view.findViewById<TextView>(R.id.btnShare).setOnClickListener {
         ShareUtils.shareScore(activity, game, scoreToShare, scoreDate, mode)
+    }
+    view.findViewById<TextView>(R.id.btnWorld).setOnClickListener {
+        val username = PrefsManager.getGlobalUsername(activity)
+        if (username != null) {
+            showGlobalLeaderboardDialog(activity, game, mode)
+        } else {
+            GlobalLeaderboard.ensureSignedIn(
+                onReady = { uid ->
+                    activity.runOnUiThread {
+                        val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode) else null
+                        showUsernameSetupDialog(activity, uid, pending, onSuccess = {
+                            showGlobalLeaderboardDialog(activity, game, mode)
+                        })
+                    }
+                },
+                onError = {
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "No connection - try again", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        }
     }
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
@@ -148,6 +170,14 @@ fun showInitialsThenLeaderboard(
         val rank = LeaderboardManager.addEntry(activity, game, score, initials)
         if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, initials)
         dialog.dismiss()
+        val globalUsername = PrefsManager.getGlobalUsername(activity)
+        if (globalUsername != null) {
+            val country = PrefsManager.getGlobalCountry(activity)
+            val state   = PrefsManager.getGlobalState(activity)
+            GlobalLeaderboard.ensureSignedIn { uid ->
+                GlobalLeaderboard.submitScore(uid, globalUsername, game, score, country, state, mode)
+            }
+        }
         activity.runOnUiThread {
             showLeaderboardDialog(activity, game, rank, shareScore = score, mode = mode, onDismiss = onDone)
         }

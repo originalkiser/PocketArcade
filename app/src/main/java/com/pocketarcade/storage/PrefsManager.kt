@@ -18,7 +18,10 @@ object PrefsManager {
     private const val KEY_LAST_INITIALS = "last_initials"
     private const val KEY_LEADERBOARD_SIZE = "leaderboard_size"
     private const val KEY_LAST_VERSION_CODE = "last_version_code"
-    private const val KEY_BB_DIFFICULTY = "bb_difficulty"
+    private const val KEY_BB_DIFFICULTY   = "bb_difficulty"
+    private const val KEY_GLOBAL_USERNAME  = "global_username"
+    private const val KEY_GLOBAL_COUNTRY   = "global_country"
+    private const val KEY_GLOBAL_STATE     = "global_state"
     private const val KEY_GAMES_PLAYED = "games_played"
     private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
@@ -164,6 +167,13 @@ object PrefsManager {
     // 0 = Easy, 1 = Medium, 2 = Hard
     fun getBBDifficulty(ctx: Context): Int = prefs(ctx).getInt(KEY_BB_DIFFICULTY, 1)
     fun setBBDifficulty(ctx: Context, value: Int) = prefs(ctx).edit { putInt(KEY_BB_DIFFICULTY, value.coerceIn(0, 2)) }
+
+    fun getGlobalUsername(ctx: Context): String? = prefs(ctx).getString(KEY_GLOBAL_USERNAME, null)
+    fun setGlobalUsername(ctx: Context, v: String) = prefs(ctx).edit { putString(KEY_GLOBAL_USERNAME, v) }
+    fun getGlobalCountry(ctx: Context): String = prefs(ctx).getString(KEY_GLOBAL_COUNTRY, "") ?: ""
+    fun setGlobalCountry(ctx: Context, v: String) = prefs(ctx).edit { putString(KEY_GLOBAL_COUNTRY, v) }
+    fun getGlobalState(ctx: Context): String = prefs(ctx).getString(KEY_GLOBAL_STATE, "") ?: ""
+    fun setGlobalState(ctx: Context, v: String) = prefs(ctx).edit { putString(KEY_GLOBAL_STATE, v) }
 
     private fun nextUpsellInterval() = (3..5).random()
 

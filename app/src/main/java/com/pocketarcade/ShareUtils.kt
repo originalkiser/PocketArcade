@@ -41,10 +41,13 @@ object ShareUtils {
 
         val scoreText = when (game) {
             PrefsManager.GAME_PONG -> {
-                if (score >= 10) {
-                    val ps = score / 10; val ai = score % 10
-                    if (ps >= 7) "Won $ps-$ai vs the AI!" else "Lost $ps-$ai to the AI"
-                } else "$score pts"
+                val ps: Int; val ai: Int
+                when {
+                    score >= 80 -> { ps = score / 100; ai = 99 - score % 100 }
+                    score >= 10 -> { ps = score / 10;  ai = score % 10 }
+                    else        -> { ps = 0;            ai = score }
+                }
+                if (ps >= 7) "Won $ps-$ai vs the AI!" else "Lost $ps-$ai to the AI"
             }
             else -> "$score pts"
         }

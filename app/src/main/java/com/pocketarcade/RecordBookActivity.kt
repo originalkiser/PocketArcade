@@ -188,7 +188,7 @@ class RecordBookActivity : AppCompatActivity() {
         val pongFmt: (Int) -> Pair<String, Int> = { enc ->
             val ps: Int; val ai: Int
             when {
-                enc >= 100 -> { ps = enc / 100; ai = 99 - enc % 100 }  // new encoding
+                enc >= 80  -> { ps = enc / 100; ai = 99 - enc % 100 }  // new encoding
                 enc >= 10  -> { ps = enc / 10;  ai = enc % 10 }         // legacy
                 else       -> { ps = 0;         ai = enc }               // very old
             }

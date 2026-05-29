@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="@color/surface">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="&#127758; JOIN GLOBAL LEADERBOARD"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create a username to compete globally"
+            android:textColor="@color/muted"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="USERNAME"
+            android:textColor="@color/muted"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="4dp" />
+
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_game_tile"
+            android:textColor="@color/text"
+            android:textColorHint="@color/muted"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:paddingHorizontal="12dp"
+            android:inputType="textNoSuggestions"
+            android:hint="3-20 chars, letters / numbers / _"
+            android:maxLength="20"
+            android:gravity="center_vertical" />
+
+        <TextView
+            android:id="@+id/tvUsernameError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/accent_red"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:paddingTop="4dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="COUNTRY"
+            android:textColor="@color/muted"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:paddingTop="14dp"
+            android:paddingBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinnerCountry"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="STATE / PROVINCE"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:paddingTop="14dp"
+                android:paddingBottom="4dp" />
+
+            <Spinner
+                android:id="@+id/spinnerState"
+                android:layout_width="match_parent"
+                android:layout_height="48dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnLater"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="MAYBE LATER"
+                android:textColor="@color/muted"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnClaim"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="CLAIM USERNAME"
+                android:textColor="@color/accent_green"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
