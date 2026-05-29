@@ -65,12 +65,15 @@ object GlobalLeaderboard {
 
     val currentUid: String? get() = auth.currentUser?.uid
 
-    fun ensureSignedIn(onReady: (uid: String) -> Unit, onError: () -> Unit = {}) {
+    fun ensureSignedIn(onReady: (uid: String) -> Unit, onError: (String) -> Unit = {}) {
         val user = auth.currentUser
         if (user != null) { onReady(user.uid); return }
         auth.signInAnonymously()
             .addOnSuccessListener { onReady(it.user!!.uid) }
-            .addOnFailureListener { onError() }
+            .addOnFailureListener { e ->
+                android.util.Log.e("GlobalLeaderboard", "signInAnonymously failed", e)
+                onError(e.message ?: "unknown error")
+            }
     }
 
     fun claimUsername(

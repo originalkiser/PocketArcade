@@ -104,9 +104,9 @@ class SettingsActivity : AppCompatActivity() {
                             })
                         }
                     },
-                    onError = {
+                    onError = { msg ->
                         runOnUiThread {
-                            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Sign-in failed: $msg", Toast.LENGTH_LONG).show()
                         }
                     }
                 )

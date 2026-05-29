@@ -118,7 +118,7 @@ fun showGlobalLeaderboardDialog(
                             )
                         }
                     },
-                    onError = { populate(emptyList()) }
+                    onError = { _ -> populate(emptyList()) }
                 )
             }
         }
@@ -139,9 +139,9 @@ fun showGlobalLeaderboardDialog(
                         })
                     }
                 },
-                onError = {
+                onError = { msg ->
                     activity.runOnUiThread {
-                        Toast.makeText(activity, "No internet connection", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, "Sign-in failed: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
             )
@@ -277,9 +277,9 @@ fun showRegistrationPromptIfNeeded(activity: AppCompatActivity) {
                     showUsernameSetupDialog(activity, uid, pendingScore = null, onSuccess = {})
                 }
             },
-            onError = {
+            onError = { msg ->
                 activity.runOnUiThread {
-                    Toast.makeText(activity, "No internet connection", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Sign-in failed: $msg", Toast.LENGTH_LONG).show()
                 }
             }
         )
