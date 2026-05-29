@@ -9,8 +9,8 @@ cardview = "1.0.0"
 playServicesAds = "23.0.0"
 billingKtx = "6.2.0"
 workManager = "2.9.0"
-firebaseBom = "33.6.0"
-googleServices = "4.4.1"
+firebaseBom = "34.14.0"
+googleServices = "4.4.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
