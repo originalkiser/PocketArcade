@@ -178,9 +178,9 @@ fun showInitialsThenLeaderboard(
             val state       = PrefsManager.getGlobalState(activity)
             val avatarIndex = PrefsManager.getAvatarIndex(activity)
             val avatarColor = PrefsManager.getAvatarColor(activity)
-            GlobalLeaderboard.ensureSignedIn { uid ->
+            GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                 GlobalLeaderboard.submitScore(uid, globalUsername, game, score, country, state, mode, avatarIndex, avatarColor)
-            }
+            })
         }
         activity.runOnUiThread {
             showLeaderboardDialog(activity, game, rank, shareScore = score, mode = mode, onDismiss = onDone)

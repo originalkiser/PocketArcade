@@ -127,12 +127,12 @@ fun showGlobalLeaderboardDialog(
 
     btnManageFriends.setOnClickListener {
         val myUsername = PrefsManager.getGlobalUsername(activity) ?: return@setOnClickListener
-        GlobalLeaderboard.ensureSignedIn { myUid ->
+        GlobalLeaderboard.ensureSignedIn(onReady = { myUid ->
             activity.runOnUiThread {
                 showFriendsDialog(activity, myUid, myUsername,
                     PrefsManager.getAvatarIndex(activity), PrefsManager.getAvatarColor(activity))
             }
-        }
+        })
     }
 
     setActive("WORLD")
