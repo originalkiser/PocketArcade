@@ -21,6 +21,17 @@
         android:background="@color/surface">
 
         <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#8592;"
+            android:textColor="@color/muted"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
             android:id="@+id/tvScore"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -30,6 +41,15 @@
             android:textSize="12sp"
             android:fontFamily="monospace"
             android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/tvLives"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="♥♥♥"
+            android:textColor="#e74c3c"
+            android:textSize="13sp"
+            android:layout_marginEnd="6dp" />
 
         <TextView
             android:id="@+id/tvLevel"

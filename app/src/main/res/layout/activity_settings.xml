@@ -329,6 +329,22 @@
                 android:clickable="true"
                 android:focusable="true" />
 
+            <!-- What's New -->
+            <TextView
+                android:id="@+id/btnWhatsNew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="&#9733;  WHAT'S NEW  &#9733;"
+                android:textColor="@color/accent_blue"
+                android:textSize="17sp"
+                android:fontFamily="monospace"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
             <!-- Credits -->
             <TextView
                 android:id="@+id/btnCredits"

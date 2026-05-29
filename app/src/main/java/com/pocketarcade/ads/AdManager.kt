@@ -26,23 +26,7 @@ object AdManager {
 
         container.visibility = View.VISIBLE
 
-        if (!hasInternet(ctx)) {
-            container.addView(makeFakeAd(ctx))
-            return
-        }
-
-        val adView = AdView(ctx).apply {
-            setAdSize(AdSize.BANNER)
-            adUnitId = BuildConfig.BANNER_AD_UNIT_ID
-            adListener = object : AdListener() {
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    container.removeAllViews()
-                    container.addView(makeFakeAd(ctx))
-                }
-            }
-            loadAd(AdRequest.Builder().build())
-        }
-        container.addView(adView)
+        container.addView(makeFakeAd(ctx))
     }
 
     private fun makeFakeAd(ctx: Context): FakeAdView {

@@ -88,6 +88,7 @@ class SettingsActivity : AppCompatActivity() {
         val btnRestore     = findViewById<TextView>(R.id.btnRestore)
         val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
         val btnShareApp    = findViewById<TextView>(R.id.btnShareApp)
+        val btnWhatsNew    = findViewById<TextView>(R.id.btnWhatsNew)
         val btnCredits     = findViewById<TextView>(R.id.btnCredits)
         val btnReset       = findViewById<TextView>(R.id.btnResetScores)
         findViewById<TextView>(R.id.tvVersion).text = "v${BuildConfig.VERSION_NAME}"
@@ -121,6 +122,7 @@ class SettingsActivity : AppCompatActivity() {
         btnRestore.setOnClickListener { billing.restorePurchases() }
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
         btnShareApp.setOnClickListener { ShareUtils.shareApp(this) }
+        btnWhatsNew.setOnClickListener { showChangelogDialog(this) }
         btnCredits.setOnClickListener { showCreditsDialog(this) }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)

@@ -1,4 +1,4 @@
-package com.pocketarcade.games.brickbreaker
+﻿package com.pocketarcade.games.brickbreaker
 
 import android.content.Context
 import android.graphics.*
@@ -14,7 +14,7 @@ import com.pocketarcade.withAlpha
 import kotlin.math.*
 
 enum class BBState { IDLE, AIM, PLAYING, LEVEL_CLEAR, GAME_OVER, WIN }
-enum class PowerUpType { WIDE_PADDLE, SLOW_BALL, MULTI_BALL, LASER }
+enum class PowerUpType { WIDE_PADDLE, SLOW_BALL, MULTI_BALL, LASER, EXTRA_LIFE }
 enum class BBDifficulty { EASY, MEDIUM, HARD }
 
 data class Ball(var x: Float, var y: Float, var vx: Float, var vy: Float, val r: Float = 16f)
@@ -101,6 +101,7 @@ class BrickBreakerView @JvmOverloads constructor(
     var onGameOver: ((Int) -> Unit)? = null
     var onWin: ((Int) -> Unit)? = null
     var onGameStarted: (() -> Unit)? = null
+    var onLivesChanged: ((Int) -> Unit)? = null
 
     private var state = BBState.IDLE
     private var demoMode = false
@@ -118,6 +119,7 @@ class BrickBreakerView @JvmOverloads constructor(
     private var widePaddleTimer = 0
     private var slowBallTimer = 0
     private var laserTimer = 0
+    private var lives = 3
 
     // Aim mode
     private var aimAngle = -PI.toFloat() / 2f
@@ -152,7 +154,8 @@ class BrickBreakerView @JvmOverloads constructor(
         PowerUpType.WIDE_PADDLE to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#9b59b6") },
         PowerUpType.SLOW_BALL   to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#00d4ff") },
         PowerUpType.MULTI_BALL  to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#f1c40f") },
-        PowerUpType.LASER       to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#e74c3c") }
+        PowerUpType.LASER       to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#e74c3c") },
+        PowerUpType.EXTRA_LIFE  to Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#e74c3c") }
     )
     private val aimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#604f8ef7"); style = Paint.Style.STROKE; strokeWidth = 1.5f
@@ -235,10 +238,16 @@ class BrickBreakerView @JvmOverloads constructor(
         score = 0; level = 0
         ballSpeed = speedForDifficulty(difficulty)
         widePaddleTimer = 0; slowBallTimer = 0; laserTimer = 0
+        lives = when (difficulty) {
+            BBDifficulty.EASY -> 3
+            BBDifficulty.MEDIUM -> 2
+            BBDifficulty.HARD -> 3
+        }
         computeLayout(); initPaddle()
         loadLevel()
         onScoreChanged?.invoke(0)
         onLevelChanged?.invoke(1)
+        onLivesChanged?.invoke(lives)
         if (!demo) onGameStarted?.invoke()
     }
 
@@ -313,6 +322,7 @@ class BrickBreakerView @JvmOverloads constructor(
             val b = ballIter.next()
             if (b.vx == 0f && b.vy == 0f) continue
 
+            val prevBx = b.x
             val prevBy = b.y
             b.x += b.vx * speed / BASE_BALL_SPEED
             b.y += b.vy * speed / BASE_BALL_SPEED
@@ -325,20 +335,23 @@ class BrickBreakerView @JvmOverloads constructor(
             // Ball lost
             if (b.y - b.r > h) { ballIter.remove(); continue }
 
-            // Paddle bounce ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â swept check prevents tunneling at high speed
+            // Paddle bounce — swept Y check; interpolate X at crossing to prevent diagonal tunneling
             if (b.vy > 0 &&
                 prevBy + b.r <= paddleY &&
-                b.y + b.r > paddleY &&
-                b.x + b.r > paddleX && b.x - b.r < paddleX + paddleW
+                b.y + b.r > paddleY
             ) {
-                val rel = (b.x - paddleX) / paddleW - 0.5f
-                val angle = rel * PI.toFloat() * 0.7f - PI.toFloat() / 2f
-                b.vx = cos(angle) * BASE_BALL_SPEED
-                b.vy = sin(angle) * BASE_BALL_SPEED
-                b.y = paddleY - b.r - 1f
-                if (!demoMode) {
-                    SoundManager.play(SoundManager.SFX.BB_PADDLE, context)
-                    post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                val t = (paddleY - b.r - prevBy) / (b.y - prevBy)
+                val crossX = prevBx + t * (b.x - prevBx)
+                if (crossX + b.r > paddleX && crossX - b.r < paddleX + paddleW) {
+                    val rel = (crossX - paddleX) / paddleW - 0.5f
+                    val angle = rel * PI.toFloat() * 0.7f - PI.toFloat() / 2f
+                    b.vx = cos(angle) * BASE_BALL_SPEED
+                    b.vy = sin(angle) * BASE_BALL_SPEED
+                    b.y = paddleY - b.r - 1f
+                    if (!demoMode) {
+                        SoundManager.play(SoundManager.SFX.BB_PADDLE, context)
+                        post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                    }
                 }
             }
 
@@ -371,8 +384,9 @@ class BrickBreakerView @JvmOverloads constructor(
                         onScoreChanged?.invoke(score)
                         // Chance to drop power-up
                         if ((0 until 5).random() == 0) {
-                            val type = PowerUpType.values().random()
-                            powerUps.add(PowerUp(bx + brickW / 2f, by_ + brickH / 2f, type))
+                            val eligible = if (level >= 3) PowerUpType.values().toList()
+                                           else PowerUpType.values().filter { it != PowerUpType.EXTRA_LIFE }
+                            powerUps.add(PowerUp(bx + brickW / 2f, by_ + brickH / 2f, eligible.random()))
                         }
                     }
                     break
@@ -382,9 +396,17 @@ class BrickBreakerView @JvmOverloads constructor(
 
         // Check all balls lost
         if (balls.isEmpty()) {
-            state = BBState.GAME_OVER
-            if (!demoMode) SoundManager.play(SoundManager.SFX.BB_GAME_OVER, context)
-            onGameOver?.invoke(score)
+            if (!demoMode && lives > 0) {
+                lives--
+                onLivesChanged?.invoke(lives)
+                balls.add(Ball(paddleX + paddleW / 2f, paddleY - 20f, 0f, 0f))
+                state = BBState.AIM
+                aimAngle = -PI.toFloat() / 2f
+            } else {
+                state = BBState.GAME_OVER
+                if (!demoMode) SoundManager.play(SoundManager.SFX.BB_GAME_OVER, context)
+                onGameOver?.invoke(score)
+            }
             return
         }
 
@@ -418,6 +440,10 @@ class BrickBreakerView @JvmOverloads constructor(
                 balls.add(Ball(existing.x, existing.y, existing.vx * 1.1f, -existing.vy * 0.8f))
             }
             PowerUpType.LASER -> laserTimer = 300
+            PowerUpType.EXTRA_LIFE -> {
+                lives++
+                onLivesChanged?.invoke(lives)
+            }
         }
     }
 
@@ -486,9 +512,17 @@ class BrickBreakerView @JvmOverloads constructor(
         }
 
         // Power-ups
+        val puTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            textAlign = Paint.Align.CENTER; textSize = 16f
+        }
         for (pu in powerUps) {
-            val paint = powerUpPaints[pu.type] ?: continue
-            canvas.drawCircle(pu.x, pu.y, 8f, paint)
+            if (pu.type == PowerUpType.EXTRA_LIFE) {
+                puTextPaint.color = Color.parseColor("#e74c3c")
+                canvas.drawText("♥", pu.x, pu.y + 6f, puTextPaint)
+            } else {
+                val paint = powerUpPaints[pu.type] ?: continue
+                canvas.drawCircle(pu.x, pu.y, 8f, paint)
+            }
         }
 
         // Balls

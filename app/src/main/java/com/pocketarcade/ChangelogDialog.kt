@@ -34,7 +34,30 @@ private val CHANGELOG = mapOf(
 
 ★ Light mode now applies to full app
 
-★ Share link now opens releases page"""
+★ Share link now opens releases page""",
+
+    4 to """★ Brick Breaker lives system
+  3 lives on Easy & Hard, 2 on Medium
+  Hearts displayed next to your score
+
+★ Extra Life power-up (level 3+)
+  ♥ drops from bricks — grab it!
+
+★ Brick Breaker back button
+  ← in the top bar + ← MENU on the
+  difficulty screen to return to menu
+
+★ Ball tunneling fix (diagonal pass)
+  Ball can no longer slip through the
+  paddle at a steep angle
+
+★ Asteroids lives shown as ♥ ♥ ♥
+
+★ Fake ads only — no test ad network
+  connections until AdMob is live
+
+★ What's New in Settings
+  View this changelog any time"""
 )
 
 fun showChangelogIfNeeded(activity: AppCompatActivity) {
@@ -44,7 +67,15 @@ fun showChangelogIfNeeded(activity: AppCompatActivity) {
     PrefsManager.setLastVersionCode(activity, current)
 
     val log = CHANGELOG[current] ?: return  // no entry = no popup
+    showChangelogDialog(activity, log)
+}
 
+fun showChangelogDialog(activity: AppCompatActivity) {
+    val log = CHANGELOG[BuildConfig.VERSION_CODE] ?: return
+    showChangelogDialog(activity, log)
+}
+
+private fun showChangelogDialog(activity: AppCompatActivity, log: String) {
     val view = activity.layoutInflater.inflate(R.layout.dialog_changelog, null)
     view.findViewById<TextView>(R.id.tvChangelogVersion).text = "v${BuildConfig.VERSION_NAME}"
     view.findViewById<TextView>(R.id.tvChangelog).text = log

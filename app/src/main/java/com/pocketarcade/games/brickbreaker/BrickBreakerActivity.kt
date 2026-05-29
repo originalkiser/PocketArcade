@@ -26,6 +26,8 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var tvScore: TextView
     private lateinit var tvHighScore: TextView
     private lateinit var tvLevel: TextView
+    private lateinit var tvLives: TextView
+    private lateinit var btnBack: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
     private lateinit var btnSound: TextView
@@ -50,6 +52,9 @@ class BrickBreakerActivity : AppCompatActivity() {
         tvScore        = findViewById(R.id.tvScore)
         tvHighScore    = findViewById(R.id.tvHighScore)
         tvLevel        = findViewById(R.id.tvLevel)
+        tvLives        = findViewById(R.id.tvLives)
+        btnBack        = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener { finish() }
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
         btnSound       = findViewById(R.id.btnSound)
@@ -60,6 +65,9 @@ class BrickBreakerActivity : AppCompatActivity() {
 
         bbView.onScoreChanged = { score ->
             runOnUiThread { tvScore.text = "SCORE: $score" }
+        }
+        bbView.onLivesChanged = { lives ->
+            runOnUiThread { tvLives.text = "♥".repeat(lives.coerceAtLeast(0)) }
         }
         bbView.onLevelChanged = { level ->
             runOnUiThread { tvLevel.text = "LV:$level" }
@@ -113,14 +121,15 @@ class BrickBreakerActivity : AppCompatActivity() {
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()
-        showDifficultyDialog(cancelable = false)
+        showDifficultyDialog(goBackOnCancel = true)
     }
 
-    private fun showDifficultyDialog(cancelable: Boolean = true) {
+    private fun showDifficultyDialog(goBackOnCancel: Boolean = false) {
         val view = layoutInflater.inflate(R.layout.dialog_bb_difficulty, null)
         val dialog = android.app.Dialog(this)
         dialog.setContentView(view)
-        dialog.setCancelable(cancelable)
+        dialog.setCancelable(goBackOnCancel)
+        if (goBackOnCancel) dialog.setOnCancelListener { finish() }
         dialog.window?.apply {
             setBackgroundDrawableResource(android.R.color.transparent)
             setLayout(android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
@@ -133,6 +142,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { dialog.dismiss(); finish() }
         view.findViewById<android.widget.LinearLayout>(R.id.btnEasy).setOnClickListener { pick(BBDifficulty.EASY, 0) }
         view.findViewById<android.widget.LinearLayout>(R.id.btnMedium).setOnClickListener { pick(BBDifficulty.MEDIUM, 1) }
         view.findViewById<android.widget.LinearLayout>(R.id.btnHard).setOnClickListener { pick(BBDifficulty.HARD, 2) }

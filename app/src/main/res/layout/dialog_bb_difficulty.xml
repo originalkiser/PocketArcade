@@ -7,6 +7,18 @@
     android:background="@color/surface">
 
     <TextView
+        android:id="@+id/btnDiffBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#8592; MENU"
+        android:textColor="@color/muted"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:paddingBottom="8dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SELECT DIFFICULTY"
