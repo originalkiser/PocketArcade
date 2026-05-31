@@ -21,11 +21,11 @@
             android:gravity="center"
             android:layout_marginBottom="20dp" />
 
-        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â COLOUR THEME Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â COLOR THEME Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="COLOUR THEME"
+            android:text="COLOR THEME"
             android:textColor="@color/muted"
             android:textSize="13sp"
             android:fontFamily="monospace"
@@ -100,44 +100,6 @@
             android:gravity="center"
             android:layout_marginBottom="12dp" />
 
-        <!-- Apply to all games toggle -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="20dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="APPLY TO ALL GAMES"
-                    android:textColor="@color/text"
-                    android:textSize="11sp"
-                    android:fontFamily="monospace" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="off = this game only"
-                    android:textColor="@color/muted"
-                    android:textSize="9sp"
-                    android:fontFamily="monospace" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/switchApplyAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true" />
-        </LinearLayout>
 
         <!-- Divider -->
         <View

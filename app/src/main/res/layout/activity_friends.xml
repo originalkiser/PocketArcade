@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/friendsRootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/surface"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/btnFriendsBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&#8592;"
+            android:textColor="@color/accent_blue"
+            android:textSize="22sp"
+            android:fontFamily="monospace"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="FRIENDS"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Tabs -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:background="@color/surface">
+
+        <TextView
+            android:id="@+id/tabMyFriends"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="MY FRIENDS"
+            android:textColor="@color/accent_blue"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/muted"
+            android:alpha="0.3" />
+
+        <TextView
+            android:id="@+id/tabLeaderboard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="LEADERBOARD"
+            android:textColor="@color/muted"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+    <!-- Tab indicator -->
+    <View
+        android:id="@+id/friendsTabIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/accent_blue" />
+
+    <!-- Content panels -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- MY FRIENDS panel -->
+        <ScrollView
+            android:id="@+id/panelMyFriends"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Own profile -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MY PROFILE"
+                    android:textColor="@color/muted"
+                    android:textSize="10sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:id="@+id/rowMyProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_game_tile"
+                    android:padding="12dp"
+                    android:layout_marginBottom="16dp">
+
+                    <FrameLayout
+                        android:id="@+id/myProfileAvatar"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:id="@+id/tvMyUsername"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="---"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:id="@+id/myRankChips"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/btnEditProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="EDIT"
+                        android:textColor="@color/accent_blue"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:background="@drawable/bg_game_tile"
+                        android:paddingHorizontal="10dp"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                </LinearLayout>
+
+                <!-- Not-registered callout -->
+                <LinearLayout
+                    android:id="@+id/layoutNotRegistered"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Create a profile to add friends and compare scores on the global leaderboard."
+                        android:textColor="@color/muted"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:paddingBottom="16dp" />
+
+                    <TextView
+                        android:id="@+id/btnCreateProfileFromFriends"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="CREATE PROFILE"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:background="@color/accent_blue"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                </LinearLayout>
+
+                <!-- Friends content (only when registered) -->
+                <LinearLayout
+                    android:id="@+id/layoutFriendsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/muted"
+                        android:alpha="0.2"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ADD FRIEND"
+                        android:textColor="@color/muted"
+                        android:textSize="10sp"
+                        android:fontFamily="monospace"
+                        android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="4dp">
+
+                        <EditText
+                            android:id="@+id/etAddFriend"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_game_tile"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            android:padding="10dp"
+                            android:hint="username"
+                            android:inputType="textNoSuggestions"
+                            android:maxLength="20"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/btnAddFriend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="44dp"
+                            android:text="ADD"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center"
+                            android:background="@color/accent_blue"
+                            android:paddingHorizontal="16dp"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvAddFriendStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:fontFamily="monospace"
+                        android:visibility="gone"
+                        android:layout_marginBottom="12dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/muted"
+                        android:alpha="0.2"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FOLLOWING"
+                        android:textColor="@color/muted"
+                        android:textSize="10sp"
+                        android:fontFamily="monospace"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvFriendsLoading"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Loading..."
+                        android:textColor="@color/muted"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="16dp" />
+
+                    <TextView
+                        android:id="@+id/tvFriendsEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Not following anyone yet.\nSearch by username above!"
+                        android:textColor="@color/muted"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/friendsListContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- LEADERBOARD panel -->
+        <LinearLayout
+            android:id="@+id/panelLeaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
+
+                <LinearLayout
+                    android:id="@+id/leaderboardFilterRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </HorizontalScrollView>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvLeaderboardLoading"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Loading..."
+                        android:textColor="@color/muted"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="24dp" />
+
+                    <TextView
+                        android:id="@+id/tvLeaderboardEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No scores to show yet.\nAdd friends to compare!"
+                        android:textColor="@color/muted"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/leaderboardContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
+            </ScrollView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

@@ -259,16 +259,17 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode) demoAI()
 
-        // Turn with small joystick movement; thrust only with larger movement
+        // Rotate incrementally from horizontal joystick; thrust in ship's facing direction
         val jMag = sqrt(joystickDX * joystickDX + joystickDY * joystickDY)
         if (jMag > 10f) {
-            ship.angle = atan2(joystickDY, joystickDX)
+            // joystickDX/jMag is the normalised horizontal component (-1..1);
+            // ROT_SPEED is in degrees-per-frame, converted to radians here.
+            ship.angle += ROT_SPEED * (PI.toFloat() / 180f) * (joystickDX / jMag)
         }
         if (jMag > 36f) {
-            val nx = joystickDX / jMag
-            val ny = joystickDY / jMag
-            ship.vx += nx * THRUST
-            ship.vy += ny * THRUST
+            // Thrust in the direction the ship is currently pointing, not the joystick direction.
+            ship.vx += cos(ship.angle) * THRUST
+            ship.vy += sin(ship.angle) * THRUST
             thrusting = true
         } else {
             thrusting = false
@@ -345,8 +346,13 @@ class AsteroidsView @JvmOverloads constructor(
                     ship.invincible = 120
                     if (ship.lives <= 0) {
                         state = AsteroidsState.GAME_OVER
-                        if (!demoMode) SoundManager.play(SoundManager.SFX.ASTEROID_GAME_OVER, context)
-                        onGameOver?.invoke(score)
+                        if (!demoMode) {
+                            SoundManager.play(SoundManager.SFX.ASTEROID_GAME_OVER, context)
+                            onGameOver?.invoke(score)
+                        } else {
+                            android.os.Handler(android.os.Looper.getMainLooper())
+                                .postDelayed({ if (demoMode) startGame(demo = true) }, 2000L)
+                        }
                     }
                     break
                 }
@@ -389,14 +395,17 @@ class AsteroidsView @JvmOverloads constructor(
         val target = asteroids.minByOrNull { dist(it.x, it.y, ship.x, ship.y) } ?: return
         val angleToTarget = atan2(target.y - ship.y, target.x - ship.x)
         val d = dist(ship.x, ship.y, target.x, target.y)
+        val diff = normalizeAngle(angleToTarget - ship.angle)
+        val aligned = abs(diff) < 0.4f
         if (d > 120f) {
-            joystickDX = cos(angleToTarget) * 50f
-            joystickDY = sin(angleToTarget) * 50f
+            // DX below thrust threshold (36) while rotating; once aligned, drop DX and
+            // push DY to trigger thrust (jMag > 36) in the ship's facing direction.
+            joystickDX = sign(diff) * if (aligned) 10f else 20f
+            joystickDY = if (aligned) -50f else 0f
         } else {
             joystickDX = 0f; joystickDY = 0f
         }
-        val diff = normalizeAngle(angleToTarget - ship.angle)
-        firePressed = abs(diff) < 0.4f
+        firePressed = aligned
     }
 
     private fun normalizeAngle(a: Float): Float {

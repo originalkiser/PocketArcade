@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.pocketarcade.HintManager
 import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
@@ -94,6 +95,10 @@ class AsteroidsActivity : AppCompatActivity() {
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()
+
+        HintManager.showToastIfNeeded(this,
+            "Try disabling auto-fire for a different experience.",
+            PrefsManager.HINT_AUTOFIRE)
     }
 
     private fun toggleAutoFire() {

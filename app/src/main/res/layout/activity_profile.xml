@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profileRootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Header bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/surface"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/btnProfileBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&#8592;"
+            android:textColor="@color/accent_blue"
+            android:textSize="22sp"
+            android:fontFamily="monospace"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="PROFILE"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Avatar section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="@color/surface"
+        android:paddingVertical="20dp"
+        android:paddingHorizontal="16dp">
+
+        <FrameLayout
+            android:id="@+id/profileAvatarContainer"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:id="@+id/btnProfileChangeAvatar"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="EMOJI"
+                android:textColor="@color/accent_blue"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:background="@drawable/bg_game_tile"
+                android:paddingHorizontal="14dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btnProfileUploadPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="UPLOAD PHOTO"
+                android:textColor="@color/accent_blue"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:background="@drawable/bg_game_tile"
+                android:paddingHorizontal="14dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- No-profile callout (shown when not registered) -->
+    <LinearLayout
+        android:id="@+id/layoutNoProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Profile not created — not posting to global leaderboards."
+            android:textColor="@color/muted"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingBottom="16dp" />
+
+        <TextView
+            android:id="@+id/btnCreateProfile"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="CREATE PROFILE"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@color/accent_blue"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+    <!-- Edit form (shown when registered) -->
+    <ScrollView
+        android:id="@+id/layoutProfileForm"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Username -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USERNAME"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="6dp"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:id="@+id/etProfileUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_game_tile"
+                android:textColor="@color/text"
+                android:textSize="15sp"
+                android:fontFamily="monospace"
+                android:padding="12dp"
+                android:inputType="textNoSuggestions"
+                android:maxLength="20"
+                android:hint="3-20 chars, letters/numbers/underscore"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvProfileUsernameError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/accent_red"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Location -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COUNTRY"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="6dp"
+                android:layout_marginTop="8dp" />
+
+            <Spinner
+                android:id="@+id/spinnerProfileCountry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_game_tile"
+                android:padding="4dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/layoutProfileState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STATE / PROVINCE"
+                    android:textColor="@color/muted"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="6dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerProfileState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_game_tile"
+                    android:padding="4dp"
+                    android:layout_marginBottom="8dp" />
+
+            </LinearLayout>
+
+            <!-- Save button -->
+            <TextView
+                android:id="@+id/btnSaveProfile"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="SAVE CHANGES"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:background="@color/accent_blue"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSaveStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/muted"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

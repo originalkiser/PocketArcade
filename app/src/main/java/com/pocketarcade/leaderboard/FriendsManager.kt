@@ -205,6 +205,49 @@ object FriendsManager {
         ))
     }
 
+    fun fetchAllGroupScores(
+        uids: List<String>,
+        onResult: (Map<String, Map<String, Int>>) -> Unit
+    ) {
+        if (uids.isEmpty()) { onResult(emptyMap()); return }
+        db.collection("globalScores")
+            .whereIn("uid", uids.take(30))
+            .get()
+            .addOnSuccessListener { snap ->
+                val result = mutableMapOf<String, MutableMap<String, Int>>()
+                snap.documents.forEach { doc ->
+                    val uid   = doc.getString("uid")   ?: return@forEach
+                    val game  = doc.getString("game")  ?: return@forEach
+                    val score = doc.getLong("score")?.toInt() ?: return@forEach
+                    val gameMap = result.getOrPut(uid) { mutableMapOf() }
+                    if (score > (gameMap[game] ?: 0)) gameMap[game] = score
+                }
+                onResult(result)
+            }
+            .addOnFailureListener { onResult(emptyMap()) }
+    }
+
+    fun searchUser(
+        username: String,
+        onFound: (uid: String, avatarIndex: Int, avatarColor: Int) -> Unit,
+        onNotFound: () -> Unit,
+        onError: () -> Unit
+    ) {
+        db.collection("usernames").document(username).get()
+            .addOnSuccessListener { snap ->
+                val uid = snap.getString("uid")
+                if (uid == null) { onNotFound(); return@addOnSuccessListener }
+                db.collection("users").document(uid).get()
+                    .addOnSuccessListener { userSnap ->
+                        val avatarIndex = (userSnap.getLong("avatarIndex") ?: 0L).toInt()
+                        val avatarColor = (userSnap.getLong("avatarColor") ?: 0L).toInt()
+                        onFound(uid, avatarIndex, avatarColor)
+                    }
+                    .addOnFailureListener { onError() }
+            }
+            .addOnFailureListener { onError() }
+    }
+
     private fun sha256(input: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
         return bytes.joinToString("") { "%02x".format(it) }

@@ -4,7 +4,7 @@ import android.graphics.Color
 
 data class GameTheme(
     val name: String,
-    val swatch: Int,      // colour shown in the theme-picker circle
+    val swatch: Int,      // color shown in the theme-picker circle
     // Canvas
     val bg: Int,
     val surface: Int,
@@ -32,12 +32,12 @@ fun Int.darken(f: Float): Int = Color.rgb(
 
 fun Int.withAlpha(a: Int): Int = Color.argb(a, Color.red(this), Color.green(this), Color.blue(this))
 
-// Snake body colours computed from the player colour
+// Snake body colors computed from the player color
 val GameTheme.snakeBodyEven: Int get() = player.darken(0.70f)
 val GameTheme.snakeBodyOdd:  Int get() = player.darken(0.55f)
 val GameTheme.snakeBodyBorder: Int get() = player.darken(0.90f)
 
-// Brick HP colour ramp
+// Brick HP color ramp
 val GameTheme.brick1: Int get() = player.darken(0.75f)  // hp=1 (softest)
 val GameTheme.brick2: Int get() = collect                // hp=2
 val GameTheme.brick3: Int get() = rival                  // hp=3 (hardest)
@@ -152,4 +152,21 @@ object Themes {
 
     /** All pairs in order. Index is persisted in prefs. */
     val ALL = listOf(CLASSIC, SUNSET, FOREST, CHERRY, ICE, NEON)
+}
+
+// ── App background themes ──────────────────────────────────────────────────────
+// Muted/desaturated dark backgrounds for the app shell (menus, settings, etc.).
+// One per game-board theme, loosely matching its visual identity.
+
+data class AppBgTheme(val name: String, val swatch: Int, val bg: Int)
+
+object AppBgThemes {
+    val ALL = listOf(
+        AppBgTheme("Void",  p("#2a3a52"), p("#0d1117")),  // Classic
+        AppBgTheme("Ember", p("#4a2a10"), p("#1a0e05")),  // Sunset
+        AppBgTheme("Grove", p("#183a14"), p("#080e06")),  // Forest
+        AppBgTheme("Dusk",  p("#3a1038"), p("#100810")),  // Cherry
+        AppBgTheme("Frost", p("#082a3c"), p("#060d16")),  // Ice
+        AppBgTheme("Ink",   p("#1a2a1c"), p("#040a04"))   // Neon
+    )
 }

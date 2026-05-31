@@ -3,13 +3,15 @@ package com.pocketarcade.leaderboard
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.DocumentSnapshot
 import com.pocketarcade.AvatarUtils
 import com.pocketarcade.R
 import com.pocketarcade.storage.PrefsManager
@@ -22,6 +24,35 @@ data class PendingGlobalScore(
     val avatarColor: Int = 0
 )
 
+private data class GameInfo(val key: String, val emoji: String, val label: String)
+private val GAMES = listOf(
+    GameInfo("snake",       "🐍", "SNAKE"),
+    GameInfo("pong",        "🏓", "PONG"),
+    GameInfo("asteroids",   "🚀", "ASTEROIDS"),
+    GameInfo("brickbreaker","🧱", "BRICKBREAKER")
+)
+
+private fun formatGlobalScore(game: String, score: Int): String {
+    if (game != "pong" && !game.startsWith("pong_")) return score.toString()
+    val ps: Int; val ai: Int
+    when {
+        score >= 80 -> { ps = score / 100; ai = 99 - score % 100 }
+        score >= 10 -> { ps = score / 10;  ai = score % 10 }
+        else        -> { ps = 0;           ai = score }
+    }
+    return "$ps-$ai"
+}
+
+private fun pongScoreColor(game: String, score: Int): Int? {
+    if (game != "pong" && !game.startsWith("pong_")) return null
+    val ps = when {
+        score >= 80 -> score / 100
+        score >= 10 -> score / 10
+        else        -> 0
+    }
+    return if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c")
+}
+
 fun showGlobalLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
@@ -33,109 +64,419 @@ fun showGlobalLeaderboardDialog(
     dialog.setContentView(view)
     dialog.window?.apply {
         setBackgroundDrawableResource(android.R.color.transparent)
-        setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        val screenH = activity.resources.displayMetrics.heightPixels
+        setLayout(WindowManager.LayoutParams.MATCH_PARENT, (screenH * 0.88f).toInt())
     }
 
-    val tabWorld        = view.findViewById<TextView>(R.id.tabWorld)
-    val tabLocal        = view.findViewById<TextView>(R.id.tabLocal)
-    val tabFriends      = view.findViewById<TextView>(R.id.tabFriends)
-    val container       = view.findViewById<LinearLayout>(R.id.globalContainer)
-    val progress        = view.findViewById<ProgressBar>(R.id.progressGlobal)
-    val tvEmpty         = view.findViewById<TextView>(R.id.tvGlobalEmpty)
-    val friendsBar      = view.findViewById<LinearLayout>(R.id.friendsBar)
-    val tabFriendsWeek  = view.findViewById<TextView>(R.id.tabFriendsWeek)
-    val tabFriendsMonth = view.findViewById<TextView>(R.id.tabFriendsMonth)
-    val tabFriendsAll   = view.findViewById<TextView>(R.id.tabFriendsAll)
+    val dp          = activity.resources.displayMetrics.density
+    val accentBlue  = activity.getColor(R.color.accent_blue)
+    val accentGreen = activity.getColor(R.color.accent_green)
+    val mutedColor  = activity.getColor(R.color.muted)
+
+    val tvCurrentGame    = view.findViewById<TextView>(R.id.tvCurrentGame)
+    val gameChipsRow     = view.findViewById<LinearLayout>(R.id.gameChipsRow)
+    val modeChipsScroll  = view.findViewById<View>(R.id.modeChipsScroll)
+    val modeChipsRow     = view.findViewById<LinearLayout>(R.id.modeChipsRow)
+    val tabWorld         = view.findViewById<TextView>(R.id.tabWorld)
+    val tabLocal         = view.findViewById<TextView>(R.id.tabLocal)
+    val tabFriends       = view.findViewById<TextView>(R.id.tabFriends)
+    val container        = view.findViewById<LinearLayout>(R.id.globalContainer)
+    val progress         = view.findViewById<ProgressBar>(R.id.progressGlobal)
+    val tvEmpty          = view.findViewById<TextView>(R.id.tvGlobalEmpty)
+    val friendsBar       = view.findViewById<LinearLayout>(R.id.friendsBar)
+    val tabFriendsWeek   = view.findViewById<TextView>(R.id.tabFriendsWeek)
+    val tabFriendsMonth  = view.findViewById<TextView>(R.id.tabFriendsMonth)
+    val tabFriendsAll    = view.findViewById<TextView>(R.id.tabFriendsAll)
     val btnManageFriends = view.findViewById<TextView>(R.id.btnManageFriends)
+    val btnLoadMore      = view.findViewById<TextView>(R.id.btnLoadMore)
+
+    // Dialog-level mutable state
+    var currentGame      = game
+    var currentMode      = mode
+    var currentTab       = "WORLD"
+    var friendsTimeRange = TimeRange.ALL_TIME
+    var pageLastDoc: DocumentSnapshot? = null
+    var loadedCount      = 0
+    var myUid: String?   = GlobalLeaderboard.currentUid
+    var myFollowingUids  = emptySet<String>()
+    var myMutualUids     = emptySet<String>()
 
     val country = PrefsManager.getGlobalCountry(activity)
     val state   = PrefsManager.getGlobalState(activity)
-    if (country.isNotEmpty()) tabLocal.visibility = View.VISIBLE
 
-    // Third tab: always visible — shows REGISTER when unregistered, FRIENDS when registered
-    tabFriends.visibility = View.VISIBLE
-    fun refreshThirdTab() {
-        tabFriends.text = if (PrefsManager.getGlobalUsername(activity) != null) "FRIENDS" else "REGISTER"
-    }
-    refreshThirdTab()
-
-    val accentBlue = activity.getColor(R.color.accent_blue)
-    val muted      = activity.getColor(R.color.muted)
-
-    var currentTab       = "WORLD"
-    var friendsTimeRange = TimeRange.ALL_TIME
-
-    fun setFriendsTimeActive(range: TimeRange) {
-        friendsTimeRange = range
-        tabFriendsWeek.setTextColor(if (range == TimeRange.WEEK) accentBlue else muted)
-        tabFriendsMonth.setTextColor(if (range == TimeRange.MONTH) accentBlue else muted)
-        tabFriendsAll.setTextColor(if (range == TimeRange.ALL_TIME) accentBlue else muted)
-    }
-
-    fun setActive(tab: String) {
-        currentTab = tab
-        tabWorld.setTextColor(if (tab == "WORLD") accentBlue else muted)
-        tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else muted)
-        tabFriends.setTextColor(if (tab == "FRIENDS") accentBlue else muted)
-        friendsBar.visibility = if (tab == "FRIENDS") View.VISIBLE else View.GONE
-    }
-
-    fun populate(entries: List<GlobalEntry>, showAvatar: Boolean = false) {
-        activity.runOnUiThread {
-            progress.visibility = View.GONE
-            container.removeAllViews()
-            if (entries.isEmpty()) {
-                tvEmpty.visibility = View.VISIBLE
-                tvEmpty.text = if (currentTab == "FRIENDS")
-                    "Add friends to see their scores!" else "No scores yet - be the first!"
-            } else {
-                tvEmpty.visibility = View.GONE
-                entries.forEachIndexed { i, e ->
-                    container.addView(buildGlobalRow(activity, i + 1, e, game, showAvatar))
+    // Pre-load social graph so WORLD/LOCAL rows get friend highlighting
+    fun loadSocialGraph() {
+        val uid = myUid ?: return
+        FriendsManager.getFollowing(uid) { following ->
+            myFollowingUids = following.map { it.uid }.toSet()
+            if (following.isNotEmpty()) {
+                FriendsManager.checkMutuals(uid, following.map { it.uid }) { mutuals ->
+                    myMutualUids = mutuals
                 }
             }
         }
     }
+    if (myUid != null) loadSocialGraph()
 
-    fun load(tab: String) {
+    // ── Chip builder ─────────────────────────────────────────────────────────
+
+    fun makeChip(text: String, active: Boolean): TextView {
+        val bg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 20 * dp
+            if (active) setColor(accentBlue)
+            else { setColor(Color.TRANSPARENT); setStroke((1 * dp).toInt(), mutedColor) }
+        }
+        return TextView(activity).apply {
+            this.text = text
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            setTextColor(if (active) Color.WHITE else mutedColor)
+            background = bg
+            setPadding((12 * dp).toInt(), 0, (12 * dp).toInt(), 0)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            isClickable = true
+            isFocusable = true
+        }
+    }
+
+    // ── Mini user profile dialog ──────────────────────────────────────────────
+
+    fun showUserProfileDialog(entry: GlobalEntry) {
+        val pView = LayoutInflater.from(activity).inflate(R.layout.dialog_user_profile, null)
+        val pDialog = Dialog(activity)
+        pDialog.setContentView(pView)
+        pDialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+
+        pView.findViewById<FrameLayout>(R.id.profileDialogAvatar)
+            .addView(AvatarUtils.buildView(activity, entry.avatarIndex, entry.avatarColor, 56))
+        pView.findViewById<TextView>(R.id.tvProfileUsername).text = "@${entry.username}"
+        val loc = when {
+            entry.state.isNotEmpty() -> "${entry.state}, ${entry.country}"
+            entry.country.isNotEmpty() -> entry.country
+            else -> "—"
+        }
+        pView.findViewById<TextView>(R.id.tvProfileLocation).text = loc
+
+        val btnFollow = pView.findViewById<TextView>(R.id.btnFollowUser)
+
+        fun refreshFollowBtn() {
+            when {
+                entry.uid == myUid -> btnFollow.visibility = View.GONE
+                entry.uid in myFollowingUids -> {
+                    btnFollow.text = "FOLLOWING ✓"
+                    btnFollow.setTextColor(accentGreen)
+                }
+                else -> {
+                    btnFollow.text = "+ ADD FRIEND"
+                    btnFollow.setTextColor(Color.WHITE)
+                }
+            }
+        }
+        refreshFollowBtn()
+
+        btnFollow.setOnClickListener {
+            if (entry.uid in myFollowingUids) {
+                val uid = myUid ?: return@setOnClickListener
+                FriendsManager.unfollow(uid, entry.uid,
+                    onSuccess = {
+                        myFollowingUids = myFollowingUids - entry.uid
+                        myMutualUids    = myMutualUids - entry.uid
+                        activity.runOnUiThread { refreshFollowBtn() }
+                    },
+                    onError = {}
+                )
+            } else {
+                GlobalLeaderboard.ensureSignedIn(
+                    onReady = { uid ->
+                        myUid = uid
+                        FriendsManager.follow(
+                            uid, entry.uid, entry.username,
+                            entry.avatarIndex, entry.avatarColor,
+                            onSuccess = {
+                                myFollowingUids = myFollowingUids + entry.uid
+                                activity.runOnUiThread { refreshFollowBtn() }
+                            },
+                            onError = {}
+                        )
+                    },
+                    onError = {}
+                )
+            }
+        }
+
+        pView.findViewById<TextView>(R.id.btnCloseProfile).setOnClickListener { pDialog.dismiss() }
+        pDialog.show()
+    }
+
+    // ── Row builder ───────────────────────────────────────────────────────────
+
+    fun buildGlobalRow(rank: Int, entry: GlobalEntry): View {
+        fun Int.px() = (this * dp).toInt()
+
+        val isMe      = !myUid.isNullOrEmpty() && entry.uid == myUid
+        val isMutual  = entry.uid in myMutualUids
+
+        val rankColor = when (rank) {
+            1    -> Color.parseColor("#FFD700")
+            2    -> Color.parseColor("#C0C0C0")
+            3    -> Color.parseColor("#CD7F32")
+            else -> if (isMe) accentBlue else if (isMutual) accentGreen else mutedColor
+        }
+        val nameColor = when {
+            isMe     -> accentBlue
+            isMutual -> accentGreen
+            else     -> Color.WHITE
+        }
+        val scoreText  = formatGlobalScore(currentGame, entry.score)
+        val scoreColor = pongScoreColor(currentGame, entry.score) ?: accentBlue
+        val location   = if (entry.state.isNotEmpty()) "${entry.state}, ${entry.country}" else entry.country
+
+        val row = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(4.px(), 7.px(), 4.px(), 7.px())
+            isClickable = true
+            isFocusable = true
+            when {
+                isMe -> background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 6 * dp
+                    setColor(Color.argb(40, 79, 142, 247))
+                }
+                isMutual -> background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 6 * dp
+                    setColor(Color.argb(30, 0, 204, 102))
+                    setStroke(1, Color.argb(60, 0, 204, 102))
+                }
+            }
+        }
+
+        // Rank — 46dp, right-aligned
+        row.addView(TextView(activity).apply {
+            text = "#%,d".format(rank)
+            setTextColor(rankColor)
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(46.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
+        })
+
+        // Avatar — 28dp with 4dp start margin
+        val avatarFrame = FrameLayout(activity).apply {
+            layoutParams = LinearLayout.LayoutParams(28.px(), 28.px()).apply {
+                marginStart = 4.px()
+            }
+        }
+        avatarFrame.addView(AvatarUtils.buildView(activity, entry.avatarIndex, entry.avatarColor, 22))
+        row.addView(avatarFrame)
+
+        // 4dp spacer
+        row.addView(View(activity).apply { layoutParams = LinearLayout.LayoutParams(4.px(), 1) })
+
+        // Username — weight=1
+        row.addView(TextView(activity).apply {
+            text = if (isMutual) "${entry.username} ♻" else entry.username
+            setTextColor(nameColor)
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        })
+
+        // Score — 52dp
+        row.addView(TextView(activity).apply {
+            text = scoreText
+            setTextColor(scoreColor)
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(52.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
+        })
+
+        // Region — 88dp
+        row.addView(TextView(activity).apply {
+            text = location
+            setTextColor(mutedColor)
+            textSize = 10f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.END
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            layoutParams = LinearLayout.LayoutParams(88.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
+        })
+
+        row.setOnClickListener { showUserProfileDialog(entry) }
+        return row
+    }
+
+    // ── Data loading ──────────────────────────────────────────────────────────
+
+    fun appendEntries(entries: List<GlobalEntry>, newLastDoc: DocumentSnapshot?) {
+        activity.runOnUiThread {
+            progress.visibility = View.GONE
+            if (loadedCount == 0 && entries.isEmpty()) {
+                tvEmpty.visibility = View.VISIBLE
+                tvEmpty.text = if (currentTab == "FRIENDS")
+                    "Add friends to see their scores!" else "No scores yet - be the first!"
+                btnLoadMore.visibility = View.GONE
+                return@runOnUiThread
+            }
+            tvEmpty.visibility = View.GONE
+            entries.forEach { entry ->
+                loadedCount++
+                container.addView(buildGlobalRow(loadedCount, entry))
+            }
+            pageLastDoc = newLastDoc
+            btnLoadMore.visibility = if (newLastDoc != null) View.VISIBLE else View.GONE
+        }
+    }
+
+    fun loadFirstPage() {
         container.removeAllViews()
         tvEmpty.visibility = View.GONE
         progress.visibility = View.VISIBLE
-        when (tab) {
-            "WORLD"   -> GlobalLeaderboard.fetchGlobal(game, mode, onResult = { populate(it) })
-            "LOCAL"   -> GlobalLeaderboard.fetchLocal(game, country, state, mode, onResult = { populate(it) })
-            "FRIENDS" -> {
-                GlobalLeaderboard.ensureSignedIn(
-                    onReady = { myUid ->
-                        FriendsManager.getFollowing(myUid) { following ->
-                            if (following.isEmpty()) { populate(emptyList(), showAvatar = true); return@getFollowing }
-                            FriendsManager.fetchFriendsScores(
-                                uids = following.map { it.uid },
-                                game = game,
-                                timeRange = friendsTimeRange,
-                                mode = mode,
-                                onResult = { populate(it, showAvatar = true) }
-                            )
-                        }
-                    },
-                    onError = { _ -> populate(emptyList()) }
-                )
+        btnLoadMore.visibility = View.GONE
+        loadedCount = 0
+        pageLastDoc = null
+        when (currentTab) {
+            "WORLD" -> GlobalLeaderboard.fetchGlobalPage(currentGame, currentMode) { entries, last ->
+                appendEntries(entries, last)
+            }
+            "LOCAL" -> GlobalLeaderboard.fetchLocalPage(currentGame, country, state, currentMode) { entries, last ->
+                appendEntries(entries, last)
+            }
+            "FRIENDS" -> GlobalLeaderboard.ensureSignedIn(
+                onReady = { uid ->
+                    myUid = uid
+                    FriendsManager.getFollowing(uid) { following ->
+                        myFollowingUids = following.map { it.uid }.toSet()
+                        if (following.isEmpty()) { appendEntries(emptyList(), null); return@getFollowing }
+                        FriendsManager.fetchFriendsScores(
+                            uids = following.map { it.uid },
+                            game = currentGame,
+                            timeRange = friendsTimeRange,
+                            mode = currentMode,
+                            onResult = { appendEntries(it, null) }
+                        )
+                    }
+                },
+                onError = { _ -> appendEntries(emptyList(), null) }
+            )
+        }
+    }
+
+    fun loadNextPage() {
+        val cursor = pageLastDoc ?: return
+        btnLoadMore.visibility = View.GONE
+        progress.visibility = View.VISIBLE
+        when (currentTab) {
+            "WORLD" -> GlobalLeaderboard.fetchGlobalPage(currentGame, currentMode, after = cursor) { entries, last ->
+                appendEntries(entries, last)
+            }
+            "LOCAL" -> GlobalLeaderboard.fetchLocalPage(currentGame, country, state, currentMode, after = cursor) { entries, last ->
+                appendEntries(entries, last)
             }
         }
     }
 
-    tabWorld.setOnClickListener { setActive("WORLD"); load("WORLD") }
-    tabLocal.setOnClickListener { setActive("LOCAL"); load("LOCAL") }
+    // ── Chip setup ────────────────────────────────────────────────────────────
+
+    fun setupModeChips() {
+        if (currentGame != "brickbreaker") {
+            modeChipsScroll.visibility = View.GONE
+            return
+        }
+        modeChipsScroll.visibility = View.VISIBLE
+        modeChipsRow.removeAllViews()
+        listOf(null to "ALL", "easy" to "EASY", "medium" to "MEDIUM", "hard" to "HARD")
+            .forEachIndexed { i, (key, label) ->
+                val chip = makeChip(label, currentMode == key)
+                if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
+                chip.setOnClickListener {
+                    currentMode = key
+                    setupModeChips()
+                    loadFirstPage()
+                }
+                modeChipsRow.addView(chip)
+            }
+    }
+
+    fun setupGameChips() {
+        gameChipsRow.removeAllViews()
+        GAMES.forEachIndexed { i, g ->
+            val chip = makeChip("${g.emoji} ${g.label}", g.key == currentGame)
+            if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
+            chip.setOnClickListener {
+                currentGame = g.key
+                currentMode = null
+                tvCurrentGame.text = "${g.emoji} ${g.label}"
+                setupGameChips()
+                setupModeChips()
+                loadFirstPage()
+            }
+            gameChipsRow.addView(chip)
+        }
+    }
+
+    // ── Tab UI helpers ────────────────────────────────────────────────────────
+
+    fun refreshThirdTab() {
+        tabFriends.text = if (PrefsManager.getGlobalUsername(activity) != null) "FRIENDS" else "REGISTER"
+    }
+
+    fun setFriendsTimeActive(range: TimeRange) {
+        friendsTimeRange = range
+        tabFriendsWeek.setTextColor(if (range == TimeRange.WEEK) accentBlue else mutedColor)
+        tabFriendsMonth.setTextColor(if (range == TimeRange.MONTH) accentBlue else mutedColor)
+        tabFriendsAll.setTextColor(if (range == TimeRange.ALL_TIME) accentBlue else mutedColor)
+    }
+
+    fun setActive(tab: String) {
+        currentTab = tab
+        tabWorld.setTextColor(if (tab == "WORLD") accentBlue else mutedColor)
+        tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else mutedColor)
+        tabFriends.setTextColor(if (tab == "FRIENDS") accentBlue else mutedColor)
+        friendsBar.visibility = if (tab == "FRIENDS") View.VISIBLE else View.GONE
+        if (tab == "FRIENDS") btnLoadMore.visibility = View.GONE
+    }
+
+    // ── Initial state ─────────────────────────────────────────────────────────
+
+    if (country.isNotEmpty()) tabLocal.visibility = View.VISIBLE
+    tabFriends.visibility = View.VISIBLE
+    refreshThirdTab()
+
+    val initGame = GAMES.find { it.key == currentGame }
+    tvCurrentGame.text = "${initGame?.emoji ?: ""} ${initGame?.label ?: currentGame.uppercase()}"
+
+    setupGameChips()
+    setupModeChips()
+
+    // ── Click listeners ───────────────────────────────────────────────────────
+
+    tabWorld.setOnClickListener  { setActive("WORLD"); loadFirstPage() }
+    tabLocal.setOnClickListener  { setActive("LOCAL"); loadFirstPage() }
     tabFriends.setOnClickListener {
         if (PrefsManager.getGlobalUsername(activity) != null) {
-            setActive("FRIENDS"); load("FRIENDS")
+            setActive("FRIENDS"); loadFirstPage()
         } else {
             GlobalLeaderboard.ensureSignedIn(
                 onReady = { uid ->
+                    myUid = uid
                     activity.runOnUiThread {
                         showUsernameSetupDialog(activity, uid, pendingScore, onSuccess = {
                             refreshThirdTab()
-                            setActive("FRIENDS"); load("FRIENDS")
+                            setActive("FRIENDS"); loadFirstPage()
                         })
                     }
                 },
@@ -148,114 +489,31 @@ fun showGlobalLeaderboardDialog(
         }
     }
 
-    tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     load("FRIENDS") }
-    tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    load("FRIENDS") }
-    tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); load("FRIENDS") }
+    tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     loadFirstPage() }
+    tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    loadFirstPage() }
+    tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); loadFirstPage() }
     setFriendsTimeActive(TimeRange.ALL_TIME)
 
     btnManageFriends.setOnClickListener {
         val myUsername = PrefsManager.getGlobalUsername(activity) ?: return@setOnClickListener
-        GlobalLeaderboard.ensureSignedIn(onReady = { myUid ->
+        GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+            myUid = uid
             activity.runOnUiThread {
-                showFriendsDialog(activity, myUid, myUsername,
+                showFriendsDialog(activity, uid, myUsername,
                     PrefsManager.getAvatarIndex(activity), PrefsManager.getAvatarColor(activity))
             }
         })
     }
 
-    setActive("WORLD")
-    load("WORLD")
-
+    btnLoadMore.setOnClickListener { loadNextPage() }
     view.findViewById<TextView>(R.id.btnGlobalClose).setOnClickListener { dialog.dismiss() }
+
+    setActive("WORLD")
+    loadFirstPage()
     dialog.show()
 }
 
-private fun buildGlobalRow(
-    activity: AppCompatActivity,
-    rank: Int,
-    entry: GlobalEntry,
-    game: String,
-    showAvatar: Boolean = false
-): View {
-    val dp = activity.resources.displayMetrics.density
-    fun Int.px() = (this * dp).toInt()
-
-    val accentBlue = Color.parseColor("#4f8ef7")
-    val muted      = Color.parseColor("#666688")
-
-    val scoreText  = formatGlobalScore(game, entry.score)
-    val scoreColor = pongScoreColor(game, entry.score) ?: accentBlue
-    val location   = if (entry.state.isNotEmpty()) "${entry.state}, ${entry.country}" else entry.country
-
-    val row = LinearLayout(activity).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
-        setPadding(4.px(), 7.px(), 4.px(), 7.px())
-    }
-
-    fun tv(text: String, color: Int, widthDp: Int = -1, weight: Float = 0f,
-           grav: Int = Gravity.START, sizeSp: Float = 14f) =
-        TextView(activity).apply {
-            this.text = text
-            setTextColor(color)
-            textSize = sizeSp
-            gravity = grav
-            typeface = Typeface.MONOSPACE
-            layoutParams = if (widthDp >= 0)
-                LinearLayout.LayoutParams(widthDp.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
-            else
-                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, weight)
-        }
-
-    row.addView(tv("#$rank", accentBlue, widthDp = 28, grav = Gravity.CENTER))
-
-    val userRow = LinearLayout(activity).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
-        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-    }
-    if (showAvatar) {
-        userRow.addView(AvatarUtils.buildView(activity, entry.avatarIndex, entry.avatarColor, 20))
-        userRow.addView(View(activity).apply { layoutParams = LinearLayout.LayoutParams(4.px(), 1) })
-    }
-    val nameTV = TextView(activity).apply {
-        text = entry.username
-        setTextColor(Color.WHITE)
-        textSize = if (showAvatar) 13f else 14f
-        typeface = Typeface.MONOSPACE
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-    }
-    userRow.addView(nameTV)
-    row.addView(userRow)
-
-    row.addView(tv(scoreText, scoreColor, widthDp = 52, grav = Gravity.END))
-    row.addView(tv(location,  muted,      widthDp = 88, grav = Gravity.END, sizeSp = 10f))
-    return row
-}
-
-private fun formatGlobalScore(game: String, score: Int): String {
-    if (game != PrefsManager.GAME_PONG && !game.startsWith("pong_")) return score.toString()
-    val ps: Int; val ai: Int
-    when {
-        score >= 80 -> { ps = score / 100; ai = 99 - score % 100 }
-        score >= 10 -> { ps = score / 10;  ai = score % 10 }
-        else        -> { ps = 0;            ai = score }
-    }
-    return "$ps-$ai"
-}
-
-private fun pongScoreColor(game: String, score: Int): Int? {
-    if (game != PrefsManager.GAME_PONG && !game.startsWith("pong_")) return null
-    val ps = when {
-        score >= 80 -> score / 100
-        score >= 10 -> score / 10
-        else        -> 0
-    }
-    return if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c")
-}
+// ── Registration prompt ───────────────────────────────────────────────────────
 
 fun showRegistrationPromptIfNeeded(activity: AppCompatActivity) {
     if (PrefsManager.getGlobalUsername(activity) != null) return
@@ -292,14 +550,81 @@ fun showRegistrationPromptIfNeeded(activity: AppCompatActivity) {
     dialog.show()
 }
 
+// ── Styled game picker (replaces AlertDialog.setItems) ────────────────────────
+
 fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
-    val labels = arrayOf("SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
-    val keys   = arrayOf("snake", "pong", "asteroids", "brickbreaker")
-    AlertDialog.Builder(activity)
-        .setTitle("Global Leaderboard")
-        .setItems(labels) { _, i -> showGlobalLeaderboardDialog(activity, keys[i]) }
-        .show()
+    val dp = activity.resources.displayMetrics.density
+    fun Int.px() = (this * dp).toInt()
+
+    val dialog = Dialog(activity)
+
+    val root = LinearLayout(activity).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(20.px(), 20.px(), 20.px(), 20.px())
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 16 * dp
+            setColor(activity.getColor(R.color.surface))
+            setStroke((1 * dp).toInt(), activity.getColor(R.color.border))
+        }
+    }
+
+    root.addView(TextView(activity).apply {
+        text = "🌎 GLOBAL LEADERBOARD"
+        textSize = 15f
+        typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        gravity = Gravity.CENTER
+        setTextColor(activity.getColor(R.color.accent_blue))
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { bottomMargin = 8.px() }
+    })
+
+    GAMES.forEach { g ->
+        val tile = TextView(activity).apply {
+            text = "${g.emoji}  ${g.label}"
+            setTextColor(Color.WHITE)
+            textSize = 15f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            background = activity.getDrawable(R.drawable.bg_game_tile)
+            isClickable = true
+            isFocusable = true
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 48.px()
+            ).apply { topMargin = 8.px() }
+        }
+        tile.setOnClickListener {
+            dialog.dismiss()
+            showGlobalLeaderboardDialog(activity, g.key)
+        }
+        root.addView(tile)
+    }
+
+    root.addView(TextView(activity).apply {
+        text = "CANCEL"
+        setTextColor(activity.getColor(R.color.muted))
+        textSize = 13f
+        typeface = Typeface.MONOSPACE
+        gravity = Gravity.CENTER
+        isClickable = true
+        isFocusable = true
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 40.px()
+        ).apply { topMargin = 12.px() }
+        setOnClickListener { dialog.dismiss() }
+    })
+
+    dialog.setContentView(root)
+    dialog.window?.apply {
+        setBackgroundDrawableResource(android.R.color.transparent)
+        setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+    dialog.show()
 }
+
+// ── Username setup dialog ─────────────────────────────────────────────────────
 
 fun showUsernameSetupDialog(
     activity: AppCompatActivity,

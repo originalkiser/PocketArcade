@@ -23,6 +23,8 @@ import com.pocketarcade.games.snake.SnakeActivity
 import com.pocketarcade.leaderboard.LeaderboardManager
 import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
 import com.pocketarcade.leaderboard.showRegistrationPromptIfNeeded
+import com.pocketarcade.leaderboard.showUsernameSetupDialog
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.storage.PrefsManager
 
 class MainActivity : AppCompatActivity() {
@@ -57,11 +59,31 @@ class MainActivity : AppCompatActivity() {
 
         applyTileBorders()
 
-        findViewById<TextView>(R.id.btnSettings).setOnClickListener {
+        findViewById<LinearLayout>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        findViewById<TextView>(R.id.btnCredits).setOnClickListener {
-            showCreditsDialog(this)
+        findViewById<LinearLayout>(R.id.btnProfile).setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+        findViewById<LinearLayout>(R.id.btnFriends).setOnClickListener {
+            if (PrefsManager.getGlobalUsername(this) == null) {
+                GlobalLeaderboard.ensureSignedIn(
+                    onReady = { uid ->
+                        runOnUiThread {
+                            showUsernameSetupDialog(this, uid, pendingScore = null, onSuccess = {
+                                startActivity(Intent(this, FriendsActivity::class.java))
+                            })
+                        }
+                    },
+                    onError = { msg ->
+                        runOnUiThread {
+                            showRegistrationPromptIfNeeded(this)
+                        }
+                    }
+                )
+            } else {
+                startActivity(Intent(this, FriendsActivity::class.java))
+            }
         }
         findViewById<LinearLayout>(R.id.btnRecordBook).setOnClickListener {
             startActivity(Intent(this, RecordBookActivity::class.java))
@@ -135,12 +157,29 @@ class MainActivity : AppCompatActivity() {
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
-        findViewById<FrameLayout>(R.id.rootFrame).setBackgroundColor(ThemeManager.currentTheme(this).bg)
+        findViewById<FrameLayout>(R.id.rootFrame).setBackgroundColor(ThemeManager.currentBgColor(this))
+
+        refreshProfileCircle()
 
         if (PrefsManager.checkAndConsumeUpsellTrigger(this)) {
             showUpsellDialog()
         }
         startBlinkPrompt()
+
+        val rootFrame = findViewById<FrameLayout>(R.id.rootFrame)
+        val friendsBtn = findViewById<LinearLayout>(R.id.btnFriends)
+        if (rootFrame != null && friendsBtn != null) {
+            HintManager.showIfNeeded(this, rootFrame, friendsBtn,
+                "Add friends to compare scores!", PrefsManager.HINT_FRIENDS)
+        }
+    }
+
+    private fun refreshProfileCircle() {
+        val circle = findViewById<FrameLayout>(R.id.profileCircle) ?: return
+        circle.removeAllViews()
+        circle.addView(
+            AvatarUtils.buildView(this, PrefsManager.getAvatarIndex(this), PrefsManager.getAvatarColor(this), 56)
+        )
     }
 
     override fun onPause() {

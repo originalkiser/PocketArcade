@@ -33,7 +33,7 @@
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
 
-            <!-- Colour Theme -->
+            <!-- Game Board Theme -->
             <LinearLayout
                 android:id="@+id/rowTheme"
                 android:layout_width="match_parent"
@@ -48,9 +48,18 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="COLOUR THEME"
+                    android:text="GAME BOARD THEME"
                     android:textColor="@color/accent_blue"
                     android:textSize="19sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Applies to all game boards"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp"
                     android:fontFamily="monospace"
                     android:layout_marginBottom="12dp" />
 
@@ -74,6 +83,60 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Classic"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="17sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- App Background Theme -->
+            <LinearLayout
+                android:id="@+id/rowBgTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="APP BACKGROUND"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="19sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tint for menus and settings screens"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_marginBottom="6dp">
+
+                    <View android:id="@+id/bgSwatch0" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/bgSwatch1" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/bgSwatch2" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/bgSwatch3" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/bgSwatch4" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/bgSwatch5" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvBgThemeName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Void"
                     android:textColor="@color/accent_blue"
                     android:textSize="17sp"
                     android:fontFamily="monospace"
@@ -431,7 +494,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="v1.1.0"
+                android:text="v1.4.0"
                 android:textColor="@color/muted"
                 android:textSize="15sp"
                 android:fontFamily="monospace"

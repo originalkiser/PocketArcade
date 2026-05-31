@@ -39,7 +39,7 @@
                 android:id="@+id/tvChangelogVersion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="v1.3.0"
+                android:text="v1.4.0"
                 android:textColor="@color/muted"
                 android:textSize="9sp"
                 android:fontFamily="monospace" />

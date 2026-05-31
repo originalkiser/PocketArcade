@@ -57,7 +57,37 @@ private val CHANGELOG = mapOf(
   connections until AdMob is live
 
 ★ What's New in Settings
-  View this changelog any time"""
+  View this changelog any time""",
+
+    5 to """★ Global Leaderboard
+  Compete with players worldwide!
+  Sign up from Profile or Settings
+
+★ Friends system
+  Add friends, compare scores,
+  send & accept friend requests
+
+★ Profile page
+  Set your username, country/state,
+  and upload a custom photo
+
+★ App Background Themes
+  6 new dark palettes (Void, Ember,
+  Grove, Dusk, Frost, Ink)
+
+★ Game Board Themes in Settings
+  Set one theme for all games at once
+
+★ Asteroids controls reworked
+  Rotation and thrust are now
+  independent — cleaner handling
+
+★ Time tracking bug fixed
+  Demo mode no longer logged
+  hundreds of thousands of hours
+
+★ Seamless Record Book scroll
+  Game tabs now loop without hitches"""
 )
 
 fun showChangelogIfNeeded(activity: AppCompatActivity, onDone: () -> Unit = {}) {

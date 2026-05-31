@@ -254,7 +254,13 @@ class BrickBreakerView @JvmOverloads constructor(
 
     private fun loadLevel() {
         level++
-        if (level > LEVELS.size) { state = BBState.WIN; onWin?.invoke(score); return }
+        if (level > LEVELS.size) {
+            state = BBState.WIN
+            if (!demoMode) onWin?.invoke(score)
+            else android.os.Handler(android.os.Looper.getMainLooper())
+                .postDelayed({ if (demoMode) startGame(demo = true) }, 2000L)
+            return
+        }
         computeLayout(); initPaddle()
         bricks.clear(); powerUps.clear()
         extraLivesDroppedThisRound = 0
@@ -413,8 +419,13 @@ class BrickBreakerView @JvmOverloads constructor(
                 aimAngle = -PI.toFloat() / 2f
             } else {
                 state = BBState.GAME_OVER
-                if (!demoMode) SoundManager.play(SoundManager.SFX.BB_GAME_OVER, context)
-                onGameOver?.invoke(score)
+                if (!demoMode) {
+                    SoundManager.play(SoundManager.SFX.BB_GAME_OVER, context)
+                    onGameOver?.invoke(score)
+                } else {
+                    android.os.Handler(android.os.Looper.getMainLooper())
+                        .postDelayed({ if (demoMode) startGame(demo = true) }, 2000L)
+                }
             }
             return
         }

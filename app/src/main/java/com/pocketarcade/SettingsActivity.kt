@@ -34,7 +34,7 @@ class SettingsActivity : AppCompatActivity() {
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
-        // ── Theme picker ──────────────────────────────────────────────────────
+        // ── Game Board Theme picker ───────────────────────────────────────────
         val tvThemeName = findViewById<TextView>(R.id.tvThemeName)
         val swatchIds = listOf(R.id.swatch0, R.id.swatch1, R.id.swatch2, R.id.swatch3, R.id.swatch4, R.id.swatch5)
         var currentIndex = ThemeManager.themeIndex(this)
@@ -57,11 +57,50 @@ class SettingsActivity : AppCompatActivity() {
             findViewById<View>(id).setOnClickListener {
                 currentIndex = i
                 ThemeManager.setThemeIndex(this, i)
+                // Blast all games to the new theme, clearing any per-game overrides.
+                listOf(PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
+                       PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER)
+                    .forEach { game -> PrefsManager.setGameUsingGlobalTheme(this, game, true) }
                 refreshSwatches()
             }
         }
 
         refreshSwatches()
+
+        // ── App Background Theme picker ───────────────────────────────────────
+        val tvBgThemeName = findViewById<TextView>(R.id.tvBgThemeName)
+        val bgSwatchIds = listOf(R.id.bgSwatch0, R.id.bgSwatch1, R.id.bgSwatch2,
+                                  R.id.bgSwatch3, R.id.bgSwatch4, R.id.bgSwatch5)
+        var bgIndex = ThemeManager.bgThemeIndex(this)
+
+        fun refreshBgSwatches() {
+            tvBgThemeName.text = AppBgThemes.ALL[bgIndex].name
+            val d = resources.displayMetrics.density
+            bgSwatchIds.forEachIndexed { i, id ->
+                val theme = AppBgThemes.ALL[i]
+                val selected = i == bgIndex
+                val gd = android.graphics.drawable.GradientDrawable()
+                gd.shape = android.graphics.drawable.GradientDrawable.OVAL
+                gd.setColor(theme.swatch)
+                if (selected) gd.setStroke((3 * d).toInt(), Color.WHITE)
+                findViewById<View>(id).background = gd
+            }
+        }
+
+        bgSwatchIds.forEachIndexed { i, id ->
+            findViewById<View>(id).setOnClickListener {
+                bgIndex = i
+                ThemeManager.setBgThemeIndex(this, i)
+                refreshBgSwatches()
+                // Refresh the activity's own background immediately.
+                val newBg = ThemeManager.currentBgColor(this)
+                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(newBg))
+                window.decorView.setBackgroundColor(newBg)
+                findViewById<LinearLayout>(R.id.rootLayout).setBackgroundColor(newBg)
+            }
+        }
+
+        refreshBgSwatches()
 
         // ── Other toggles ──────────────────────────────────────────────────────
         val switchDemo  = findViewById<Switch>(R.id.switchDemoMode)
@@ -187,7 +226,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ThemeManager.applyWindowBackground(this)
-        val bg = ThemeManager.currentTheme(this).bg
+        val bg = ThemeManager.currentBgColor(this)
         findViewById<LinearLayout>(R.id.rootLayout).setBackgroundColor(bg)
     }
 

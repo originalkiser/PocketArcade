@@ -12,8 +12,9 @@ object PrefsManager {
     private const val KEY_SESSIONS_UNTIL_UPSELL = "sessions_until_upsell"
     private const val KEY_DEMO_MODE = "demo_mode"
     private const val KEY_SOUND = "sound"
-    private const val KEY_THEME_INDEX = "theme_index"
-    private const val KEY_LIGHT_MODE = "light_mode"
+    private const val KEY_THEME_INDEX    = "theme_index"
+    private const val KEY_BG_THEME_INDEX = "bg_theme_index"
+    private const val KEY_LIGHT_MODE     = "light_mode"
     private const val KEY_LAST_UPDATE_CHECK = "last_update_check"
     private const val KEY_LAST_INITIALS = "last_initials"
     private const val KEY_LEADERBOARD_SIZE = "leaderboard_size"
@@ -25,7 +26,13 @@ object PrefsManager {
     private const val KEY_AVATAR_INDEX          = "avatar_index"
     private const val KEY_AVATAR_COLOR          = "avatar_color"
     private const val KEY_REG_PROMPT_DISMISSED  = "reg_prompt_dismissed"
+    private const val KEY_PROFILE_PHOTO_PATH    = "profile_photo_path"
+    private const val KEY_HINT_PREFIX           = "hint_shown_"
     private const val KEY_GAMES_PLAYED = "games_played"
+
+    const val HINT_FRIENDS        = "friends"
+    const val HINT_AUTOFIRE       = "autofire"
+    const val HINT_SNAKE_CONTROLS = "snake_controls"
     private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
     const val GAME_SNAKE = "snake"
@@ -133,6 +140,9 @@ object PrefsManager {
     fun getThemeIndex(ctx: Context): Int = prefs(ctx).getInt(KEY_THEME_INDEX, 0)
     fun setThemeIndex(ctx: Context, index: Int) = prefs(ctx).edit { putInt(KEY_THEME_INDEX, index) }
 
+    fun getBgThemeIndex(ctx: Context): Int = prefs(ctx).getInt(KEY_BG_THEME_INDEX, 0)
+    fun setBgThemeIndex(ctx: Context, index: Int) = prefs(ctx).edit { putInt(KEY_BG_THEME_INDEX, index) }
+
     fun isLightMode(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_LIGHT_MODE, false)
     fun setGlobalLightMode(ctx: Context, value: Boolean) = prefs(ctx).edit { putBoolean(KEY_LIGHT_MODE, value) }
 
@@ -186,6 +196,16 @@ object PrefsManager {
         prefs(ctx).getBoolean(KEY_REG_PROMPT_DISMISSED, false)
     fun setRegPromptDismissed(ctx: Context) =
         prefs(ctx).edit { putBoolean(KEY_REG_PROMPT_DISMISSED, true) }
+
+    fun getProfilePhotoPath(ctx: Context): String? = prefs(ctx).getString(KEY_PROFILE_PHOTO_PATH, null)
+    fun setProfilePhotoPath(ctx: Context, path: String?) = prefs(ctx).edit {
+        if (path != null) putString(KEY_PROFILE_PHOTO_PATH, path) else remove(KEY_PROFILE_PHOTO_PATH)
+    }
+
+    fun isHintShown(ctx: Context, key: String): Boolean =
+        prefs(ctx).getBoolean(KEY_HINT_PREFIX + key, false)
+    fun markHintShown(ctx: Context, key: String) =
+        prefs(ctx).edit { putBoolean(KEY_HINT_PREFIX + key, true) }
 
     private fun nextUpsellInterval() = (3..5).random()
 

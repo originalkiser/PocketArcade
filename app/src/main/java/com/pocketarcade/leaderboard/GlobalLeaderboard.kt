@@ -1,6 +1,7 @@
 package com.pocketarcade.leaderboard
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -111,6 +112,57 @@ object GlobalLeaderboard {
             .update(mapOf("avatarIndex" to avatarIndex, "avatarColor" to avatarColor))
     }
 
+    fun changeUsername(
+        uid: String,
+        oldUsername: String,
+        newUsername: String,
+        onSuccess: () -> Unit,
+        onTaken: () -> Unit,
+        onError: () -> Unit
+    ) {
+        val oldRef  = db.collection("usernames").document(oldUsername)
+        val newRef  = db.collection("usernames").document(newUsername)
+        val userRef = db.collection("users").document(uid)
+        db.runTransaction { tx ->
+            if (tx.get(newRef).exists()) throw Exception("taken")
+            tx.delete(oldRef)
+            tx.set(newRef, mapOf("uid" to uid))
+            tx.update(userRef, "username", newUsername)
+        }.addOnSuccessListener {
+            db.collection("globalScores").whereEqualTo("uid", uid).get()
+                .addOnSuccessListener { snap ->
+                    if (snap.isEmpty) { onSuccess(); return@addOnSuccessListener }
+                    val batch = db.batch()
+                    snap.documents.forEach { batch.update(it.reference, "username", newUsername) }
+                    batch.commit()
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { onError() }
+                }.addOnFailureListener { onError() }
+        }.addOnFailureListener { e ->
+            if (e.message == "taken") onTaken() else onError()
+        }
+    }
+
+    fun migrateLocation(
+        uid: String,
+        newCountry: String,
+        newState: String,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        val userRef = db.collection("users").document(uid)
+        db.collection("globalScores").whereEqualTo("uid", uid).get()
+            .addOnSuccessListener { snap ->
+                val batch = db.batch()
+                val update = mapOf("country" to newCountry, "state" to newState)
+                snap.documents.forEach { batch.update(it.reference, update) }
+                batch.update(userRef, update)
+                batch.commit()
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener { onError() }
+            }.addOnFailureListener { onError() }
+    }
+
     fun submitScore(
         uid: String,
         username: String,
@@ -170,6 +222,51 @@ object GlobalLeaderboard {
             .get()
             .addOnSuccessListener { snap -> onResult(snap.documents.mapNotNull { it.toEntry() }) }
             .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun fetchGlobalPage(
+        game: String,
+        mode: String? = null,
+        pageSize: Long = 100,
+        after: DocumentSnapshot? = null,
+        onResult: (List<GlobalEntry>, DocumentSnapshot?) -> Unit
+    ) {
+        var q: Query = db.collection("globalScores").whereEqualTo("game", game)
+        if (mode != null) q = q.whereEqualTo("mode", mode)
+        q = q.orderBy("score", Query.Direction.DESCENDING).limit(pageSize)
+        if (after != null) q = q.startAfter(after)
+        q.get()
+            .addOnSuccessListener { snap ->
+                val docs = snap.documents
+                val entries = docs.mapNotNull { it.toEntry() }
+                onResult(entries, if (entries.size.toLong() >= pageSize) docs.lastOrNull() else null)
+            }
+            .addOnFailureListener { onResult(emptyList(), null) }
+    }
+
+    fun fetchLocalPage(
+        game: String,
+        country: String,
+        state: String,
+        mode: String? = null,
+        pageSize: Long = 100,
+        after: DocumentSnapshot? = null,
+        onResult: (List<GlobalEntry>, DocumentSnapshot?) -> Unit
+    ) {
+        var q: Query = db.collection("globalScores")
+            .whereEqualTo("game", game)
+            .whereEqualTo("country", country)
+        if (state.isNotEmpty()) q = q.whereEqualTo("state", state)
+        if (mode != null) q = q.whereEqualTo("mode", mode)
+        q = q.orderBy("score", Query.Direction.DESCENDING).limit(pageSize)
+        if (after != null) q = q.startAfter(after)
+        q.get()
+            .addOnSuccessListener { snap ->
+                val docs = snap.documents
+                val entries = docs.mapNotNull { it.toEntry() }
+                onResult(entries, if (entries.size.toLong() >= pageSize) docs.lastOrNull() else null)
+            }
+            .addOnFailureListener { onResult(emptyList(), null) }
     }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toEntry(): GlobalEntry? =

@@ -3,7 +3,6 @@ package com.pocketarcade
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.View
-import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,16 +15,14 @@ fun showThemePickerDialog(
 ) {
     val view = activity.layoutInflater.inflate(R.layout.dialog_theme_picker, null)
 
-    val tvThemeName    = view.findViewById<TextView>(R.id.tvThemeName)
-    val switchApplyAll = view.findViewById<Switch>(R.id.switchApplyAll)
+    val tvThemeName = view.findViewById<TextView>(R.id.tvThemeName)
     val swatchIds = listOf(
         R.id.swatch0, R.id.swatch1, R.id.swatch2,
         R.id.swatch3, R.id.swatch4, R.id.swatch5
     )
 
-    var localIndex  = ThemeManager.effectiveThemeIndex(activity, game)
-    var applyToAll  = PrefsManager.isGameUsingGlobalTheme(activity, game)
-    switchApplyAll.isChecked = applyToAll
+    // Always show the currently effective theme (game-specific if set, else global fallback).
+    var localIndex = ThemeManager.effectiveThemeIndex(activity, game)
 
     fun refreshSwatches() {
         tvThemeName.text = Themes.ALL[localIndex].first.name
@@ -43,23 +40,11 @@ fun showThemePickerDialog(
     swatchIds.forEachIndexed { i, id ->
         view.findViewById<View>(id).setOnClickListener {
             localIndex = i
-            if (applyToAll) {
-                ThemeManager.setThemeIndex(activity, i)
-            } else {
-                PrefsManager.setGameThemeIndex(activity, game, i)
-            }
+            // Always save as a game-specific override.
+            PrefsManager.setGameThemeIndex(activity, game, i)
+            PrefsManager.setGameUsingGlobalTheme(activity, game, false)
             refreshSwatches()
             onApplied()
-        }
-    }
-
-    switchApplyAll.setOnCheckedChangeListener { _, checked ->
-        applyToAll = checked
-        PrefsManager.setGameUsingGlobalTheme(activity, game, checked)
-        if (checked) {
-            ThemeManager.setThemeIndex(activity, localIndex)
-        } else {
-            PrefsManager.setGameThemeIndex(activity, game, localIndex)
         }
     }
 

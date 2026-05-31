@@ -13,6 +13,24 @@ object ThemeManager {
     fun setThemeIndex(ctx: Context, index: Int) = PrefsManager.setThemeIndex(ctx, index)
     fun setLightMode(ctx: Context, value: Boolean) = PrefsManager.setGlobalLightMode(ctx, value)
 
+    // ── App background theme ────────────────────────────────────────────────
+
+    fun bgThemeIndex(ctx: Context): Int = PrefsManager.getBgThemeIndex(ctx)
+    fun setBgThemeIndex(ctx: Context, index: Int) = PrefsManager.setBgThemeIndex(ctx, index)
+
+    /**
+     * Background color for shell activities (menus, settings, record book, etc.).
+     * In dark mode this uses the selected [AppBgTheme]; in light mode it reuses the
+     * game-board theme's own light background so it stays coherent.
+     */
+    fun currentBgColor(ctx: Context): Int =
+        if (isLightMode(ctx))
+            currentTheme(ctx).bg
+        else
+            AppBgThemes.ALL[bgThemeIndex(ctx).coerceIn(0, AppBgThemes.ALL.lastIndex)].bg
+
+    // ── Game board theme ────────────────────────────────────────────────────
+
     /** The resolved theme index for a game (game-specific if overridden, else global). */
     fun effectiveThemeIndex(ctx: Context, game: String? = null): Int =
         if (game != null && !PrefsManager.isGameUsingGlobalTheme(ctx, game))
@@ -20,9 +38,13 @@ object ThemeManager {
         else
             themeIndex(ctx)
 
-    /** Sets window and root layout background to match the current theme. */
+    /**
+     * Sets the window + decor background.
+     * - game != null → game board theme bg (for in-game activities)
+     * - game == null → app background theme bg (for shell activities)
+     */
     fun applyWindowBackground(activity: Activity, game: String? = null) {
-        val bg = currentTheme(activity, game).bg
+        val bg = if (game != null) currentTheme(activity, game).bg else currentBgColor(activity)
         activity.window.setBackgroundDrawable(ColorDrawable(bg))
         activity.window.decorView.setBackgroundColor(bg)
     }

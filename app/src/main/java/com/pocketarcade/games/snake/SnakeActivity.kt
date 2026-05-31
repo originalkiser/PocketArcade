@@ -12,12 +12,12 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.SeekBar
-import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.pocketarcade.HintManager
 import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
@@ -160,6 +160,10 @@ class SnakeActivity : AppCompatActivity() {
         applyControlBarState()
         applyDpadLayout()
         scheduleIdle()
+
+        HintManager.showToastIfNeeded(this,
+            "You can adjust controls in Settings.",
+            PrefsManager.HINT_SNAKE_CONTROLS)
     }
 
     override fun onResume() {
@@ -376,24 +380,19 @@ class SnakeActivity : AppCompatActivity() {
 
         // ── Theme swatches ──
         val swatchIds = listOf(R.id.swatch0, R.id.swatch1, R.id.swatch2, R.id.swatch3, R.id.swatch4, R.id.swatch5)
-        val tvThemeName    = view.findViewById<TextView>(R.id.tvThemeName)
-        val switchApplyAll = view.findViewById<Switch>(R.id.switchApplyAll)
+        val tvThemeName = view.findViewById<TextView>(R.id.tvThemeName)
+        // Always show the currently effective theme (game-specific if set, else global fallback).
         var localThemeIndex = ThemeManager.effectiveThemeIndex(this, PrefsManager.GAME_SNAKE)
-        var applyToAll = PrefsManager.isGameUsingGlobalTheme(this, PrefsManager.GAME_SNAKE)
-        switchApplyAll.isChecked = applyToAll
 
         fun refreshSwatches() {
             tvThemeName.text = Themes.ALL[localThemeIndex].first.name
             swatchIds.forEachIndexed { i, id ->
                 val sw = view.findViewById<View>(id)
-                val color = Themes.ALL[i].first.swatch
                 val d = resources.displayMetrics.density
                 val gd = GradientDrawable()
                 gd.shape = GradientDrawable.OVAL
-                gd.setColor(color)
-                if (i == localThemeIndex) {
-                    gd.setStroke((3 * d).toInt(), Color.WHITE)
-                }
+                gd.setColor(Themes.ALL[i].first.swatch)
+                if (i == localThemeIndex) gd.setStroke((3 * d).toInt(), Color.WHITE)
                 sw.background = gd
             }
         }
@@ -401,23 +400,11 @@ class SnakeActivity : AppCompatActivity() {
         swatchIds.forEachIndexed { i, id ->
             view.findViewById<View>(id).setOnClickListener {
                 localThemeIndex = i
-                if (applyToAll) {
-                    ThemeManager.setThemeIndex(this, i)
-                } else {
-                    PrefsManager.setGameThemeIndex(this, PrefsManager.GAME_SNAKE, i)
-                }
+                // Always save as a game-specific override.
+                PrefsManager.setGameThemeIndex(this, PrefsManager.GAME_SNAKE, i)
+                PrefsManager.setGameUsingGlobalTheme(this, PrefsManager.GAME_SNAKE, false)
                 refreshSwatches()
                 applyThemeToUi()
-            }
-        }
-
-        switchApplyAll.setOnCheckedChangeListener { _, checked ->
-            applyToAll = checked
-            PrefsManager.setGameUsingGlobalTheme(this, PrefsManager.GAME_SNAKE, checked)
-            if (checked) {
-                ThemeManager.setThemeIndex(this, localThemeIndex)
-            } else {
-                PrefsManager.setGameThemeIndex(this, PrefsManager.GAME_SNAKE, localThemeIndex)
             }
         }
 

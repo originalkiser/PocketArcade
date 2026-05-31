@@ -302,12 +302,22 @@ class PongView @JvmOverloads constructor(
     private fun checkWin() {
         if (playerScore >= WIN_SCORE) {
             state = PongState.GAME_OVER
-            if (!demoMode) SoundManager.play(SoundManager.SFX.PONG_WIN, context)
-            onMatchEnd?.invoke(true, playerScore, aiScore)
+            if (!demoMode) {
+                SoundManager.play(SoundManager.SFX.PONG_WIN, context)
+                onMatchEnd?.invoke(true, playerScore, aiScore)
+            } else {
+                android.os.Handler(android.os.Looper.getMainLooper())
+                    .postDelayed({ if (demoMode) startGame(demo = true) }, 2000L)
+            }
         } else if (aiScore >= WIN_SCORE) {
             state = PongState.GAME_OVER
-            if (!demoMode) SoundManager.play(SoundManager.SFX.PONG_LOSE, context)
-            onMatchEnd?.invoke(false, playerScore, aiScore)
+            if (!demoMode) {
+                SoundManager.play(SoundManager.SFX.PONG_LOSE, context)
+                onMatchEnd?.invoke(false, playerScore, aiScore)
+            } else {
+                android.os.Handler(android.os.Looper.getMainLooper())
+                    .postDelayed({ if (demoMode) startGame(demo = true) }, 2000L)
+            }
         }
     }
 

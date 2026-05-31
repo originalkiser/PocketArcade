@@ -53,8 +53,10 @@ class RecordBookActivity : AppCompatActivity() {
             )
         }
 
-        // 3 copies — seamless infinite scroll via repositioning at the edges
-        repeat(3) {
+        // 5 copies — wide enough that the edge is unreachable in normal use;
+        // repositioning fires only when scroll is idle, so no fling is ever cancelled.
+        val copiesCount = 5
+        repeat(copiesCount) {
             tabs.forEach { tab ->
                 val tv = TextView(this).apply {
                     text = tab
@@ -94,26 +96,42 @@ class RecordBookActivity : AppCompatActivity() {
         tabScroll.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 tabScroll.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                val setWidth = tabBar.width / 3
-                if (setWidth > 0) tabScroll.scrollTo(setWidth, 0)
+                // Start in the middle copy so there are (copiesCount/2) copies of buffer on each side.
+                val setWidth = tabBar.width / copiesCount
+                if (setWidth > 0) tabScroll.scrollTo(setWidth * (copiesCount / 2), 0)
             }
         })
 
         val mainHandler = Handler(Looper.getMainLooper())
         var isRepositioning = false
+        var pendingReposition: Runnable? = null
+
         tabScroll.setOnScrollChangeListener { _, scrollX, _, _, _ ->
             if (isRepositioning) return@setOnScrollChangeListener
-            val setWidth = tabBar.width / 3
-            if (setWidth <= 0) return@setOnScrollChangeListener
-            val maxScrollX = tabBar.width - tabScroll.width
-            val newX = when {
-                scrollX < setWidth / 2              -> scrollX + setWidth
-                scrollX > maxScrollX - setWidth / 2 -> scrollX - setWidth
-                else                                -> return@setOnScrollChangeListener
+            // Cancel any previously queued idle-reposition check.
+            pendingReposition?.let { mainHandler.removeCallbacks(it) }
+            // Schedule a reposition that fires only after the scroll has been fully idle
+            // for 150 ms (i.e. any fling has finished).  We capture scrollX here and
+            // compare it at fire-time: if they differ the view is still decelerating,
+            // so we skip — the next scroll event will reschedule us.
+            val r = Runnable {
+                if (isRepositioning) return@Runnable
+                val cur = tabScroll.scrollX
+                if (cur != scrollX) return@Runnable   // still moving, wait for next event
+                val setWidth = tabBar.width / copiesCount
+                if (setWidth <= 0) return@Runnable
+                val maxScrollX = tabBar.width - tabScroll.width
+                val newX = when {
+                    cur < setWidth              -> cur + setWidth
+                    cur > maxScrollX - setWidth -> cur - setWidth
+                    else                        -> return@Runnable
+                }
+                isRepositioning = true
+                tabScroll.scrollTo(newX, 0)
+                mainHandler.post { isRepositioning = false }
             }
-            isRepositioning = true
-            tabScroll.scrollTo(newX, 0)
-            mainHandler.post { isRepositioning = false }
+            pendingReposition = r
+            mainHandler.postDelayed(r, 150)
         }
 
         val divider = android.view.View(this).apply {

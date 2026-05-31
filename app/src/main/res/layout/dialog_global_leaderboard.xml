@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:padding="16dp"
     android:background="@color/surface">
 
     <TextView
@@ -15,13 +15,58 @@
         android:fontFamily="monospace"
         android:gravity="center"
         android:textStyle="bold"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="2dp" />
 
+    <TextView
+        android:id="@+id/tvCurrentGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/muted"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:paddingBottom="8dp" />
+
+    <!-- Game chip selector -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:scrollbars="none"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:id="@+id/gameChipsRow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical" />
+
+    </HorizontalScrollView>
+
+    <!-- Mode chip selector — visible only for Brick Breaker -->
+    <HorizontalScrollView
+        android:id="@+id/modeChipsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="28dp"
+        android:scrollbars="none"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/modeChipsRow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical" />
+
+    </HorizontalScrollView>
+
+    <!-- WORLD / LOCAL / FRIENDS tabs -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="34dp"
         android:orientation="horizontal"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="8dp">
 
         <TextView
             android:id="@+id/tabWorld"
@@ -73,7 +118,7 @@
     <LinearLayout
         android:id="@+id/friendsBar"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="30dp"
         android:orientation="horizontal"
         android:layout_marginBottom="8dp"
         android:visibility="gone">
@@ -135,22 +180,29 @@
 
     </LinearLayout>
 
+    <!-- Column header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="28dp"
+        android:layout_height="26dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         android:background="@color/border">
 
         <TextView
-            android:layout_width="28dp"
+            android:layout_width="46dp"
             android:layout_height="wrap_content"
             android:text="#"
             android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace"
-            android:gravity="center" />
+            android:gravity="end" />
+
+        <!-- Avatar column spacer -->
+        <View
+            android:layout_width="32dp"
+            android:layout_height="1dp" />
 
         <TextView
             android:layout_width="0dp"
@@ -182,9 +234,11 @@
 
     </LinearLayout>
 
+    <!-- Scrollable entry list — takes all remaining vertical space -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="220dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:id="@+id/globalContainer"
@@ -211,14 +265,29 @@
         android:textSize="12sp"
         android:fontFamily="monospace"
         android:gravity="center"
-        android:paddingVertical="16dp"
+        android:paddingVertical="12dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/btnLoadMore"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="6dp"
+        android:text="LOAD MORE ▼"
+        android:textColor="@color/accent_blue"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/btnGlobalClose"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="10dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="6dp"
         android:text="CLOSE"
         android:textColor="@color/accent_blue"
         android:textSize="13sp"
