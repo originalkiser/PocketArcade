@@ -225,6 +225,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        UpdateChecker.checkResumeDownload(this)
         ThemeManager.applyWindowBackground(this)
         val bg = ThemeManager.currentBgColor(this)
         findViewById<LinearLayout>(R.id.rootLayout).setBackgroundColor(bg)

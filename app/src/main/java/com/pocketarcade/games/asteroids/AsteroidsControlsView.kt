@@ -124,7 +124,6 @@ class AsteroidsControlsView @JvmOverloads constructor(
             canvas.drawLine(w / 2f, 8f, w / 2f, h - 8f, divPaint)
             val fcx = w * 3f / 4f; val fcy = h / 2f
             canvas.drawCircle(fcx, fcy, fr, if (fireActive) fireActivePaint else firePaint)
-            canvas.drawText("!", fcx, fcy + labelPaint.textSize * 0.38f, labelPaint)
             canvas.drawText("FIRE", fcx, h * 0.88f, hintPaint)
         }
     }

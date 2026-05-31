@@ -207,6 +207,19 @@ object PrefsManager {
     fun markHintShown(ctx: Context, key: String) =
         prefs(ctx).edit { putBoolean(KEY_HINT_PREFIX + key, true) }
 
+    // ── Auto-fire preference (Asteroids) ──────────────────────────────────────
+    fun isAutoFireEnabled(ctx: Context): Boolean =
+        prefs(ctx).getBoolean("autofire_enabled", true)
+    fun setAutoFireEnabled(ctx: Context, value: Boolean) =
+        prefs(ctx).edit { putBoolean("autofire_enabled", value) }
+
+    // ── Snake control-hint tracking ───────────────────────────────────────────
+    /** Number of times the "try other control mode" hint has been shown (capped at 2). */
+    fun getSnakeControlHintCount(ctx: Context): Int =
+        prefs(ctx).getInt("snake_hint_count", 0)
+    fun setSnakeControlHintCount(ctx: Context, count: Int) =
+        prefs(ctx).edit { putInt("snake_hint_count", count) }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

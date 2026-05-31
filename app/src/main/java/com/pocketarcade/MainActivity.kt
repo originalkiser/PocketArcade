@@ -85,10 +85,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, FriendsActivity::class.java))
             }
         }
-        findViewById<LinearLayout>(R.id.btnRecordBook).setOnClickListener {
-            startActivity(Intent(this, RecordBookActivity::class.java))
-        }
-
         // Marquee requires isSelected = true to scroll
         findViewById<TextView>(R.id.tvMarquee).isSelected = true
 
@@ -154,6 +150,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        UpdateChecker.checkResumeDownload(this)
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
@@ -216,33 +213,10 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
         findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
 
-        // Record Book summary card
-        updateRecordBookSummary()
-
         // Update score ticker
         val tvMarquee = findViewById<TextView>(R.id.tvMarquee)
         tvMarquee.text = buildMarqueeTicker()
         tvMarquee.isSelected = true
-    }
-
-    private fun updateRecordBookSummary() {
-        val games = listOf(PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
-            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER)
-        val total = games.sumOf { PrefsManager.getStatPlays(this, it) }
-        val tv = findViewById<TextView>(R.id.tvRecordBookSummary)
-        if (total == 0) {
-            tv.text = "NO GAMES LOGGED YET"
-            return
-        }
-        val labels = mapOf(
-            PrefsManager.GAME_SNAKE        to "SNAKE",
-            PrefsManager.GAME_PONG         to "PONG",
-            PrefsManager.GAME_ASTEROIDS    to "ASTEROIDS",
-            PrefsManager.GAME_BRICKBREAKER to "BRICK BREAKER"
-        )
-        val topGame = games.maxByOrNull { PrefsManager.getStatPlays(this, it) }!!
-        val topPlays = PrefsManager.getStatPlays(this, topGame)
-        tv.text = "$total GAMES\nMost Played: ${labels[topGame]} - $topPlays games"
     }
 
     private fun buildMarqueeTicker(): String {

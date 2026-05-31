@@ -90,19 +90,23 @@ class AsteroidsActivity : AppCompatActivity() {
         btnSound.setOnClickListener { toggleSound() }
         btnLightMode.setOnClickListener { toggleLightMode() }
 
-        astView.autoFire = true
+        astView.autoFire = PrefsManager.isAutoFireEnabled(this)
         updateAutoFireButton()
         updateSoundButton()
         updateLightModeButton()
         scheduleIdle()
 
-        HintManager.showToastIfNeeded(this,
-            "Try disabling auto-fire for a different experience.",
-            PrefsManager.HINT_AUTOFIRE)
+        // Show the hint bubble above the AUTO button after 3 s (once, persisted).
+        btnAutoFire.postDelayed({
+            HintManager.showAboveIfNeeded(this, btnAutoFire,
+                "Try turning off auto-fire for a different challenge!",
+                PrefsManager.HINT_AUTOFIRE)
+        }, 3_000L)
     }
 
     private fun toggleAutoFire() {
         astView.autoFire = !astView.autoFire
+        PrefsManager.setAutoFireEnabled(this, astView.autoFire)
         updateAutoFireButton()
     }
 

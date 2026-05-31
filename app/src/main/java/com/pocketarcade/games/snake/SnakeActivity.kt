@@ -51,6 +51,7 @@ class SnakeActivity : AppCompatActivity() {
     private var isDpadMode = false
     private var gameStartTime = 0L
     private var fruitsThisGame = 0
+    private var consecutiveLowScores = 0  // resets when score >= 15; not persisted
 
     private var dpadButtonSizeDp = 56f
     private var dpadHSpreadDp = 0f
@@ -116,11 +117,16 @@ class SnakeActivity : AppCompatActivity() {
             PrefsManager.addSnakeFruits(this, fruitsThisGame)
             PrefsManager.setHighScore(this, PrefsManager.GAME_SNAKE, score)
             runOnUiThread { updateHighScore() }
+
+            // Track consecutive low scores for the control-hint system.
+            if (score < 15) consecutiveLowScores++ else consecutiveLowScores = 0
+
             idleHandler.postDelayed({
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_SNAKE, score) {
                         btnRestart.visibility = View.VISIBLE
                     }
+                    checkControlHint()
                 }
             }, 1500L)
             scheduleIdle()
@@ -424,6 +430,43 @@ class SnakeActivity : AppCompatActivity() {
 
         dialog.window?.setBackgroundDrawableResource(R.color.surface)
         dialog.show()
+    }
+
+    // ── Control hint ───────────────────────────────────────────────────────────
+
+    /**
+     * After 3 consecutive low scores (<15): show control-switch hint once.
+     * After 6 more consecutive low scores without switching: show it a second time.
+     * Never shown more than 2 times total.
+     */
+    private fun checkControlHint() {
+        val hintCount = PrefsManager.getSnakeControlHintCount(this)
+        if (hintCount >= 2) return
+        val threshold = if (hintCount == 0) 3 else 6
+        if (consecutiveLowScores < threshold) return
+
+        consecutiveLowScores = 0
+        PrefsManager.setSnakeControlHintCount(this, hintCount + 1)
+
+        // Small extra delay so the hint doesn't overlap with the leaderboard dialog.
+        idleHandler.postDelayed({
+            val msg = if (isDpadMode)
+                "Having trouble? Try SWIPE mode for a more fluid feel!"
+            else
+                "Having trouble? Try D-PAD for more precise control!"
+            showControlHintDialog(msg)
+        }, 2_500L)
+    }
+
+    private fun showControlHintDialog(message: String) {
+        val switchText = if (isDpadMode) "SWITCH TO SWIPE" else "SWITCH TO D-PAD"
+        AlertDialog.Builder(this)
+            .setMessage(message)
+            .setPositiveButton(switchText) { _, _ -> setDpadMode(!isDpadMode) }
+            .setNegativeButton("DISMISS", null)
+            .create()
+            .also { it.window?.setBackgroundDrawableResource(R.color.surface) }
+            .show()
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

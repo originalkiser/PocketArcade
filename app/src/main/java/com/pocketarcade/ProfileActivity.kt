@@ -2,12 +2,16 @@ package com.pocketarcade
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -19,11 +23,15 @@ import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.LocationData
+import com.pocketarcade.leaderboard.LeaderboardManager
+import com.pocketarcade.leaderboard.formatGlobalScore
 import com.pocketarcade.leaderboard.showUsernameSetupDialog
 import com.pocketarcade.storage.PrefsManager
 import java.io.File
@@ -33,6 +41,15 @@ class ProfileActivity : AppCompatActivity() {
     private var selAvatarIndex = 0
     private var selAvatarColor = 0
     private var hasPhotoOverride = false
+    private var isEditMode = false
+    private var isDirty = false
+
+    // Snapshot of original values for change detection
+    private var origUsername = ""
+    private var origCountry  = ""
+    private var origState    = ""
+    private var origAvatarIndex = 0
+    private var origAvatarColor = 0
 
     private val photoPicker = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -44,7 +61,9 @@ class ProfileActivity : AppCompatActivity() {
             file.outputStream().use { out -> input.copyTo(out) }
             PrefsManager.setProfilePhotoPath(this, file.absolutePath)
             hasPhotoOverride = true
+            isDirty = true
             refreshAvatarPreview()
+            refreshSaveButton()
         } catch (e: Exception) {
             Toast.makeText(this, "Could not load photo", Toast.LENGTH_SHORT).show()
         }
@@ -54,17 +73,25 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        selAvatarIndex = PrefsManager.getAvatarIndex(this)
-        selAvatarColor = PrefsManager.getAvatarColor(this)
+        selAvatarIndex  = PrefsManager.getAvatarIndex(this)
+        selAvatarColor  = PrefsManager.getAvatarColor(this)
+        origAvatarIndex = selAvatarIndex
+        origAvatarColor = selAvatarColor
         hasPhotoOverride = PrefsManager.getProfilePhotoPath(this) != null
 
         val btnBack         = findViewById<TextView>(R.id.btnProfileBack)
+        val btnEdit         = findViewById<TextView>(R.id.btnEditProfile)
         val avatarContainer = findViewById<FrameLayout>(R.id.profileAvatarContainer)
         val btnChangeAvatar = findViewById<TextView>(R.id.btnProfileChangeAvatar)
         val btnUploadPhoto  = findViewById<TextView>(R.id.btnProfileUploadPhoto)
+        val layoutAvatarBtns = findViewById<LinearLayout>(R.id.layoutAvatarEditButtons)
         val layoutNoProfile = findViewById<LinearLayout>(R.id.layoutNoProfile)
         val layoutForm      = findViewById<ScrollView>(R.id.layoutProfileForm)
         val btnCreate       = findViewById<TextView>(R.id.btnCreateProfile)
+        val layoutViewMode  = findViewById<LinearLayout>(R.id.layoutViewMode)
+        val layoutEditMode  = findViewById<LinearLayout>(R.id.layoutEditMode)
+        val tvViewUsername  = findViewById<TextView>(R.id.tvViewUsername)
+        val tvViewLocation  = findViewById<TextView>(R.id.tvViewLocation)
         val etUsername      = findViewById<EditText>(R.id.etProfileUsername)
         val tvUsernameError = findViewById<TextView>(R.id.tvProfileUsernameError)
         val spinnerCountry  = findViewById<Spinner>(R.id.spinnerProfileCountry)
@@ -72,8 +99,25 @@ class ProfileActivity : AppCompatActivity() {
         val spinnerState    = findViewById<Spinner>(R.id.spinnerProfileState)
         val btnSave         = findViewById<TextView>(R.id.btnSaveProfile)
         val tvStatus        = findViewById<TextView>(R.id.tvSaveStatus)
+        val btnViewRecordBook = findViewById<TextView>(R.id.btnViewRecordBook)
 
-        btnBack.setOnClickListener { finish() }
+        // Back press handling — confirm if editing with unsaved changes
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isEditMode && isDirty) {
+                    AlertDialog.Builder(this@ProfileActivity)
+                        .setTitle("Discard changes?")
+                        .setMessage("You have unsaved changes. Discard them?")
+                        .setPositiveButton("DISCARD") { _, _ -> finish() }
+                        .setNegativeButton("KEEP EDITING", null)
+                        .show()
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         refreshAvatarPreview()
 
@@ -83,7 +127,9 @@ class ProfileActivity : AppCompatActivity() {
             AvatarUtils.showAvatarPickerDialog(this, selAvatarIndex, selAvatarColor) { emojiIdx, colorIdx ->
                 selAvatarIndex = emojiIdx
                 selAvatarColor = colorIdx
+                checkDirty(etUsername, spinnerCountry, spinnerState, layoutState)
                 refreshAvatarPreview()
+                refreshSaveButton()
             }
         }
 
@@ -114,19 +160,24 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
+        // --- Registered user ---
         layoutNoProfile.visibility = View.GONE
         layoutForm.visibility = View.VISIBLE
+        btnEdit.visibility = View.VISIBLE
 
-        val currentUsername = PrefsManager.getGlobalUsername(this) ?: ""
-        val currentCountry  = PrefsManager.getGlobalCountry(this)
-        val currentState    = PrefsManager.getGlobalState(this)
+        origUsername = PrefsManager.getGlobalUsername(this) ?: ""
+        origCountry  = PrefsManager.getGlobalCountry(this)
+        origState    = PrefsManager.getGlobalState(this)
 
-        etUsername.setText(currentUsername)
+        // Populate read-only view mode labels
+        tvViewUsername.text = origUsername
+        tvViewLocation.text = buildLocationLabel(origCountry, origState)
 
+        // Setup spinners for edit mode
         val countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, LocationData.countries)
         countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCountry.adapter = countryAdapter
-        spinnerCountry.setSelection(LocationData.countries.indexOf(currentCountry).coerceAtLeast(0))
+        spinnerCountry.setSelection(LocationData.countries.indexOf(origCountry).coerceAtLeast(0))
 
         fun updateStateSpinner() {
             val c = LocationData.countries[spinnerCountry.selectedItemPosition]
@@ -136,14 +187,37 @@ class ProfileActivity : AppCompatActivity() {
                 spinnerState.adapter = ArrayAdapter(
                     this, android.R.layout.simple_spinner_item, regions
                 ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-                val stateIdx = regions.indexOf(currentState)
-                if (stateIdx >= 0) spinnerState.setSelection(stateIdx)
+                val idx = regions.indexOf(origState)
+                if (idx >= 0) spinnerState.setSelection(idx)
             }
         }
         updateStateSpinner()
-        spinnerCountry.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) = updateStateSpinner()
+
+        // Initialize edit fields with current values
+        etUsername.setText(origUsername)
+
+        // Change detection
+        etUsername.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                checkDirty(etUsername, spinnerCountry, spinnerState, layoutState)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        val spinnerListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                if (spinnerCountry == p) updateStateSpinner()
+                checkDirty(etUsername, spinnerCountry, spinnerState, layoutState)
+            }
             override fun onNothingSelected(p: AdapterView<*>?) {}
+        }
+        spinnerCountry.onItemSelectedListener = spinnerListener
+        spinnerState.onItemSelectedListener   = spinnerListener
+
+        // EDIT button toggles edit mode
+        btnEdit.setOnClickListener {
+            if (!isEditMode) setEditMode(true, layoutViewMode, layoutEditMode, layoutAvatarBtns, btnEdit)
         }
 
         val usernameRegex = Regex("^[a-z0-9_]{3,20}$")
@@ -163,16 +237,9 @@ class ProfileActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val usernameChanged = newUsername != currentUsername
-            val locationChanged = newCountry != currentCountry || newState != currentState
-            val avatarChanged   = selAvatarIndex != PrefsManager.getAvatarIndex(this) ||
-                                  selAvatarColor  != PrefsManager.getAvatarColor(this)
-
-            if (!usernameChanged && !locationChanged && !avatarChanged) {
-                tvStatus.text = "No changes to save."
-                tvStatus.visibility = View.VISIBLE
-                return@setOnClickListener
-            }
+            val usernameChanged = newUsername != origUsername
+            val locationChanged = newCountry != origCountry || newState != origState
+            val avatarChanged   = selAvatarIndex != origAvatarIndex || selAvatarColor != origAvatarColor
 
             btnSave.isEnabled = false
             tvStatus.text = "Saving..."
@@ -185,16 +252,16 @@ class ProfileActivity : AppCompatActivity() {
                             PrefsManager.setAvatarIndex(this, selAvatarIndex)
                             PrefsManager.setAvatarColor(this, selAvatarColor)
                             GlobalLeaderboard.updateUserAvatar(uid, selAvatarIndex, selAvatarColor)
+                            origAvatarIndex = selAvatarIndex
+                            origAvatarColor = selAvatarColor
                         }
                         if (locationChanged) {
                             GlobalLeaderboard.migrateLocation(uid, newCountry, newState,
                                 onSuccess = {
                                     PrefsManager.setGlobalCountry(this, newCountry)
                                     PrefsManager.setGlobalState(this, newState)
-                                    runOnUiThread {
-                                        btnSave.isEnabled = true
-                                        tvStatus.text = "Saved!"
-                                    }
+                                    origCountry = newCountry; origState = newState
+                                    runOnUiThread { onSaveSuccess(tvViewUsername, tvViewLocation, btnSave, tvStatus, btnEdit, layoutViewMode, layoutEditMode, layoutAvatarBtns) }
                                 },
                                 onError = {
                                     runOnUiThread {
@@ -204,17 +271,15 @@ class ProfileActivity : AppCompatActivity() {
                                 }
                             )
                         } else {
-                            runOnUiThread {
-                                btnSave.isEnabled = true
-                                tvStatus.text = "Saved!"
-                            }
+                            runOnUiThread { onSaveSuccess(tvViewUsername, tvViewLocation, btnSave, tvStatus, btnEdit, layoutViewMode, layoutEditMode, layoutAvatarBtns) }
                         }
                     }
 
                     if (usernameChanged) {
-                        GlobalLeaderboard.changeUsername(uid, currentUsername, newUsername,
+                        GlobalLeaderboard.changeUsername(uid, origUsername, newUsername,
                             onSuccess = {
                                 PrefsManager.setGlobalUsername(this, newUsername)
+                                origUsername = newUsername
                                 doAvatarThenLocation()
                             },
                             onTaken = {
@@ -244,14 +309,184 @@ class ProfileActivity : AppCompatActivity() {
                 }
             )
         }
+
+        // Score highlights
+        loadScoreHighlights()
+
+        // Record Book link
+        btnViewRecordBook.setOnClickListener {
+            startActivity(Intent(this, RecordBookActivity::class.java))
+        }
     }
+
+    // ── Edit mode helpers ─────────────────────────────────────────────────────
+
+    private fun setEditMode(
+        on: Boolean,
+        layoutViewMode: LinearLayout,
+        layoutEditMode: LinearLayout,
+        layoutAvatarBtns: LinearLayout,
+        btnEdit: TextView
+    ) {
+        isEditMode = on
+        layoutViewMode.visibility  = if (on) View.GONE  else View.VISIBLE
+        layoutEditMode.visibility  = if (on) View.VISIBLE else View.GONE
+        layoutAvatarBtns.visibility = if (on) View.VISIBLE else View.GONE
+        btnEdit.text = if (on) "CANCEL" else "EDIT"
+        if (on) {
+            btnEdit.setOnClickListener {
+                if (isDirty) {
+                    AlertDialog.Builder(this)
+                        .setTitle("Discard changes?")
+                        .setMessage("You have unsaved changes. Discard them?")
+                        .setPositiveButton("DISCARD") { _, _ ->
+                            // Revert avatar
+                            selAvatarIndex = origAvatarIndex
+                            selAvatarColor = origAvatarColor
+                            hasPhotoOverride = PrefsManager.getProfilePhotoPath(this) != null
+                            refreshAvatarPreview()
+                            isDirty = false
+                            setEditMode(false, layoutViewMode, layoutEditMode, layoutAvatarBtns, btnEdit)
+                        }
+                        .setNegativeButton("KEEP EDITING", null)
+                        .show()
+                } else {
+                    setEditMode(false, layoutViewMode, layoutEditMode, layoutAvatarBtns, btnEdit)
+                }
+            }
+        } else {
+            isDirty = false
+            btnEdit.setOnClickListener {
+                setEditMode(true, layoutViewMode, layoutEditMode, layoutAvatarBtns, btnEdit)
+            }
+        }
+    }
+
+    private fun checkDirty(
+        etUsername: EditText,
+        spinnerCountry: Spinner,
+        spinnerState: Spinner,
+        layoutState: LinearLayout
+    ) {
+        val newUsername = etUsername.text.toString().lowercase().trim()
+        val newCountry  = LocationData.countries.getOrNull(spinnerCountry.selectedItemPosition) ?: ""
+        val newState    = if (layoutState.visibility == View.VISIBLE)
+            LocationData.subregions(newCountry).getOrNull(spinnerState.selectedItemPosition) ?: "" else ""
+
+        isDirty = newUsername != origUsername
+                || newCountry != origCountry
+                || newState   != origState
+                || selAvatarIndex != origAvatarIndex
+                || selAvatarColor != origAvatarColor
+                || (hasPhotoOverride != (PrefsManager.getProfilePhotoPath(this) != null))
+        refreshSaveButton()
+    }
+
+    private fun refreshSaveButton() {
+        val btnSave = findViewById<TextView>(R.id.btnSaveProfile) ?: return
+        btnSave.visibility = if (isEditMode && isDirty) View.VISIBLE else View.GONE
+    }
+
+    private fun onSaveSuccess(
+        tvViewUsername: TextView,
+        tvViewLocation: TextView,
+        btnSave: TextView,
+        tvStatus: TextView,
+        btnEdit: TextView,
+        layoutViewMode: LinearLayout,
+        layoutEditMode: LinearLayout,
+        layoutAvatarBtns: LinearLayout
+    ) {
+        tvStatus.visibility = View.GONE
+        isDirty = false
+        tvViewUsername.text = origUsername
+        tvViewLocation.text = buildLocationLabel(origCountry, origState)
+        setEditMode(false, layoutViewMode, layoutEditMode, layoutAvatarBtns, btnEdit)
+        loadScoreHighlights()
+        Toast.makeText(this, "Profile saved!", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun buildLocationLabel(country: String, state: String): String {
+        return when {
+            state.isNotEmpty() && country.isNotEmpty() -> "$state, $country"
+            country.isNotEmpty() -> country
+            else -> "—"
+        }
+    }
+
+    // ── Score Highlights ──────────────────────────────────────────────────────
+
+    private fun loadScoreHighlights() {
+        val container = findViewById<LinearLayout>(R.id.profileHighlightsContainer) ?: return
+        container.removeAllViews()
+        val dp = resources.displayMetrics.density
+
+        data class GameRow(val key: String, val label: String, val color: Int, val iconRes: Int)
+        val gameRows = listOf(
+            GameRow(PrefsManager.GAME_SNAKE,        "SNAKE",       getColor(R.color.accent_blue),   R.drawable.ic_snake),
+            GameRow(PrefsManager.GAME_PONG,         "PONG",        getColor(R.color.accent_red),    R.drawable.ic_pong),
+            GameRow(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS",   getColor(R.color.accent_cyan),   R.drawable.ic_asteroids),
+            GameRow(PrefsManager.GAME_BRICKBREAKER, "BRICK BREAKER", getColor(R.color.accent_yellow), R.drawable.ic_brickbreaker)
+        )
+
+        gameRows.forEach { game ->
+            val score = PrefsManager.getHighScore(this, game.key)
+            val scoreStr = when (game.key) {
+                PrefsManager.GAME_PONG -> {
+                    val wins = score
+                    val plays = PrefsManager.getStatPlays(this, game.key)
+                    val losses = (plays - wins).coerceAtLeast(0)
+                    val wl = if (losses > 0) "%.1f".format(wins.toFloat() / losses) else if (wins > 0) "INF" else "—"
+                    "$wins W  ·  W/L $wl"
+                }
+                else -> if (score > 0) "%,d pts".format(score) else "—"
+            }
+
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                background = getDrawable(R.drawable.bg_game_tile)
+                setPadding((12 * dp).toInt(), (10 * dp).toInt(), (12 * dp).toInt(), (10 * dp).toInt())
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = (6 * dp).toInt() }
+            }
+            val iconSize = (24 * dp).toInt()
+            row.addView(ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+                setImageResource(game.iconRes)
+            })
+            val nameTV = TextView(this).apply {
+                text = game.label
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+                setTextColor(game.color)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginStart = (10 * dp).toInt()
+                }
+            }
+            row.addView(nameTV)
+            val scoreTV = TextView(this).apply {
+                text = scoreStr
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+                setTextColor(getColor(R.color.muted))
+                gravity = Gravity.END
+            }
+            row.addView(scoreTV)
+            container.addView(row)
+        }
+    }
+
+    // ── Avatar preview ────────────────────────────────────────────────────────
 
     private fun refreshAvatarPreview() {
         val container = findViewById<FrameLayout>(R.id.profileAvatarContainer) ?: return
         container.removeAllViews()
         val photoPath = if (hasPhotoOverride) PrefsManager.getProfilePhotoPath(this) else null
         if (photoPath != null) {
-            val bmp = BitmapFactory.decodeFile(photoPath)
+            val bmp = android.graphics.BitmapFactory.decodeFile(photoPath)
             if (bmp != null) {
                 val iv = ImageView(this).apply {
                     layoutParams = FrameLayout.LayoutParams(

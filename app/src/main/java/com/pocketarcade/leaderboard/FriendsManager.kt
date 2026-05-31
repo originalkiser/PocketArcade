@@ -5,6 +5,7 @@ import android.provider.ContactsContract
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.security.MessageDigest
+import java.util.Calendar
 
 data class FollowEntry(
     val uid: String = "",
@@ -15,6 +16,36 @@ data class FollowEntry(
 )
 
 enum class TimeRange { WEEK, MONTH, ALL_TIME }
+
+/** Midnight of the most recent Sunday (start of current calendar week). */
+fun calendarStartOfWeek(): Long {
+    val cal = Calendar.getInstance()
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0);      cal.set(Calendar.MILLISECOND, 0)
+    return cal.timeInMillis
+}
+
+/** Midnight of the 1st of the current calendar month. */
+fun calendarStartOfMonth(): Long {
+    val cal = Calendar.getInstance()
+    cal.set(Calendar.DAY_OF_MONTH, 1)
+    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0);      cal.set(Calendar.MILLISECOND, 0)
+    return cal.timeInMillis
+}
+
+/** Days remaining in the current Sun–Sat week (today counts as 1). */
+fun daysLeftInWeek(): Int {
+    val cal = Calendar.getInstance()
+    return Calendar.SATURDAY - cal.get(Calendar.DAY_OF_WEEK) + 1
+}
+
+/** Days remaining in the current calendar month (today counts as 1). */
+fun daysLeftInMonth(): Int {
+    val cal = Calendar.getInstance()
+    return cal.getActualMaximum(Calendar.DAY_OF_MONTH) - cal.get(Calendar.DAY_OF_MONTH) + 1
+}
 
 object FriendsManager {
 
@@ -116,8 +147,8 @@ object FriendsManager {
             .get()
             .addOnSuccessListener { snap ->
                 val cutoff = when (timeRange) {
-                    TimeRange.WEEK     -> System.currentTimeMillis() - 7L * 24 * 3600 * 1000
-                    TimeRange.MONTH    -> System.currentTimeMillis() - 30L * 24 * 3600 * 1000
+                    TimeRange.WEEK     -> calendarStartOfWeek()
+                    TimeRange.MONTH    -> calendarStartOfMonth()
                     TimeRange.ALL_TIME -> 0L
                 }
                 val entries = snap.documents.mapNotNull { doc ->

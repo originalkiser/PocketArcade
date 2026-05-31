@@ -5,6 +5,18 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
+/** Decodes Pong encoded score (playerScore*100 + 99-aiScore) → "ps–ai"; passes through other scores. */
+fun formatGlobalScore(game: String, score: Int): String {
+    if (game != "pong" && !game.startsWith("pong_")) return "%,d".format(score)
+    val ps: Int; val ai: Int
+    when {
+        score >= 80 -> { ps = score / 100; ai = 99 - score % 100 }
+        score >= 10 -> { ps = score / 10;  ai = score % 10 }
+        else        -> { ps = 0;           ai = score }
+    }
+    return "$ps–$ai"
+}
+
 data class GlobalEntry(
     val username: String = "",
     val score: Int = 0,
@@ -186,7 +198,63 @@ object GlobalLeaderboard {
             "timestamp"   to System.currentTimeMillis()
         )
         if (mode != null) data["mode"] = mode
-        db.collection("globalScores").add(data)
+
+        // Enforce per-player 5-entry limit per game+mode combination.
+        var q: Query = db.collection("globalScores")
+            .whereEqualTo("uid", uid)
+            .whereEqualTo("game", game)
+        if (mode != null) q = q.whereEqualTo("mode", mode)
+
+        q.get().addOnSuccessListener { snap ->
+            val docs = snap.documents
+            when {
+                docs.size < 5 -> {
+                    // Under limit — add freely
+                    db.collection("globalScores").add(data)
+                }
+                else -> {
+                    // At limit — replace lowest only if new score beats it
+                    val lowestDoc = docs.minByOrNull { (it.getLong("score") ?: 0L) }
+                        ?: run { db.collection("globalScores").add(data); return@addOnSuccessListener }
+                    val lowestScore = (lowestDoc.getLong("score") ?: 0L).toInt()
+                    if (score > lowestScore) {
+                        db.runTransaction { tx ->
+                            tx.delete(lowestDoc.reference)
+                            tx.set(db.collection("globalScores").document(), data)
+                        }
+                    }
+                    // else: new score doesn't beat any existing — skip
+                }
+            }
+        }.addOnFailureListener {
+            // If query fails, add anyway (fail open) to avoid losing scores
+            db.collection("globalScores").add(data)
+        }
+    }
+
+    /** Fetch a user's country and state from the users collection. */
+    fun fetchUserInfo(uid: String, onResult: (country: String, state: String) -> Unit) {
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                onResult(doc.getString("country") ?: "", doc.getString("state") ?: "")
+            }
+            .addOnFailureListener { onResult("", "") }
+    }
+
+    /** Fetch the best global score per game for a given user (base game key, ignoring mode). */
+    fun fetchUserBestScores(uid: String, onResult: (Map<String, Int>) -> Unit) {
+        db.collection("globalScores").whereEqualTo("uid", uid).get()
+            .addOnSuccessListener { snap ->
+                val best = mutableMapOf<String, Int>()
+                snap.documents.forEach { doc ->
+                    val game  = doc.getString("game") ?: return@forEach
+                    val score = (doc.getLong("score") ?: 0L).toInt()
+                    // Normalise: "brickbreaker" (ignore mode suffixes stored as separate field)
+                    if (score > (best[game] ?: 0)) best[game] = score
+                }
+                onResult(best)
+            }
+            .addOnFailureListener { onResult(emptyMap()) }
     }
 
     fun fetchGlobal(

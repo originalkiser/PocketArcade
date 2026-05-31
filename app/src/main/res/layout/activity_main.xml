@@ -339,61 +339,6 @@
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- RECORD BOOK: 70% width, centered -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:orientation="horizontal">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1.5" />
-
-                    <LinearLayout
-                        android:id="@+id/btnRecordBook"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_record_book"
-                        android:padding="14dp"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="[ RECORD BOOK ]"
-                            android:textColor="#AA44FF"
-                            android:textSize="19sp"
-                            android:fontFamily="monospace"
-                            android:gravity="center"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvRecordBookSummary"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="NO MISSIONS LOGGED YET"
-                            android:textColor="#666688"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace"
-                            android:gravity="center" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1.5" />
-
-                </LinearLayout>
-
                 <!-- GLOBAL SCORES button -->
                 <LinearLayout
                     android:layout_width="match_parent"

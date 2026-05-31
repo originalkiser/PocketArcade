@@ -11,14 +11,14 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Two-row header (controls + hearts/high score) -->
+    <!-- Two-row header: score/level + hearts/high score -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/surface">
 
-        <!-- Row 1: back, score, level, buttons -->
+        <!-- Row 1: back, score, level -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -30,15 +30,16 @@
                 android:id="@+id/btnBack"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="&#8592;"
-                android:textColor="@color/muted"
-                android:textSize="16sp"
+                android:text="&#8592; MENU"
+                android:textColor="@color/accent_yellow"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
                 android:gravity="center"
-                android:paddingHorizontal="10dp"
+                android:paddingHorizontal="12dp"
                 android:background="@drawable/bg_game_tile"
                 android:clickable="true"
                 android:focusable="true"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="10dp" />
 
             <TextView
                 android:id="@+id/tvScore"
@@ -58,49 +59,8 @@
                 android:text="LV:1"
                 android:textColor="@color/accent_green"
                 android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:layout_marginEnd="4dp" />
+                android:fontFamily="monospace" />
 
-            <TextView
-                android:id="@+id/btnSound"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#128266;"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/btnLightMode"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#127769;"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/btnLeaderboard"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#127942;"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/btnSettings"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#9881;"
-                android:textColor="@color/muted"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true" />
         </LinearLayout>
 
         <!-- Row 2: hearts (left) + high score (right) -->
@@ -155,5 +115,76 @@
             android:textSize="10sp"
             android:fontFamily="monospace" />
     </FrameLayout>
+
+    <!-- Bottom settings bar: 🌙 | 🔊 | 🏆 | ⚙ -->
+    <LinearLayout
+        android:id="@+id/controlBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btnLightMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127769;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSound"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128266;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnLeaderboard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127942;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#9881;"
+            android:textColor="@color/muted"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
 
 </LinearLayout>

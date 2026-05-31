@@ -42,8 +42,9 @@ class AsteroidsView @JvmOverloads constructor(
         const val SMALL_R = 16f
         const val SHIP_SIZE = 20f
         const val BULLET_SPEED = 14f
-        const val ROT_SPEED = 4f
+        const val ROT_SPEED = 6f          // degrees per frame (was 4f — too sluggish)
         const val THRUST = 0.22f
+        const val THRUST_THRESHOLD = 60f  // px displacement before thrust activates (was 36f)
         const val FRICTION = 0.98f
         const val RAPID_FIRE_INTERVAL = 8
         const val SCORE_LARGE = 20
@@ -259,17 +260,18 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode) demoAI()
 
-        // Rotate incrementally from horizontal joystick; thrust in ship's facing direction
+        // Rotate incrementally from horizontal joystick; thrust in ship's facing direction.
+        // Light touch (jMag 10–60) → rotation only; hard push (jMag > 60) → thrust scales up.
         val jMag = sqrt(joystickDX * joystickDX + joystickDY * joystickDY)
         if (jMag > 10f) {
-            // joystickDX/jMag is the normalised horizontal component (-1..1);
-            // ROT_SPEED is in degrees-per-frame, converted to radians here.
+            // Normalised horizontal component drives rotation; ROT_SPEED is degrees/frame.
             ship.angle += ROT_SPEED * (PI.toFloat() / 180f) * (joystickDX / jMag)
         }
-        if (jMag > 36f) {
-            // Thrust in the direction the ship is currently pointing, not the joystick direction.
-            ship.vx += cos(ship.angle) * THRUST
-            ship.vy += sin(ship.angle) * THRUST
+        if (jMag > THRUST_THRESHOLD) {
+            // Scale thrust linearly from 0 at threshold to full THRUST at ring edge (72 px).
+            val thrustScale = ((jMag - THRUST_THRESHOLD) / (72f - THRUST_THRESHOLD)).coerceIn(0f, 1f)
+            ship.vx += cos(ship.angle) * THRUST * thrustScale
+            ship.vy += sin(ship.angle) * THRUST * thrustScale
             thrusting = true
         } else {
             thrusting = false
@@ -398,10 +400,10 @@ class AsteroidsView @JvmOverloads constructor(
         val diff = normalizeAngle(angleToTarget - ship.angle)
         val aligned = abs(diff) < 0.4f
         if (d > 120f) {
-            // DX below thrust threshold (36) while rotating; once aligned, drop DX and
-            // push DY to trigger thrust (jMag > 36) in the ship's facing direction.
-            joystickDX = sign(diff) * if (aligned) 10f else 20f
-            joystickDY = if (aligned) -50f else 0f
+            // While turning, keep jMag below THRUST_THRESHOLD (60) so only rotation fires.
+            // Once aligned, push jMag above THRUST_THRESHOLD to trigger scaled thrust.
+            joystickDX = sign(diff) * if (aligned) 10f else 30f
+            joystickDY = if (aligned) -65f else 0f   // jMag ≈ 65.8 when aligned → thrusts
         } else {
             joystickDX = 0f; joystickDY = 0f
         }

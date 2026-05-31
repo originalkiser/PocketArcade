@@ -37,6 +37,22 @@
             android:fontFamily="monospace"
             android:textStyle="bold" />
 
+        <!-- EDIT button — shown when registered -->
+        <TextView
+            android:id="@+id/btnEditProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="EDIT"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_game_tile"
+            android:paddingHorizontal="14dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <!-- Avatar section -->
@@ -53,15 +69,16 @@
             android:id="@+id/profileAvatarContainer"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_gravity="center_horizontal"
-            android:clickable="true"
-            android:focusable="true" />
+            android:layout_gravity="center_horizontal" />
 
+        <!-- Avatar edit buttons — only visible in edit mode -->
         <LinearLayout
+            android:id="@+id/layoutAvatarEditButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/btnProfileChangeAvatar"
@@ -131,7 +148,7 @@
 
     </LinearLayout>
 
-    <!-- Edit form (shown when registered) -->
+    <!-- Profile content scroll (shown when registered) -->
     <ScrollView
         android:id="@+id/layoutProfileForm"
         android:layout_width="match_parent"
@@ -145,62 +162,61 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Username -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="USERNAME"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:layout_marginBottom="6dp"
-                android:layout_marginTop="8dp" />
-
-            <EditText
-                android:id="@+id/etProfileUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_game_tile"
-                android:textColor="@color/text"
-                android:textSize="15sp"
-                android:fontFamily="monospace"
-                android:padding="12dp"
-                android:inputType="textNoSuggestions"
-                android:maxLength="20"
-                android:hint="3-20 chars, letters/numbers/underscore"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvProfileUsernameError"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/accent_red"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
-                android:visibility="gone"
-                android:layout_marginBottom="8dp" />
-
-            <!-- Location -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="COUNTRY"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:layout_marginBottom="6dp"
-                android:layout_marginTop="8dp" />
-
-            <Spinner
-                android:id="@+id/spinnerProfileCountry"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_game_tile"
-                android:padding="4dp"
-                android:layout_marginBottom="8dp" />
-
+            <!-- ── VIEW MODE section ── -->
             <LinearLayout
-                android:id="@+id/layoutProfileState"
+                android:id="@+id/layoutViewMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="USERNAME"
+                    android:textColor="@color/muted"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tvViewUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_game_tile"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LOCATION"
+                    android:textColor="@color/muted"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvViewLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text"
+                    android:textSize="14sp"
+                    android:fontFamily="monospace"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_game_tile"
+                    android:layout_marginBottom="8dp" />
+
+            </LinearLayout>
+
+            <!-- ── EDIT MODE section ── -->
+            <LinearLayout
+                android:id="@+id/layoutEditMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -209,47 +225,148 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="STATE / PROVINCE"
+                    android:text="USERNAME"
                     android:textColor="@color/muted"
                     android:textSize="11sp"
                     android:fontFamily="monospace"
-                    android:layout_marginBottom="6dp" />
+                    android:layout_marginBottom="6dp"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/etProfileUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_game_tile"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace"
+                    android:padding="12dp"
+                    android:inputType="textNoSuggestions"
+                    android:maxLength="20"
+                    android:hint="3-20 chars, letters/numbers/underscore"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvProfileUsernameError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/accent_red"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:visibility="gone"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="COUNTRY"
+                    android:textColor="@color/muted"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="6dp"
+                    android:layout_marginTop="8dp" />
 
                 <Spinner
-                    android:id="@+id/spinnerProfileState"
+                    android:id="@+id/spinnerProfileCountry"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_game_tile"
                     android:padding="4dp"
                     android:layout_marginBottom="8dp" />
 
+                <LinearLayout
+                    android:id="@+id/layoutProfileState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="STATE / PROVINCE"
+                        android:textColor="@color/muted"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:layout_marginBottom="6dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerProfileState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_game_tile"
+                        android:padding="4dp"
+                        android:layout_marginBottom="8dp" />
+
+                </LinearLayout>
+
+                <!-- Save Changes button — shown only when dirty -->
+                <TextView
+                    android:id="@+id/btnSaveProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="SAVE CHANGES"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:background="@color/accent_blue"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvSaveStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:layout_marginBottom="8dp" />
+
             </LinearLayout>
 
-            <!-- Save button -->
-            <TextView
-                android:id="@+id/btnSaveProfile"
+            <!-- ── Score Highlights section (always visible when registered) ── -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:text="SAVE CHANGES"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:fontFamily="monospace"
-                android:gravity="center"
-                android:background="@color/accent_blue"
-                android:clickable="true"
-                android:focusable="true"
+                android:layout_height="1dp"
+                android:background="@color/border"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
             <TextView
-                android:id="@+id/tvSaveStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SCORE HIGHLIGHTS"
+                android:textColor="@color/muted"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/profileHighlightsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/muted"
+                android:orientation="vertical" />
+
+            <!-- View Full Record Book button -->
+            <TextView
+                android:id="@+id/btnViewRecordBook"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="VIEW FULL RECORD BOOK"
+                android:textColor="@color/accent_blue"
                 android:textSize="12sp"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:visibility="gone"
+                android:background="@drawable/bg_game_tile"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="12dp"
                 android:layout_marginBottom="16dp" />
 
         </LinearLayout>

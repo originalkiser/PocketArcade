@@ -2,11 +2,13 @@ package com.pocketarcade
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -77,6 +79,68 @@ object HintManager {
 
             bubble.setOnClickListener { dismiss() }
             container.postDelayed({ dismiss() }, 5_000)
+        }
+    }
+
+    /**
+     * Shows a floating hint bubble ABOVE [anchor] using a PopupWindow.
+     * Works with any layout (no FrameLayout container required).
+     * Dismissed on tap or after 5 seconds. Shown at most once (persisted via [hintKey]).
+     */
+    fun showAboveIfNeeded(
+        activity: AppCompatActivity,
+        anchor: View,
+        message: String,
+        hintKey: String
+    ) {
+        if (PrefsManager.isHintShown(activity, hintKey)) return
+
+        anchor.post {
+            val dp = activity.resources.displayMetrics.density
+            val width = (220 * dp).toInt()
+
+            val bubble = TextView(activity).apply {
+                text = "💡 $message"
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                gravity = Gravity.CENTER
+                setPadding(
+                    (14 * dp).toInt(), (10 * dp).toInt(),
+                    (14 * dp).toInt(), (10 * dp).toInt()
+                )
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 10 * dp
+                    setColor(0xEE1A2040.toInt())
+                    setStroke((1.5f * dp).toInt(), 0xFF4488FF.toInt())
+                }
+                elevation = 12 * dp
+            }
+
+            // Measure so we know the height before showing.
+            bubble.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            val bubbleH = bubble.measuredHeight
+
+            val popup = PopupWindow(bubble, width, ViewGroup.LayoutParams.WRAP_CONTENT, false).apply {
+                isOutsideTouchable = true
+                setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            }
+
+            // Center the bubble over the anchor, positioned above it.
+            val xOff = -((width - anchor.width) / 2)
+            val yOff = -(anchor.height + bubbleH + (8 * dp).toInt())
+
+            fun dismiss() {
+                try { popup.dismiss() } catch (_: Exception) {}
+                PrefsManager.markHintShown(activity, hintKey)
+            }
+
+            bubble.setOnClickListener { dismiss() }
+            popup.showAsDropDown(anchor, xOff, yOff)
+            anchor.postDelayed({ dismiss() }, 5_000)
         }
     }
 }

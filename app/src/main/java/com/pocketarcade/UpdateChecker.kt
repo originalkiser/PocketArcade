@@ -23,10 +23,13 @@ object UpdateChecker {
 
     private const val API_URL =
         "https://api.github.com/repos/originalkiser/PocketArcade/releases/latest"
-    private const val DOWNLOAD_URL =
+    private const val FALLBACK_DOWNLOAD_URL =
         "https://github.com/originalkiser/PocketArcade/releases/latest/download/PocketArcade.apk"
     private const val INTERVAL_MS  = 24 * 60 * 60 * 1000L
     private const val APK_FILENAME = "PocketArcade_update.apk"
+
+    /** Holds the APK URL while waiting for the user to grant install-unknown-apps permission. */
+    private var pendingApkUrl: String? = null
 
     /** Auto check: silent, throttled to once per 24 h. */
     fun check(activity: Activity) {
@@ -39,6 +42,31 @@ object UpdateChecker {
     fun checkNow(activity: Activity) {
         Toast.makeText(activity, "Checking for updates…", Toast.LENGTH_SHORT).show()
         fetch(activity, manual = true)
+    }
+
+    /**
+     * Call from onResume() of any activity that can trigger the update flow.
+     * If the user just granted install-unknown-apps permission, this resumes the download.
+     */
+    fun checkResumeDownload(activity: Activity) {
+        val url = pendingApkUrl ?: return
+        if (activity.packageManager.canRequestPackageInstalls()) {
+            pendingApkUrl = null
+            performDownload(activity, url)
+        }
+    }
+
+    /** Returns true if [remote] version string is strictly newer than [local]. */
+    private fun isNewerVersion(remote: String, local: String): Boolean {
+        val r = remote.trimStart('v').split(".").mapNotNull { it.toIntOrNull() }
+        val l = local.trimStart('v').split(".").mapNotNull { it.toIntOrNull() }
+        for (i in 0 until maxOf(r.size, l.size)) {
+            val rv = r.getOrElse(i) { 0 }
+            val lv = l.getOrElse(i) { 0 }
+            if (rv > lv) return true
+            if (rv < lv) return false
+        }
+        return false
     }
 
     private fun fetch(activity: Activity, manual: Boolean) {
@@ -62,10 +90,15 @@ object UpdateChecker {
                         return@Thread
                     }
 
+                // Prefer the actual asset URL from the release; fall back to the static URL.
+                val apkUrl = Regex(""""browser_download_url"\s*:\s*"([^"]+\.apk)"""")
+                    .find(json)?.groupValues?.get(1)
+                    ?: FALLBACK_DOWNLOAD_URL
+
                 activity.runOnUiThread {
                     val currentTag = "v${BuildConfig.VERSION_NAME}"
-                    if (tagName != currentTag) {
-                        showUpdateDialog(activity, tagName)
+                    if (isNewerVersion(tagName, currentTag)) {
+                        showUpdateDialog(activity, tagName, apkUrl)
                     } else if (manual) {
                         toast(activity, "You're up to date!")
                     }
@@ -78,14 +111,14 @@ object UpdateChecker {
         }.start()
     }
 
-    private fun showUpdateDialog(activity: Activity, tagName: String) {
+    private fun showUpdateDialog(activity: Activity, tagName: String, apkUrl: String) {
         showStyledDialog(
             activity,
             title    = "UPDATE AVAILABLE",
             message  = "Version $tagName of Pocket Arcade is ready.\nDownload and install now?",
             positive = "DOWNLOAD UPDATE",
             negative = "LATER"
-        ) { startDownload(activity) }
+        ) { startDownload(activity, apkUrl) }
     }
 
     private fun showPermissionDialog(activity: Activity) {
@@ -127,12 +160,17 @@ object UpdateChecker {
         dialog.show()
     }
 
-    private fun startDownload(activity: Activity) {
+    private fun startDownload(activity: Activity, apkUrl: String) {
         if (!activity.packageManager.canRequestPackageInstalls()) {
+            pendingApkUrl = apkUrl   // retry after permission is granted in onResume
             showPermissionDialog(activity)
             return
         }
+        pendingApkUrl = null
+        performDownload(activity, apkUrl)
+    }
 
+    private fun performDownload(activity: Activity, apkUrl: String) {
         val apkFile = activity.getExternalFilesDir(null)
             ?.let { File(it, APK_FILENAME) }
             ?: return toast(activity, "Storage not available. Try again later.")
@@ -141,7 +179,7 @@ object UpdateChecker {
 
         val dm = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val dlId = dm.enqueue(
-            DownloadManager.Request(Uri.parse(DOWNLOAD_URL))
+            DownloadManager.Request(Uri.parse(apkUrl))
                 .setTitle("Pocket Arcade Update")
                 .setDescription("Downloading…")
                 .setDestinationInExternalFilesDir(activity, null, APK_FILENAME)

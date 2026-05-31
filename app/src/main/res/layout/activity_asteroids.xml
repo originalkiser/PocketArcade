@@ -11,7 +11,7 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Controls bar (above game, below ad) -->
+    <!-- Top bar: back button + score display only -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -24,15 +24,16 @@
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:text="&#8592;"
-            android:textColor="@color/muted"
-            android:textSize="16sp"
+            android:text="&#8592; MENU"
+            android:textColor="@color/accent_cyan"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
             android:gravity="center"
-            android:paddingHorizontal="10dp"
+            android:paddingHorizontal="12dp"
             android:background="@drawable/bg_game_tile"
             android:clickable="true"
             android:focusable="true"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="10dp" />
 
         <TextView
             android:id="@+id/tvScore"
@@ -51,74 +52,18 @@
             android:text="Best: 0"
             android:textColor="@color/muted"
             android:textSize="10sp"
-            android:fontFamily="monospace"
-            android:layout_marginEnd="4dp" />
+            android:fontFamily="monospace" />
 
-        <TextView
-            android:id="@+id/btnAutoFire"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:paddingHorizontal="8dp"
-            android:text="AUTO"
-            android:textColor="@color/muted"
-            android:textSize="9sp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:background="@drawable/bg_game_tile"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginEnd="4dp" />
-
-        <TextView
-            android:id="@+id/btnSound"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#128266;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
-            android:id="@+id/btnLightMode"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#127769;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
-            android:id="@+id/btnLeaderboard"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#127942;"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
-            android:id="@+id/btnSettings"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:text="&#9881;"
-            android:textColor="@color/muted"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
     </LinearLayout>
 
-    <!-- Game area (shorter to leave room for controls) -->
+    <!-- Game area -->
     <com.pocketarcade.games.asteroids.AsteroidsView
         android:id="@+id/asteroidsView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3" />
 
-    <!-- Dedicated controls panel: joystick left, fire right -->
+    <!-- Joystick + fire controls panel -->
     <com.pocketarcade.games.asteroids.AsteroidsControlsView
         android:id="@+id/controlsPanel"
         android:layout_width="match_parent"
@@ -128,5 +73,93 @@
         android:clickable="true"
         android:focusable="true" />
 
-</LinearLayout>
+    <!-- Bottom settings bar: AUTO | 🌙 | 🔊 | 🏆 | ⚙ -->
+    <LinearLayout
+        android:id="@+id/controlBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:gravity="center_vertical">
 
+        <TextView
+            android:id="@+id/btnAutoFire"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="AUTO"
+            android:textColor="@color/muted"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnLightMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127769;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSound"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128266;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnLeaderboard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127942;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#9881;"
+            android:textColor="@color/muted"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>

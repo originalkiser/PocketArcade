@@ -337,6 +337,7 @@
             android:orientation="vertical"
             android:visibility="gone">
 
+            <!-- Game filter chips -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -351,6 +352,29 @@
                     android:orientation="horizontal" />
 
             </HorizontalScrollView>
+
+            <!-- Time range bar: WEEK | MONTH | ALL TIME -->
+            <LinearLayout
+                android:id="@+id/leaderboardTimeBar"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal"
+                android:background="@color/surface"
+                android:gravity="center_vertical"
+                android:paddingEnd="8dp" />
+
+            <!-- Days remaining in period -->
+            <TextView
+                android:id="@+id/tvTimeRangeInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/muted"
+                android:gravity="center"
+                android:paddingVertical="3dp"
+                android:background="@color/surface"
+                android:visibility="gone" />
 
             <ScrollView
                 android:layout_width="match_parent"

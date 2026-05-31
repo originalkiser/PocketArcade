@@ -59,6 +59,46 @@ private val CHANGELOG = mapOf(
 ★ What's New in Settings
   View this changelog any time""",
 
+    6 to """★ Profile view mode
+  Profile opens read-only by default
+  Tap EDIT to make changes; Save
+  appears only when something changed
+
+★ Score Highlights in Profile
+  See your best scores per game
+  right on your profile page
+  Record Book link at the bottom
+
+★ Tap friends to view their profile
+  Opens full profile with their
+  best global scores
+
+★ Friends leaderboard time periods
+  WEEK / MONTH / ALL TIME filters
+  Calendar-based (Sun–Sat week)
+  Days remaining shown below tabs
+  Gold/silver/bronze for timed periods
+
+★ Real match score for Pong
+  Global boards now show "7–3"
+  instead of a raw number
+
+★ Game icons replace emoji
+  Leaderboards and rank chips now
+  use the real game icons
+
+★ Difficulty labels on leaderboards
+  "(H) 4,820" format when showing
+  all difficulties together
+  Abbreviated state & country codes
+
+★ Leaderboard 5-entry cap per player
+  Each player's top 5 scores kept
+  per game & difficulty combination
+
+★ Record Book moved to Profile
+  Removed from the main menu""",
+
     5 to """★ Global Leaderboard
   Compete with players worldwide!
   Sign up from Profile or Settings

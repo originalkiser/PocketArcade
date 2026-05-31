@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.pocketarcade.leaderboard.*
 import com.pocketarcade.storage.PrefsManager
 
@@ -20,17 +21,19 @@ class FriendsActivity : AppCompatActivity() {
     private var myUid: String? = null
     private var following = listOf<FollowEntry>()
     private var mutuals = setOf<String>()
+    private var myFollowingUids = setOf<String>()
     private var groupScores = mapOf<String, Map<String, Int>>()
     private var ranks = mapOf<String, Map<String, Int>>()
     private var selectedGame = PrefsManager.GAME_SNAKE
+    private var selectedTimeRange = TimeRange.ALL_TIME
     private var leaderboardLoaded = false
 
-    private data class GameInfo(val key: String, val emoji: String, val label: String)
+    private data class GameInfo(val key: String, val iconRes: Int, val label: String)
     private val games = listOf(
-        GameInfo(PrefsManager.GAME_SNAKE, "🐍", "SNAKE"),
-        GameInfo(PrefsManager.GAME_PONG, "🏓", "PONG"),
-        GameInfo(PrefsManager.GAME_ASTEROIDS, "🚀", "ASTEROIDS"),
-        GameInfo(PrefsManager.GAME_BRICKBREAKER, "🧱", "BRICKBREAKER")
+        GameInfo(PrefsManager.GAME_SNAKE,        R.drawable.ic_snake,        "SNAKE"),
+        GameInfo(PrefsManager.GAME_PONG,         R.drawable.ic_pong,         "PONG"),
+        GameInfo(PrefsManager.GAME_ASTEROIDS,    R.drawable.ic_asteroids,    "ASTEROIDS"),
+        GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRKR BREAKER")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +107,7 @@ class FriendsActivity : AppCompatActivity() {
                 myUid = uid
                 FriendsManager.getFollowing(uid) { list ->
                     following = list
+                    myFollowingUids = list.map { it.uid }.toSet()
                     val allUids = (listOf(uid) + list.map { it.uid }).distinct()
                     var pending = 2
                     fun done() {
@@ -160,7 +164,7 @@ class FriendsActivity : AppCompatActivity() {
         val dp = resources.displayMetrics.density
         games.forEach { game ->
             val rank = myRanks[game.key] ?: return@forEach
-            chipsContainer.addView(makeRankChip(game.emoji, rank, isMutual = false, dp))
+            chipsContainer.addView(makeRankChip(game.iconRes, rank, isMutual = false, dp))
         }
     }
 
@@ -169,6 +173,8 @@ class FriendsActivity : AppCompatActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
             background = if (isMutual) {
                 GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
@@ -184,6 +190,36 @@ class FriendsActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = (6 * dp).toInt() }
+        }
+
+        // Tap row → show profile dialog
+        row.setOnClickListener {
+            GlobalLeaderboard.fetchUserInfo(entry.uid) { country, state ->
+                val globalEntry = GlobalEntry(
+                    uid         = entry.uid,
+                    username    = entry.username,
+                    country     = country,
+                    state       = state,
+                    avatarIndex = entry.avatarIndex,
+                    avatarColor = entry.avatarColor
+                )
+                runOnUiThread {
+                    showPlayerProfileDialog(
+                        activity    = this,
+                        entry       = globalEntry,
+                        myUid       = myUid,
+                        isFollowing = following.any { it.uid == entry.uid },
+                        onFollowChanged = { isNowFollowing ->
+                            if (!isNowFollowing) {
+                                following = following.filter { it.uid != entry.uid }
+                                myFollowingUids = myFollowingUids - entry.uid
+                                mutuals = mutuals - entry.uid
+                                buildFriendsList()
+                            }
+                        }
+                    )
+                }
+            }
         }
 
         row.addView(AvatarUtils.buildView(this, entry.avatarIndex, entry.avatarColor, 40))
@@ -213,7 +249,7 @@ class FriendsActivity : AppCompatActivity() {
         val entryRanks = ranks[entry.uid] ?: emptyMap()
         games.forEach { game ->
             val rank = entryRanks[game.key] ?: return@forEach
-            rankChips.addView(makeRankChip(game.emoji, rank, isMutual, dp))
+            rankChips.addView(makeRankChip(game.iconRes, rank, isMutual, dp))
         }
         nameCol.addView(rankChips)
         row.addView(nameCol)
@@ -234,17 +270,34 @@ class FriendsActivity : AppCompatActivity() {
         return row
     }
 
-    private fun makeRankChip(emoji: String, rank: Int, isMutual: Boolean, dp: Float): TextView {
-        return TextView(this).apply {
-            text = "$emoji#$rank"
-            textSize = 10f
-            typeface = Typeface.MONOSPACE
-            setTextColor(if (isMutual) Color.parseColor("#00CC66") else getColor(R.color.muted))
+    /** Rank chip: small game icon + "#N" text */
+    private fun makeRankChip(iconRes: Int, rank: Int, isMutual: Boolean, dp: Float): View {
+        val color = if (isMutual) Color.parseColor("#00CC66") else getColor(R.color.muted)
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { marginEnd = (4 * dp).toInt() }
+            ).apply { marginEnd = (6 * dp).toInt() }
         }
+        val iconSize = (13 * dp).toInt()
+        container.addView(ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+            setImageResource(iconRes)
+            setColorFilter(color)
+        })
+        container.addView(TextView(this).apply {
+            text = "#$rank"
+            textSize = 10f
+            typeface = Typeface.MONOSPACE
+            setTextColor(color)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginStart = (2 * dp).toInt() }
+        })
+        return container
     }
 
     private fun confirmUnfollow(entry: FollowEntry) {
@@ -361,7 +414,68 @@ class FriendsActivity : AppCompatActivity() {
 
     private fun loadLeaderboard() {
         setupLeaderboardFilters()
+        setupTimeRangeBar()
         fetchAndShowLeaderboard()
+    }
+
+    private fun setupTimeRangeBar() {
+        val bar = findViewById<LinearLayout>(R.id.leaderboardTimeBar) ?: return
+        val tvInfo = findViewById<TextView>(R.id.tvTimeRangeInfo) ?: return
+        bar.removeAllViews()
+        val dp = resources.displayMetrics.density
+
+        data class Range(val label: String, val range: TimeRange)
+        val ranges = listOf(Range("WEEK", TimeRange.WEEK), Range("MONTH", TimeRange.MONTH), Range("ALL TIME", TimeRange.ALL_TIME))
+
+        fun refreshStyles() {
+            ranges.forEachIndexed { i, r ->
+                val chip = bar.getChildAt(i) as? TextView ?: return@forEachIndexed
+                val active = r.range == selectedTimeRange
+                chip.setTextColor(if (active) Color.WHITE else getColor(R.color.muted))
+                chip.background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 16 * dp
+                    if (active) setColor(getColor(R.color.accent_blue))
+                    else { setColor(Color.TRANSPARENT); setStroke((1 * dp).toInt(), getColor(R.color.muted)) }
+                }
+            }
+            // Days remaining subtitle
+            when (selectedTimeRange) {
+                TimeRange.WEEK -> {
+                    val days = daysLeftInWeek()
+                    tvInfo.text = "$days day${if (days == 1) "" else "s"} left in this week (Sun–Sat)"
+                    tvInfo.visibility = View.VISIBLE
+                }
+                TimeRange.MONTH -> {
+                    val days = daysLeftInMonth()
+                    tvInfo.text = "$days day${if (days == 1) "" else "s"} left in this month"
+                    tvInfo.visibility = View.VISIBLE
+                }
+                TimeRange.ALL_TIME -> tvInfo.visibility = View.GONE
+            }
+        }
+
+        ranges.forEach { r ->
+            val chip = TextView(this).apply {
+                text = r.label
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+                setPadding((12 * dp).toInt(), 0, (12 * dp).toInt(), 0)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, (30 * dp).toInt()
+                ).apply { marginStart = (8 * dp).toInt() }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener {
+                    selectedTimeRange = r.range
+                    refreshStyles()
+                    fetchAndShowLeaderboard()
+                }
+            }
+            bar.addView(chip)
+        }
+        refreshStyles()
     }
 
     private fun setupLeaderboardFilters() {
@@ -371,7 +485,7 @@ class FriendsActivity : AppCompatActivity() {
 
         games.forEach { game ->
             val chip = TextView(this).apply {
-                text = "${game.emoji} ${game.label}"
+                text = " ${game.label}"
                 textSize = 11f
                 typeface = Typeface.MONOSPACE
                 gravity = Gravity.CENTER
@@ -380,6 +494,12 @@ class FriendsActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     (34 * dp).toInt()
                 ).apply { marginEnd = (8 * dp).toInt() }
+                // Game icon as compound drawable
+                val iconSize = (16 * dp).toInt()
+                val d = ContextCompat.getDrawable(this@FriendsActivity, game.iconRes)
+                d?.setBounds(0, 0, iconSize, iconSize)
+                setCompoundDrawablesRelative(d, null, null, null)
+                compoundDrawablePadding = (4 * dp).toInt()
             }
             filterRow.addView(chip)
         }
@@ -424,7 +544,7 @@ class FriendsActivity : AppCompatActivity() {
         val uid = myUid ?: run { tvLoading.text = "Sign in required"; return }
         val allUids = (listOf(uid) + following.map { it.uid }).distinct()
 
-        FriendsManager.fetchFriendsScores(allUids, selectedGame, TimeRange.ALL_TIME) { entries ->
+        FriendsManager.fetchFriendsScores(allUids, selectedGame, selectedTimeRange) { entries ->
             runOnUiThread {
                 tvLoading.visibility = View.GONE
                 if (entries.isEmpty()) {
@@ -447,9 +567,27 @@ class FriendsActivity : AppCompatActivity() {
         isMutual: Boolean
     ): View {
         val dp = resources.displayMetrics.density
+        // Medals (gold/silver/bronze) only for timed periods, not ALL TIME
+        val useMedals = selectedTimeRange != TimeRange.ALL_TIME
+        val rankColor = when {
+            useMedals && rank == 1 -> Color.parseColor("#FFD700")
+            useMedals && rank == 2 -> Color.parseColor("#C0C0C0")
+            useMedals && rank == 3 -> Color.parseColor("#CD7F32")
+            isMe     -> getColor(R.color.accent_blue)
+            isMutual -> Color.parseColor("#00CC66")
+            else     -> getColor(R.color.muted)
+        }
+        val nameColor = when {
+            isMe    -> getColor(R.color.accent_blue)
+            isMutual -> Color.parseColor("#00CC66")
+            else    -> getColor(R.color.text)
+        }
+
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 6 * dp
@@ -466,26 +604,30 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { bottomMargin = (4 * dp).toInt() }
         }
 
+        // Tap row → show player profile dialog
+        row.setOnClickListener {
+            showPlayerProfileDialog(
+                activity    = this,
+                entry       = entry,
+                myUid       = myUid,
+                isFollowing = myFollowingUids.contains(entry.uid),
+                onFollowChanged = { isNowFollowing ->
+                    myFollowingUids = if (isNowFollowing) myFollowingUids + entry.uid
+                                     else myFollowingUids - entry.uid
+                }
+            )
+        }
+
         row.addView(TextView(this).apply {
             text = "#$rank"
             textSize = 13f
             typeface = Typeface.MONOSPACE
-            setTextColor(when (rank) {
-                1    -> Color.parseColor("#FFD700")
-                2    -> Color.parseColor("#C0C0C0")
-                3    -> Color.parseColor("#CD7F32")
-                else -> getColor(R.color.muted)
-            })
+            setTextColor(rankColor)
             layoutParams = LinearLayout.LayoutParams((36 * dp).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT)
         })
 
         row.addView(AvatarUtils.buildView(this, entry.avatarIndex, entry.avatarColor, 32))
 
-        val nameColor = when {
-            isMe    -> getColor(R.color.accent_blue)
-            isMutual -> Color.parseColor("#00CC66")
-            else    -> getColor(R.color.text)
-        }
         row.addView(TextView(this).apply {
             text = "@${entry.username}" + if (isMe) " (me)" else if (isMutual) " ♻" else ""
             setTextColor(nameColor)
@@ -496,14 +638,22 @@ class FriendsActivity : AppCompatActivity() {
             }
         })
 
+        // Score column with game icon
         val gameInfo = games.find { it.key == selectedGame }
-        val scoreText = if (selectedGame == PrefsManager.GAME_PONG) "${entry.score}W" else "${entry.score}"
+        val scoreText = formatGlobalScore(selectedGame, entry.score)
         row.addView(TextView(this).apply {
-            text = "${gameInfo?.emoji ?: ""} $scoreText"
+            text = " $scoreText"
             setTextColor(nameColor)
             textSize = 12f
             typeface = Typeface.MONOSPACE
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            if (gameInfo != null) {
+                val iconSize = (16 * dp).toInt()
+                val d = ContextCompat.getDrawable(this@FriendsActivity, gameInfo.iconRes)
+                d?.setBounds(0, 0, iconSize, iconSize)
+                setCompoundDrawablesRelative(d, null, null, null)
+                compoundDrawablePadding = (2 * dp).toInt()
+            }
         })
 
         return row

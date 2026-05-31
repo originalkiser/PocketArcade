@@ -24,24 +24,13 @@ data class PendingGlobalScore(
     val avatarColor: Int = 0
 )
 
-private data class GameInfo(val key: String, val emoji: String, val label: String)
+private data class GameInfo(val key: String, val iconRes: Int, val label: String)
 private val GAMES = listOf(
-    GameInfo("snake",       "🐍", "SNAKE"),
-    GameInfo("pong",        "🏓", "PONG"),
-    GameInfo("asteroids",   "🚀", "ASTEROIDS"),
-    GameInfo("brickbreaker","🧱", "BRICKBREAKER")
+    GameInfo("snake",        R.drawable.ic_snake,        "SNAKE"),
+    GameInfo("pong",         R.drawable.ic_pong,         "PONG"),
+    GameInfo("asteroids",    R.drawable.ic_asteroids,    "ASTEROIDS"),
+    GameInfo("brickbreaker", R.drawable.ic_brickbreaker, "BRICKBREAKER")
 )
-
-private fun formatGlobalScore(game: String, score: Int): String {
-    if (game != "pong" && !game.startsWith("pong_")) return score.toString()
-    val ps: Int; val ai: Int
-    when {
-        score >= 80 -> { ps = score / 100; ai = 99 - score % 100 }
-        score >= 10 -> { ps = score / 10;  ai = score % 10 }
-        else        -> { ps = 0;           ai = score }
-    }
-    return "$ps-$ai"
-}
 
 private fun pongScoreColor(game: String, score: Int): Int? {
     if (game != "pong" && !game.startsWith("pong_")) return null
@@ -51,6 +40,28 @@ private fun pongScoreColor(game: String, score: Int): Int? {
         else        -> 0
     }
     return if (ps >= 7) Color.parseColor("#2ecc71") else Color.parseColor("#e74c3c")
+}
+
+// ── Location abbreviation helpers ─────────────────────────────────────────────
+
+private fun formatLocationShort(country: String, state: String): String {
+    val cc = countryCode(country)
+    return when {
+        country == "United States" && state.isNotEmpty() ->
+            "${abbreviateState(country, state)}, $cc"
+        country == "Canada" && state.isNotEmpty() ->
+            "${abbreviateState(country, state)}, $cc"
+        cc.isNotEmpty() -> cc
+        country.isNotEmpty() -> country.take(8)
+        else -> ""
+    }
+}
+
+private fun modeLabel(mode: String?): String = when (mode?.lowercase()) {
+    "easy"   -> "(E) "
+    "medium" -> "(M) "
+    "hard"   -> "(H) "
+    else     -> ""
 }
 
 fun showGlobalLeaderboardDialog(
@@ -120,7 +131,7 @@ fun showGlobalLeaderboardDialog(
 
     // ── Chip builder ─────────────────────────────────────────────────────────
 
-    fun makeChip(text: String, active: Boolean): TextView {
+    fun makeChip(text: String, active: Boolean, iconRes: Int? = null): TextView {
         val bg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 20 * dp
@@ -141,79 +152,33 @@ fun showGlobalLeaderboardDialog(
             )
             isClickable = true
             isFocusable = true
+            if (iconRes != null) {
+                val iconSize = (16 * dp).toInt()
+                val d = activity.getDrawable(iconRes)
+                d?.setBounds(0, 0, iconSize, iconSize)
+                setCompoundDrawablesRelative(d, null, null, null)
+                compoundDrawablePadding = (4 * dp).toInt()
+            }
         }
     }
 
-    // ── Mini user profile dialog ──────────────────────────────────────────────
+    // ── User profile dialog ───────────────────────────────────────────────────
 
     fun showUserProfileDialog(entry: GlobalEntry) {
-        val pView = LayoutInflater.from(activity).inflate(R.layout.dialog_user_profile, null)
-        val pDialog = Dialog(activity)
-        pDialog.setContentView(pView)
-        pDialog.window?.apply {
-            setBackgroundDrawableResource(android.R.color.transparent)
-            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
-        }
-
-        pView.findViewById<FrameLayout>(R.id.profileDialogAvatar)
-            .addView(AvatarUtils.buildView(activity, entry.avatarIndex, entry.avatarColor, 56))
-        pView.findViewById<TextView>(R.id.tvProfileUsername).text = "@${entry.username}"
-        val loc = when {
-            entry.state.isNotEmpty() -> "${entry.state}, ${entry.country}"
-            entry.country.isNotEmpty() -> entry.country
-            else -> "—"
-        }
-        pView.findViewById<TextView>(R.id.tvProfileLocation).text = loc
-
-        val btnFollow = pView.findViewById<TextView>(R.id.btnFollowUser)
-
-        fun refreshFollowBtn() {
-            when {
-                entry.uid == myUid -> btnFollow.visibility = View.GONE
-                entry.uid in myFollowingUids -> {
-                    btnFollow.text = "FOLLOWING ✓"
-                    btnFollow.setTextColor(accentGreen)
-                }
-                else -> {
-                    btnFollow.text = "+ ADD FRIEND"
-                    btnFollow.setTextColor(Color.WHITE)
+        showPlayerProfileDialog(
+            activity  = activity,
+            entry     = entry,
+            myUid     = myUid,
+            isFollowing = entry.uid in myFollowingUids,
+            onFollowChanged = { isNowFollowing ->
+                if (isNowFollowing) {
+                    myFollowingUids = myFollowingUids + entry.uid
+                } else {
+                    myFollowingUids = myFollowingUids - entry.uid
+                    myMutualUids    = myMutualUids    - entry.uid
                 }
             }
-        }
-        refreshFollowBtn()
-
-        btnFollow.setOnClickListener {
-            if (entry.uid in myFollowingUids) {
-                val uid = myUid ?: return@setOnClickListener
-                FriendsManager.unfollow(uid, entry.uid,
-                    onSuccess = {
-                        myFollowingUids = myFollowingUids - entry.uid
-                        myMutualUids    = myMutualUids - entry.uid
-                        activity.runOnUiThread { refreshFollowBtn() }
-                    },
-                    onError = {}
-                )
-            } else {
-                GlobalLeaderboard.ensureSignedIn(
-                    onReady = { uid ->
-                        myUid = uid
-                        FriendsManager.follow(
-                            uid, entry.uid, entry.username,
-                            entry.avatarIndex, entry.avatarColor,
-                            onSuccess = {
-                                myFollowingUids = myFollowingUids + entry.uid
-                                activity.runOnUiThread { refreshFollowBtn() }
-                            },
-                            onError = {}
-                        )
-                    },
-                    onError = {}
-                )
-            }
-        }
-
-        pView.findViewById<TextView>(R.id.btnCloseProfile).setOnClickListener { pDialog.dismiss() }
-        pDialog.show()
+        )
     }
 
     // ── Row builder ───────────────────────────────────────────────────────────
@@ -235,9 +200,11 @@ fun showGlobalLeaderboardDialog(
             isMutual -> accentGreen
             else     -> Color.WHITE
         }
-        val scoreText  = formatGlobalScore(currentGame, entry.score)
+        // Mode prefix "(H) " etc. only when showing all-modes view
+        val prefix     = if (currentMode == null) modeLabel(entry.mode) else ""
+        val scoreText  = prefix + formatGlobalScore(currentGame, entry.score)
         val scoreColor = pongScoreColor(currentGame, entry.score) ?: accentBlue
-        val location   = if (entry.state.isNotEmpty()) "${entry.state}, ${entry.country}" else entry.country
+        val location   = formatLocationShort(entry.country, entry.state)
 
         val row = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -414,12 +381,12 @@ fun showGlobalLeaderboardDialog(
     fun setupGameChips() {
         gameChipsRow.removeAllViews()
         GAMES.forEachIndexed { i, g ->
-            val chip = makeChip("${g.emoji} ${g.label}", g.key == currentGame)
+            val chip = makeChip(" ${g.label}", g.key == currentGame, g.iconRes)
             if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
             chip.setOnClickListener {
                 currentGame = g.key
                 currentMode = null
-                tvCurrentGame.text = "${g.emoji} ${g.label}"
+                tvCurrentGame.text = g.label
                 setupGameChips()
                 setupModeChips()
                 loadFirstPage()
@@ -457,7 +424,7 @@ fun showGlobalLeaderboardDialog(
     refreshThirdTab()
 
     val initGame = GAMES.find { it.key == currentGame }
-    tvCurrentGame.text = "${initGame?.emoji ?: ""} ${initGame?.label ?: currentGame.uppercase()}"
+    tvCurrentGame.text = initGame?.label ?: currentGame.uppercase()
 
     setupGameChips()
     setupModeChips()
@@ -570,7 +537,7 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
     }
 
     root.addView(TextView(activity).apply {
-        text = "🌎 GLOBAL LEADERBOARD"
+        text = "GLOBAL LEADERBOARD"
         textSize = 15f
         typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
         gravity = Gravity.CENTER
@@ -583,7 +550,7 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
 
     GAMES.forEach { g ->
         val tile = TextView(activity).apply {
-            text = "${g.emoji}  ${g.label}"
+            text = "  ${g.label}"
             setTextColor(Color.WHITE)
             textSize = 15f
             typeface = Typeface.MONOSPACE
@@ -594,6 +561,11 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 48.px()
             ).apply { topMargin = 8.px() }
+            val iconSize = 20.px()
+            val d = activity.getDrawable(g.iconRes)
+            d?.setBounds(0, 0, iconSize, iconSize)
+            setCompoundDrawablesRelative(d, null, null, null)
+            compoundDrawablePadding = 8.px()
         }
         tile.setOnClickListener {
             dialog.dismiss()
