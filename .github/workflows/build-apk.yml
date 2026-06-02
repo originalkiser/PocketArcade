@@ -23,8 +23,8 @@ jobs:
 
       - name: Compute version tag
         run: |
-          PATCH=$(git rev-list --count HEAD)
-          echo "RELEASE_TAG=v1.3.${PATCH}" >> $GITHUB_ENV
+          VERSION=$(grep 'versionName' app/build.gradle.kts | sed 's/.*versionName\s*=\s*"\(.*\)".*/\1/' | tr -d '[:space:]')
+          echo "RELEASE_TAG=v${VERSION}" >> $GITHUB_ENV
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
@@ -38,7 +38,6 @@ jobs:
       - name: Build Release APK
         run: |
           ./gradlew assembleRelease --no-daemon \
-            -PversionName=${RELEASE_TAG#v} \
             -Pandroid.injected.signing.store.file=$PWD/keystore.jks \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_STORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEYSTORE_KEY_ALIAS }} \
@@ -61,6 +60,10 @@ jobs:
           EOF
 
       - name: Create release
-        run: gh release create "$RELEASE_TAG" PocketArcade.apk --title "Pocket Arcade $RELEASE_TAG" --notes-file notes.md --latest
+        run: |
+          # Delete any existing release/tag with this name so re-runs don't fail
+          gh release delete "$RELEASE_TAG" --yes 2>/dev/null || true
+          git push origin ":refs/tags/$RELEASE_TAG" 2>/dev/null || true
+          gh release create "$RELEASE_TAG" PocketArcade.apk --title "Pocket Arcade $RELEASE_TAG" --notes-file notes.md --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
