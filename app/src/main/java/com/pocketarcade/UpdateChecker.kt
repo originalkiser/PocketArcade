@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.widget.TextView
 import android.widget.Toast
@@ -15,7 +17,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import com.pocketarcade.storage.PrefsManager
 import java.io.File
-import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -190,29 +191,33 @@ object UpdateChecker {
     }
 
     private fun performDownload(activity: Activity, apkUrl: String) {
-        val apkFile = activity.getExternalFilesDir(null)
+        // Capture application context up front — this survives activity recreation and
+        // prevents the WeakReference-becomes-null problem that silently swallowed installs.
+        val appContext = activity.applicationContext
+
+        val apkFile = appContext.getExternalFilesDir(null)
             ?.let { File(it, APK_FILENAME) }
             ?: return toast(activity, "Storage not available. Try again later.")
 
         if (apkFile.exists()) apkFile.delete()
 
-        val dm = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val dm = appContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val dlId = dm.enqueue(
             DownloadManager.Request(Uri.parse(apkUrl))
                 .setTitle("Pocket Arcade Update")
                 .setDescription("Downloading…")
-                .setDestinationInExternalFilesDir(activity, null, APK_FILENAME)
+                .setDestinationInExternalFilesDir(appContext, null, APK_FILENAME)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setAllowedOverMetered(true)
         )
 
         toast(activity, "Downloading update…")
 
-        val weakRef = WeakReference(activity)
+        // Register on applicationContext so the receiver fires regardless of activity lifecycle.
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context, intent: Intent) {
                 if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) != dlId) return
-                try { ctx.unregisterReceiver(this) } catch (_: Exception) {}
+                try { appContext.unregisterReceiver(this) } catch (_: Exception) {}
 
                 val cursor = dm.query(DownloadManager.Query().setFilterById(dlId))
                 val ok = cursor.use {
@@ -221,43 +226,45 @@ object UpdateChecker {
                     ) == DownloadManager.STATUS_SUCCESSFUL
                 }
 
-                weakRef.get()?.runOnUiThread {
-                    val act = weakRef.get() ?: return@runOnUiThread
-                    if (ok) installApk(act, apkFile)
-                    else toast(act, "Download failed. Try again.")
+                Handler(Looper.getMainLooper()).post {
+                    if (ok) {
+                        installApk(appContext, apkFile)
+                    } else {
+                        Toast.makeText(appContext, "Download failed. Try again.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            activity.registerReceiver(
+            appContext.registerReceiver(
                 receiver,
                 IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
                 Context.RECEIVER_NOT_EXPORTED
             )
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag")
-            activity.registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+            appContext.registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         }
     }
 
-    private fun installApk(activity: Activity, apkFile: File) {
-        if (activity.isFinishing || activity.isDestroyed) return
+    private fun installApk(context: Context, apkFile: File) {
         try {
             val uri = FileProvider.getUriForFile(
-                activity,
-                "${activity.packageName}.fileprovider",
+                context,
+                "${context.packageName}.fileprovider",
                 apkFile
             )
-            activity.startActivity(
+            context.startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, "application/vnd.android.package-archive")
+                    // FLAG_ACTIVITY_NEW_TASK required when starting from a non-Activity context
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
             )
         } catch (e: Exception) {
             android.util.Log.e("UpdateChecker", "installApk failed", e)
-            toast(activity, "Install failed. Please install manually from Settings.")
+            Toast.makeText(context, "Install failed. Please install manually from Settings.", Toast.LENGTH_SHORT).show()
         }
     }
 
