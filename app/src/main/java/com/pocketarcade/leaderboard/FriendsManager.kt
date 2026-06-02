@@ -138,23 +138,33 @@ object FriendsManager {
         onResult: (List<GlobalEntry>) -> Unit
     ) {
         if (uids.isEmpty()) { onResult(emptyList()); return }
+
+        val cutoff = when (timeRange) {
+            TimeRange.WEEK     -> calendarStartOfWeek()
+            TimeRange.MONTH    -> calendarStartOfMonth()
+            TimeRange.ALL_TIME -> 0L
+        }
+
         var q: Query = db.collection("globalScores")
             .whereEqualTo("game", game)
             .whereIn("uid", uids.take(30))
         if (mode != null) q = q.whereEqualTo("mode", mode)
-        q.orderBy("score", Query.Direction.DESCENDING)
-            .limit(200)
+
+        // For time-bounded ranges, filter at the DB level so we fetch every score
+        // submitted in the period — not just the all-time top entries, which would
+        // cause recent lower scores to be silently excluded by the query limit.
+        if (cutoff > 0L) {
+            q = q.whereGreaterThanOrEqualTo("timestamp", cutoff)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+        } else {
+            q = q.orderBy("score", Query.Direction.DESCENDING)
+        }
+
+        q.limit(if (cutoff > 0L) 500L else 200L)
             .get()
             .addOnSuccessListener { snap ->
-                val cutoff = when (timeRange) {
-                    TimeRange.WEEK     -> calendarStartOfWeek()
-                    TimeRange.MONTH    -> calendarStartOfMonth()
-                    TimeRange.ALL_TIME -> 0L
-                }
                 val entries = snap.documents.mapNotNull { doc ->
                     runCatching {
-                        val ts = doc.getLong("timestamp") ?: 0L
-                        if (ts < cutoff) return@runCatching null
                         GlobalEntry(
                             uid         = doc.getString("uid") ?: "",
                             username    = doc.getString("username") ?: "???",
@@ -162,12 +172,14 @@ object FriendsManager {
                             country     = doc.getString("country") ?: "",
                             state       = doc.getString("state") ?: "",
                             mode        = doc.getString("mode"),
-                            timestamp   = ts,
+                            timestamp   = doc.getLong("timestamp") ?: 0L,
                             avatarIndex = (doc.getLong("avatarIndex") ?: 0L).toInt(),
                             avatarColor = (doc.getLong("avatarColor") ?: 0L).toInt()
                         )
                     }.getOrNull()
                 }
+                // Pick each friend's single best score within the fetched window,
+                // then rank the friend list by that score descending.
                 val best = entries
                     .groupBy { it.uid }
                     .map { (_, scores) -> scores.maxByOrNull { it.score }!! }
