@@ -23,7 +23,7 @@ jobs:
 
       - name: Compute version tag
         run: |
-          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          VERSION=$(grep -oP '(?<=versionName = ")[^"]+' app/build.gradle.kts)
           echo "Extracted versionName: ${VERSION}"
           if [ -z "$VERSION" ]; then
             echo "ERROR: Could not extract versionName from build.gradle.kts"
