@@ -30,7 +30,7 @@
                 android:id="@+id/btnBack"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="&#8592; MENU"
+                android:text="&lt; MENU"
                 android:textColor="@color/accent_yellow"
                 android:textSize="11sp"
                 android:fontFamily="monospace"

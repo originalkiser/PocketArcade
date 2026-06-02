@@ -151,32 +151,30 @@ fun showPlayerProfileDialog(
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { bottomMargin = (3 * dp).toInt() }
+                    ).apply { bottomMargin = (4 * dp).toInt() }
                 }
-                val iconSize = (14 * dp).toInt()
-                val iv = android.widget.ImageView(activity).apply {
-                    layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-                    setImageResource(iconRes)
-                }
-                row.addView(iv)
-                val nameTV = TextView(activity).apply {
+                // Left column: game name, right-aligned
+                row.addView(TextView(activity).apply {
                     text = label
                     textSize = 11f
                     typeface = Typeface.MONOSPACE
                     setTextColor(mutedColor)
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                        marginStart = (6 * dp).toInt()
-                    }
-                }
-                row.addView(nameTV)
-                val scoreTV = TextView(activity).apply {
+                    gravity = Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                })
+                // Spacer between columns
+                row.addView(View(activity).apply {
+                    layoutParams = LinearLayout.LayoutParams((8 * dp).toInt(), LinearLayout.LayoutParams.MATCH_PARENT)
+                })
+                // Right column: score, left-aligned
+                row.addView(TextView(activity).apply {
                     text = scoreStr
                     textSize = 11f
                     typeface = Typeface.MONOSPACE
                     setTextColor(accentBlue)
-                    gravity = Gravity.END
-                }
-                row.addView(scoreTV)
+                    gravity = Gravity.START
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                })
                 scoresContainer.addView(row)
             }
         }

@@ -199,7 +199,7 @@ object GlobalLeaderboard {
         )
         if (mode != null) data["mode"] = mode
 
-        // Enforce per-player 5-entry limit per game+mode combination.
+        // Enforce per-player 1-entry limit per game+mode combination.
         var q: Query = db.collection("globalScores")
             .whereEqualTo("uid", uid)
             .whereEqualTo("game", game)
@@ -208,22 +208,21 @@ object GlobalLeaderboard {
         q.get().addOnSuccessListener { snap ->
             val docs = snap.documents
             when {
-                docs.size < 5 -> {
-                    // Under limit — add freely
+                docs.isEmpty() -> {
+                    // No entry yet — add freely
                     db.collection("globalScores").add(data)
                 }
                 else -> {
-                    // At limit — replace lowest only if new score beats it
-                    val lowestDoc = docs.minByOrNull { (it.getLong("score") ?: 0L) }
-                        ?: run { db.collection("globalScores").add(data); return@addOnSuccessListener }
-                    val lowestScore = (lowestDoc.getLong("score") ?: 0L).toInt()
-                    if (score > lowestScore) {
+                    // Already has an entry — replace only if new score beats it
+                    val existingDoc = docs[0]
+                    val existingScore = (existingDoc.getLong("score") ?: 0L).toInt()
+                    if (score > existingScore) {
                         db.runTransaction { tx ->
-                            tx.delete(lowestDoc.reference)
+                            tx.delete(existingDoc.reference)
                             tx.set(db.collection("globalScores").document(), data)
                         }
                     }
-                    // else: new score doesn't beat any existing — skip
+                    // else: new score doesn't beat existing — skip
                 }
             }
         }.addOnFailureListener {

@@ -35,6 +35,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
     private var gameStartTime = 0L
+    private var currentLevel = 1
 
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !bbView.isUserPlaying()) {
@@ -70,7 +71,8 @@ class BrickBreakerActivity : AppCompatActivity() {
             runOnUiThread { tvLives.text = "♥".repeat(lives.coerceAtLeast(0)) }
         }
         bbView.onLevelChanged = { level ->
-            runOnUiThread { tvLevel.text = "LV:$level" }
+            currentLevel = level
+            runOnUiThread { updateLevelDisplay() }
         }
         bbView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         bbView.onGameOver = { score ->
@@ -188,20 +190,27 @@ class BrickBreakerActivity : AppCompatActivity() {
         }
         refreshDiff()
 
-        btnEasy.setOnClickListener {
-            PrefsManager.setBBDifficulty(this, 0)
-            bbView.difficulty = BBDifficulty.EASY
-            refreshDiff()
-        }
-        btnMedium.setOnClickListener {
-            PrefsManager.setBBDifficulty(this, 1)
-            bbView.difficulty = BBDifficulty.MEDIUM
-            refreshDiff()
-        }
-        btnHard.setOnClickListener {
-            PrefsManager.setBBDifficulty(this, 2)
-            bbView.difficulty = BBDifficulty.HARD
-            refreshDiff()
+        if (bbView.isUserPlaying()) {
+            listOf(btnEasy, btnMedium, btnHard).forEach { btn ->
+                btn.alpha = 0.4f
+                btn.isClickable = false
+            }
+        } else {
+            btnEasy.setOnClickListener {
+                PrefsManager.setBBDifficulty(this, 0)
+                bbView.difficulty = BBDifficulty.EASY
+                refreshDiff()
+            }
+            btnMedium.setOnClickListener {
+                PrefsManager.setBBDifficulty(this, 1)
+                bbView.difficulty = BBDifficulty.MEDIUM
+                refreshDiff()
+            }
+            btnHard.setOnClickListener {
+                PrefsManager.setBBDifficulty(this, 2)
+                bbView.difficulty = BBDifficulty.HARD
+                refreshDiff()
+            }
         }
 
         val themeIndex = ThemeManager.effectiveThemeIndex(this, PrefsManager.GAME_BRICKBREAKER)
@@ -216,6 +225,15 @@ class BrickBreakerActivity : AppCompatActivity() {
         view.findViewById<TextView>(R.id.btnDone).setOnClickListener { dialog.dismiss() }
 
         dialog.show()
+    }
+
+    private fun updateLevelDisplay() {
+        val diffPrefix = when (bbView.difficulty) {
+            BBDifficulty.EASY   -> "E"
+            BBDifficulty.MEDIUM -> "M"
+            BBDifficulty.HARD   -> "H"
+        }
+        tvLevel.text = "$diffPrefix·LV:$currentLevel"
     }
 
     private fun updateHighScore() {

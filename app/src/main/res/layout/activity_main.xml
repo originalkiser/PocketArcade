@@ -339,41 +339,6 @@
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- GLOBAL SCORES button -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:orientation="horizontal">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1.5" />
-
-                    <TextView
-                        android:id="@+id/btnGlobalScores"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:text="&#127758;  GLOBAL SCORES  &#127758;"
-                        android:textColor="@color/accent_blue"
-                        android:textSize="14sp"
-                        android:fontFamily="monospace"
-                        android:gravity="center"
-                        android:textStyle="bold"
-                        android:background="@drawable/bg_game_tile"
-                        android:padding="14dp"
-                        android:clickable="true"
-                        android:focusable="true" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1.5" />
-
-                </LinearLayout>
 
             </LinearLayout>
 
@@ -490,6 +455,42 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="FRIENDS"
+                    android:textColor="@color/muted"
+                    android:textSize="9sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
+            <!-- Leaderboards -->
+            <LinearLayout
+                android:id="@+id/btnLeaderboards"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_circle_btn">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="&#127758;"
+                        android:textSize="26sp"
+                        android:gravity="center" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SCORES"
                     android:textColor="@color/muted"
                     android:textSize="9sp"
                     android:fontFamily="monospace"

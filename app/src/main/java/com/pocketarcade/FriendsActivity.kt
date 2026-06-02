@@ -94,6 +94,9 @@ class FriendsActivity : AppCompatActivity() {
         btnEditProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
+        findViewById<LinearLayout>(R.id.rowMyProfile).setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
         btnCreateProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
@@ -164,7 +167,7 @@ class FriendsActivity : AppCompatActivity() {
         val dp = resources.displayMetrics.density
         games.forEach { game ->
             val rank = myRanks[game.key] ?: return@forEach
-            chipsContainer.addView(makeRankChip(game.iconRes, rank, isMutual = false, dp))
+            chipsContainer.addView(makeRankChip(game.iconRes, game.key, rank, dp))
         }
     }
 
@@ -249,7 +252,7 @@ class FriendsActivity : AppCompatActivity() {
         val entryRanks = ranks[entry.uid] ?: emptyMap()
         games.forEach { game ->
             val rank = entryRanks[game.key] ?: return@forEach
-            rankChips.addView(makeRankChip(game.iconRes, rank, isMutual, dp))
+            rankChips.addView(makeRankChip(game.iconRes, game.key, rank, dp))
         }
         nameCol.addView(rankChips)
         row.addView(nameCol)
@@ -270,9 +273,15 @@ class FriendsActivity : AppCompatActivity() {
         return row
     }
 
-    /** Rank chip: small game icon + "#N" text */
-    private fun makeRankChip(iconRes: Int, rank: Int, isMutual: Boolean, dp: Float): View {
-        val color = if (isMutual) Color.parseColor("#00CC66") else getColor(R.color.muted)
+    /** Rank chip: small game icon + "#N" text, colored by game accent */
+    private fun makeRankChip(iconRes: Int, gameKey: String, rank: Int, dp: Float): View {
+        val color = when (gameKey) {
+            PrefsManager.GAME_SNAKE        -> Color.parseColor("#4f8ef7")
+            PrefsManager.GAME_PONG         -> Color.parseColor("#e74c3c")
+            PrefsManager.GAME_ASTEROIDS    -> Color.parseColor("#00d4ff")
+            PrefsManager.GAME_BRICKBREAKER -> Color.parseColor("#f1c40f")
+            else -> getColor(R.color.muted)
+        }
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -285,7 +294,7 @@ class FriendsActivity : AppCompatActivity() {
         container.addView(ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
             setImageResource(iconRes)
-            setColorFilter(color)
+            setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN)
         })
         container.addView(TextView(this).apply {
             text = "#$rank"

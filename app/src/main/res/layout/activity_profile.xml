@@ -19,7 +19,7 @@
             android:id="@+id/btnProfileBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="&#8592;"
+            android:text="&lt;"
             android:textColor="@color/accent_blue"
             android:textSize="22sp"
             android:fontFamily="monospace"

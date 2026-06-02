@@ -24,9 +24,9 @@ class AsteroidsControlsView @JvmOverloads constructor(
     private var fireId = -1
     private var fireActive = false
 
-    private val r  = 72f   // joystick ring radius (was 54)
-    private val kr = 32f   // knob radius (was 24)
-    private val fr = 68f   // fire button radius (was 48)
+    private val r  = 54f   // joystick ring radius
+    private val kr = 24f   // knob radius
+    private val fr = 48f   // fire button radius
 
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#803a4a6e"); style = Paint.Style.FILL

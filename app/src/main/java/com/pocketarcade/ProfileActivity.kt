@@ -433,11 +433,13 @@ class ProfileActivity : AppCompatActivity() {
             val score = PrefsManager.getHighScore(this, game.key)
             val scoreStr = when (game.key) {
                 PrefsManager.GAME_PONG -> {
-                    val wins = score
+                    val wins = PrefsManager.getPongWins(this)
                     val plays = PrefsManager.getStatPlays(this, game.key)
                     val losses = (plays - wins).coerceAtLeast(0)
-                    val wl = if (losses > 0) "%.1f".format(wins.toFloat() / losses) else if (wins > 0) "INF" else "—"
-                    "$wins W  ·  W/L $wl"
+                    val wl = if (losses > 0) "%.1f".format(wins.toFloat() / losses) else if (wins > 0) "∞" else "—"
+                    val bestGame = if (score >= 100) formatGlobalScore(game.key, score) else if (score > 0) "$score–?" else null
+                    val best = if (bestGame != null) "  ·  Best $bestGame" else ""
+                    "$wins W  ·  W/L $wl$best"
                 }
                 else -> if (score > 0) "%,d pts".format(score) else "—"
             }

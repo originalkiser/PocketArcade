@@ -2,6 +2,7 @@ package com.pocketarcade.leaderboard
 
 import android.app.Dialog
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
@@ -91,6 +92,7 @@ fun showGlobalLeaderboardDialog(
     val tabWorld         = view.findViewById<TextView>(R.id.tabWorld)
     val tabLocal         = view.findViewById<TextView>(R.id.tabLocal)
     val tabFriends       = view.findViewById<TextView>(R.id.tabFriends)
+    val tabPersonal      = view.findViewById<TextView>(R.id.tabPersonal)
     val container        = view.findViewById<LinearLayout>(R.id.globalContainer)
     val progress         = view.findViewById<ProgressBar>(R.id.progressGlobal)
     val tvEmpty          = view.findViewById<TextView>(R.id.tvGlobalEmpty)
@@ -131,7 +133,7 @@ fun showGlobalLeaderboardDialog(
 
     // ── Chip builder ─────────────────────────────────────────────────────────
 
-    fun makeChip(text: String, active: Boolean, iconRes: Int? = null): TextView {
+    fun makeChip(text: String, active: Boolean, iconRes: Int? = null, iconColor: Int? = null): TextView {
         val bg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 20 * dp
@@ -154,7 +156,11 @@ fun showGlobalLeaderboardDialog(
             isFocusable = true
             if (iconRes != null) {
                 val iconSize = (16 * dp).toInt()
-                val d = activity.getDrawable(iconRes)
+                val d = activity.getDrawable(iconRes)?.mutate()
+                when {
+                    active     -> d?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+                    iconColor != null -> d?.setColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
+                }
                 d?.setBounds(0, 0, iconSize, iconSize)
                 setCompoundDrawablesRelative(d, null, null, null)
                 compoundDrawablePadding = (4 * dp).toInt()
@@ -249,25 +255,24 @@ fun showGlobalLeaderboardDialog(
         // 4dp spacer
         row.addView(View(activity).apply { layoutParams = LinearLayout.LayoutParams(4.px(), 1) })
 
-        // Username — weight=1
+        // Username — weight=1, wraps to 2 lines for long names
         row.addView(TextView(activity).apply {
             text = if (isMutual) "${entry.username} ♻" else entry.username
             setTextColor(nameColor)
             textSize = 13f
             typeface = Typeface.MONOSPACE
-            maxLines = 1
-            ellipsize = TextUtils.TruncateAt.END
+            maxLines = 2
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })
 
-        // Score — 52dp
+        // Score — 80dp (wide enough for 7-digit scores)
         row.addView(TextView(activity).apply {
             text = scoreText
             setTextColor(scoreColor)
             textSize = 13f
             typeface = Typeface.MONOSPACE
             gravity = Gravity.END
-            layoutParams = LinearLayout.LayoutParams(52.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
+            layoutParams = LinearLayout.LayoutParams(80.px(), LinearLayout.LayoutParams.WRAP_CONTENT)
         })
 
         // Region — 88dp
@@ -305,6 +310,70 @@ fun showGlobalLeaderboardDialog(
             }
             pageLastDoc = newLastDoc
             btnLoadMore.visibility = if (newLastDoc != null) View.VISIBLE else View.GONE
+        }
+    }
+
+    fun loadPersonalScores() {
+        fun Int.px() = (this * dp).toInt()
+        container.removeAllViews()
+        tvEmpty.visibility = View.GONE
+        progress.visibility = View.GONE
+        btnLoadMore.visibility = View.GONE
+        loadedCount = 0
+
+        data class PersonalGame(val key: String, val label: String, val iconRes: Int, val color: Int)
+        val personalGames = listOf(
+            PersonalGame("snake",        "SNAKE",        R.drawable.ic_snake,        Color.parseColor("#4f8ef7")),
+            PersonalGame("pong",         "PONG",         R.drawable.ic_pong,         Color.parseColor("#e74c3c")),
+            PersonalGame("asteroids",    "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
+            PersonalGame("brickbreaker", "BRKR BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f"))
+        )
+
+        var hasAny = false
+        personalGames.forEach { game ->
+            val score = PrefsManager.getHighScore(activity, game.key)
+            if (score <= 0) return@forEach
+            hasAny = true
+            val scoreStr = formatGlobalScore(game.key, score)
+
+            val row = LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(4.px(), 10.px(), 4.px(), 10.px())
+            }
+            val iconSize = 20.px()
+            row.addView(ImageView(activity).apply {
+                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+                setImageResource(game.iconRes)
+                setColorFilter(game.color, PorterDuff.Mode.SRC_IN)
+            })
+            row.addView(TextView(activity).apply {
+                text = game.label
+                setTextColor(game.color)
+                textSize = 14f
+                typeface = Typeface.MONOSPACE
+                setTypeface(typeface, Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginStart = 8.px()
+                }
+            })
+            row.addView(TextView(activity).apply {
+                text = scoreStr
+                setTextColor(accentBlue)
+                textSize = 14f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.END
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            })
+            container.addView(row)
+        }
+
+        if (!hasAny) {
+            tvEmpty.text = "No local scores yet — play a game!"
+            tvEmpty.visibility = View.VISIBLE
         }
     }
 
@@ -378,10 +447,17 @@ fun showGlobalLeaderboardDialog(
             }
     }
 
+    val gameChipColors = mapOf(
+        "snake"        to Color.parseColor("#4f8ef7"),
+        "pong"         to Color.parseColor("#e74c3c"),
+        "asteroids"    to Color.parseColor("#00d4ff"),
+        "brickbreaker" to Color.parseColor("#f1c40f")
+    )
+
     fun setupGameChips() {
         gameChipsRow.removeAllViews()
         GAMES.forEachIndexed { i, g ->
-            val chip = makeChip(" ${g.label}", g.key == currentGame, g.iconRes)
+            val chip = makeChip(" ${g.label}", g.key == currentGame, g.iconRes, gameChipColors[g.key])
             if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
             chip.setOnClickListener {
                 currentGame = g.key
@@ -389,7 +465,7 @@ fun showGlobalLeaderboardDialog(
                 tvCurrentGame.text = g.label
                 setupGameChips()
                 setupModeChips()
-                loadFirstPage()
+                if (currentTab != "PERSONAL") loadFirstPage()
             }
             gameChipsRow.addView(chip)
         }
@@ -413,8 +489,9 @@ fun showGlobalLeaderboardDialog(
         tabWorld.setTextColor(if (tab == "WORLD") accentBlue else mutedColor)
         tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else mutedColor)
         tabFriends.setTextColor(if (tab == "FRIENDS") accentBlue else mutedColor)
+        tabPersonal.setTextColor(if (tab == "PERSONAL") accentBlue else mutedColor)
         friendsBar.visibility = if (tab == "FRIENDS") View.VISIBLE else View.GONE
-        if (tab == "FRIENDS") btnLoadMore.visibility = View.GONE
+        if (tab == "FRIENDS" || tab == "PERSONAL") btnLoadMore.visibility = View.GONE
     }
 
     // ── Initial state ─────────────────────────────────────────────────────────
@@ -456,6 +533,7 @@ fun showGlobalLeaderboardDialog(
         }
     }
 
+    tabPersonal.setOnClickListener { setActive("PERSONAL"); loadPersonalScores() }
     tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     loadFirstPage() }
     tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    loadFirstPage() }
     tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); loadFirstPage() }

@@ -49,6 +49,7 @@ class PongView @JvmOverloads constructor(
     private var paddleStartX = 0f
 
     var readyForRestart = false
+    private var firstServe = false
 
     // Demo: virtual "finger" for player paddle
     private var demoTouchX = 0f
@@ -177,7 +178,13 @@ class PongView @JvmOverloads constructor(
         val angle = Math.toRadians((30 + (0 until 60).random()).toDouble())
         val dir = if ((0..1).random() == 0) 1f else -1f
         bvx = speed * cos(angle).toFloat() * dir
-        bvy = speed * sin(angle).toFloat() * if ((0..1).random() == 0) 1f else -1f
+        if (firstServe) {
+            // First serve always goes toward AI (top of screen, negative Y)
+            bvy = -abs(speed * sin(angle).toFloat())
+            firstServe = false
+        } else {
+            bvy = speed * sin(angle).toFloat() * if ((0..1).random() == 0) 1f else -1f
+        }
         volley = 0
     }
 
@@ -192,6 +199,7 @@ class PongView @JvmOverloads constructor(
 
     fun startGame(demo: Boolean = false) {
         demoMode = demo
+        firstServe = !demo
         playerScore = 0; aiScore = 0
         state = PongState.PLAYING
         initGame()

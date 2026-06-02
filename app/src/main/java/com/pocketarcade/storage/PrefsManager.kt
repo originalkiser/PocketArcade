@@ -220,6 +220,22 @@ object PrefsManager {
     fun setSnakeControlHintCount(ctx: Context, count: Int) =
         prefs(ctx).edit { putInt("snake_hint_count", count) }
 
+    /** One-time migration: reset any time_ms value that is absurdly large (> 10 days),
+     *  which would be a sign it was inflated by demo-mode sessions before the fix in v5. */
+    fun migrateInflatedTime(ctx: Context) {
+        val p = prefs(ctx)
+        if (p.getBoolean("time_migration_v1", false)) return
+        val tenDaysMs = 10L * 24 * 60 * 60 * 1000
+        val games = listOf(GAME_SNAKE, GAME_PONG, GAME_ASTEROIDS, GAME_BRICKBREAKER)
+        p.edit {
+            for (game in games) {
+                val key = statKey("time_ms", game)
+                if (p.getLong(key, 0L) > tenDaysMs) putLong(key, 0L)
+            }
+            putBoolean("time_migration_v1", true)
+        }
+    }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

@@ -10,7 +10,7 @@
         android:id="@+id/btnDiffBack"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:text="&#8592; MENU"
+        android:text="&lt; MENU"
         android:textColor="@color/muted"
         android:textSize="12sp"
         android:fontFamily="monospace"

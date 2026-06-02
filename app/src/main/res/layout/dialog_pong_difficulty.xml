@@ -10,7 +10,7 @@
         android:id="@+id/btnDiffBack"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:text="&#8592; MENU"
+        android:text="&lt; MENU"
         android:textColor="@color/muted"
         android:textSize="12sp"
         android:fontFamily="monospace"
@@ -117,6 +117,22 @@
             android:textSize="11sp"
             android:fontFamily="monospace" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/btnStartGame"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:text="START GAME"
+        android:textColor="@color/accent_blue"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/bg_game_tile"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
 
 </LinearLayout>
 

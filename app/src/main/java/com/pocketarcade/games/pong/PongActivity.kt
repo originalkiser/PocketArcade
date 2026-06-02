@@ -16,6 +16,7 @@ import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
+import com.pocketarcade.leaderboard.formatGlobalScore
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
@@ -72,7 +73,8 @@ class PongActivity : AppCompatActivity() {
             PrefsManager.recordGameStat(this, PrefsManager.GAME_PONG, playerScore, duration, mode)
             pongView.readyForRestart = false
             if (playerWon) {
-                PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, playerScore)
+                val hi = PrefsManager.getHighScore(this, PrefsManager.GAME_PONG)
+                if (encodedScore > hi) PrefsManager.setHighScore(this, PrefsManager.GAME_PONG, encodedScore)
                 PrefsManager.recordPongWin(this)
                 runOnUiThread { updateHighScore() }
             }
@@ -110,8 +112,15 @@ class PongActivity : AppCompatActivity() {
             setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
         }
 
+        val btnStartGame = view.findViewById<TextView>(R.id.btnStartGame)
+
         fun pick(diff: PongDifficulty) {
             pongView.difficulty = diff
+            updateHighScore()
+            btnStartGame.visibility = View.VISIBLE
+        }
+
+        btnStartGame.setOnClickListener {
             pongView.startGame(false)
             dialog.dismiss()
         }
@@ -155,9 +164,15 @@ class PongActivity : AppCompatActivity() {
                 pongView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_PONG))
             }
         }
-        view.findViewById<LinearLayout>(R.id.rowDifficulty).setOnClickListener {
-            dialog.dismiss()
-            showDifficultyDialog(cancelable = true)
+        val rowDifficulty = view.findViewById<LinearLayout>(R.id.rowDifficulty)
+        if (pongView.isUserPlaying()) {
+            rowDifficulty.alpha = 0.4f
+            rowDifficulty.isClickable = false
+        } else {
+            rowDifficulty.setOnClickListener {
+                dialog.dismiss()
+                showDifficultyDialog(cancelable = true)
+            }
         }
         view.findViewById<TextView>(R.id.btnDone).setOnClickListener { dialog.dismiss() }
 
@@ -166,7 +181,9 @@ class PongActivity : AppCompatActivity() {
 
     private fun updateHighScore() {
         val hi = PrefsManager.getHighScore(this, PrefsManager.GAME_PONG)
-        tvHighScore.text = "Best: $hi"
+        val diffLabel = pongView.difficulty.name.let { it[0] + it.substring(1).lowercase() }
+        val formatted = if (hi >= 100) formatGlobalScore(PrefsManager.GAME_PONG, hi) else if (hi > 0) "$hi–?" else "–"
+        tvHighScore.text = "$diffLabel · Best: $formatted"
     }
 
     private fun toggleSound() {
