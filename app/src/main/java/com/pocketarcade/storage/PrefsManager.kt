@@ -30,6 +30,12 @@ object PrefsManager {
     private const val KEY_HINT_PREFIX           = "hint_shown_"
     private const val KEY_GAMES_PLAYED = "games_played"
 
+    // ── Friend nudge notifications ────────────────────────────────────────────
+    private const val KEY_NOTIF_NEW_SCORE    = "notif_new_score"
+    private const val KEY_NOTIF_BEATEN       = "notif_beaten"
+    private const val KEY_LAST_NUDGE_CHECK   = "last_nudge_check"
+    private const val KEY_NUDGE_SNAPSHOT     = "nudge_snapshot"
+
     const val HINT_FRIENDS        = "friends"
     const val HINT_AUTOFIRE       = "autofire"
     const val HINT_SNAKE_CONTROLS = "snake_controls"
@@ -235,6 +241,16 @@ object PrefsManager {
             putBoolean("time_migration_v1", true)
         }
     }
+
+    // Friend nudge preferences
+    fun isNotifNewScore(ctx: Context): Boolean    = prefs(ctx).getBoolean(KEY_NOTIF_NEW_SCORE, false)
+    fun setNotifNewScore(ctx: Context, v: Boolean) = prefs(ctx).edit { putBoolean(KEY_NOTIF_NEW_SCORE, v) }
+    fun isNotifBeaten(ctx: Context): Boolean      = prefs(ctx).getBoolean(KEY_NOTIF_BEATEN, false)
+    fun setNotifBeaten(ctx: Context, v: Boolean)   = prefs(ctx).edit { putBoolean(KEY_NOTIF_BEATEN, v) }
+    fun getLastNudgeCheck(ctx: Context): Long      = prefs(ctx).getLong(KEY_LAST_NUDGE_CHECK, 0L)
+    fun setLastNudgeCheck(ctx: Context, t: Long)   = prefs(ctx).edit { putLong(KEY_LAST_NUDGE_CHECK, t) }
+    fun getNudgeSnapshot(ctx: Context): String?    = prefs(ctx).getString(KEY_NUDGE_SNAPSHOT, null)
+    fun setNudgeSnapshot(ctx: Context, json: String) = prefs(ctx).edit { putString(KEY_NUDGE_SNAPSHOT, json) }
 
     private fun nextUpsellInterval() = (3..5).random()
 

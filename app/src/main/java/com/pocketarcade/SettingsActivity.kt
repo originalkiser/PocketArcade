@@ -1,7 +1,9 @@
 package com.pocketarcade
 
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -10,6 +12,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
@@ -161,6 +165,55 @@ class SettingsActivity : AppCompatActivity() {
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
 
+        // ── Friend notification switches ───────────────────────────────────────
+        val switchNotifNew    = findViewById<Switch>(R.id.switchNotifNewScore)
+        val switchNotifBeaten = findViewById<Switch>(R.id.switchNotifBeaten)
+        switchNotifNew.isChecked    = PrefsManager.isNotifNewScore(this)
+        switchNotifBeaten.isChecked = PrefsManager.isNotifBeaten(this)
+
+        fun requestNotifPermIfNeeded(): Boolean {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+            return if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                true
+            } else {
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    FriendNudgeManager.REQ_NOTIF_PERM)
+                false   // wait for result — revert if denied
+            }
+        }
+
+        switchNotifNew.setOnCheckedChangeListener { _, checked ->
+            if (PrefsManager.getGlobalUsername(this) == null) {
+                switchNotifNew.isChecked = false
+                Toast.makeText(this,
+                    "Register on the global leaderboard to enable notifications.",
+                    Toast.LENGTH_LONG).show()
+                return@setOnCheckedChangeListener
+            }
+            if (checked && !requestNotifPermIfNeeded()) {
+                // Permission prompt shown — defer saving until onRequestPermissionsResult
+                return@setOnCheckedChangeListener
+            }
+            PrefsManager.setNotifNewScore(this, checked)
+        }
+
+        switchNotifBeaten.setOnCheckedChangeListener { _, checked ->
+            if (PrefsManager.getGlobalUsername(this) == null) {
+                switchNotifBeaten.isChecked = false
+                Toast.makeText(this,
+                    "Register on the global leaderboard to enable notifications.",
+                    Toast.LENGTH_LONG).show()
+                return@setOnCheckedChangeListener
+            }
+            if (checked && !requestNotifPermIfNeeded()) {
+                return@setOnCheckedChangeListener
+            }
+            PrefsManager.setNotifBeaten(this, checked)
+        }
+
         refreshAdFreeUi(tvAdFreeTitle, tvAdFreeDesc, tvAdFreeChevron, rowAdFree)
 
         switchDemo.setOnCheckedChangeListener { _, checked ->
@@ -214,6 +267,40 @@ class SettingsActivity : AppCompatActivity() {
             desc.text = getString(R.string.ad_free_desc)
             chevron.visibility = View.VISIBLE
             row.isClickable = true
+        }
+    }
+
+    /**
+     * Handles the POST_NOTIFICATIONS permission result triggered when the user
+     * flips a notification switch for the first time on API 33+.
+     * If denied: revert both switches and clear the prefs.
+     * If granted: save both switch states as they currently stand.
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != FriendNudgeManager.REQ_NOTIF_PERM) return
+        val granted = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        val switchNotifNew    = findViewById<Switch>(R.id.switchNotifNewScore)
+        val switchNotifBeaten = findViewById<Switch>(R.id.switchNotifBeaten)
+        if (granted) {
+            // Permission granted — commit whatever is currently shown
+            PrefsManager.setNotifNewScore(this, switchNotifNew.isChecked)
+            PrefsManager.setNotifBeaten(this, switchNotifBeaten.isChecked)
+        } else {
+            // Denied — revert both switches
+            switchNotifNew.isChecked    = false
+            switchNotifBeaten.isChecked = false
+            PrefsManager.setNotifNewScore(this, false)
+            PrefsManager.setNotifBeaten(this, false)
+            Toast.makeText(
+                this,
+                "Notification permission denied. You can enable it in Android Settings.",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

@@ -156,6 +156,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         UpdateChecker.checkResumeDownload(this)
+        FriendNudgeManager.checkOnOpen(this)
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
