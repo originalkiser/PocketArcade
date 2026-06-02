@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        PrefsManager.migrateInflatedTime(this)
+
         MobileAds.initialize(this) {
             runOnUiThread { AdManager.populateBannerContainer(findViewById(R.id.adContainer)) }
         }
@@ -102,15 +104,18 @@ class MainActivity : AppCompatActivity() {
             )
             splash.onDone = {
                 root.removeView(splash)
-                showChangelogIfNeeded(this) {
-                    showRegistrationPromptIfNeeded(this)
+                // Update dialog takes precedence — skip changelog/onboarding if it's already visible.
+                if (!UpdateChecker.updateDialogShown) {
+                    showChangelogIfNeeded(this) {
+                        showRegistrationPromptIfNeeded(this)
+                    }
                 }
             }
             root.addView(splash)
             splash.post { splash.start() }
         }
 
-        findViewById<TextView>(R.id.btnGlobalScores).setOnClickListener {
+        findViewById<LinearLayout>(R.id.btnLeaderboards).setOnClickListener {
             showGlobalLeaderboardPicker(this)
         }
     }
@@ -201,12 +206,12 @@ class MainActivity : AppCompatActivity() {
         val pongLosses = (pongPlays - pongWins).coerceAtLeast(0)
         val wlRatio = if (pongLosses > 0) "%.1f".format(pongWins.toFloat() / pongLosses) else if (pongWins > 0) "INF" else "-"
         findViewById<TextView>(R.id.tvScoreSnake).text =
-            "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_SNAKE)}"
+            "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_SNAKE))
         findViewById<TextView>(R.id.tvScorePong).text = "Wins: $pongWins  W/L: $wlRatio"
         findViewById<TextView>(R.id.tvScoreAsteroids).text =
-            "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS)}"
+            "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS))
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
-            "High Score: ${PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER)}"
+            "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER))
 
         findViewById<TextView>(R.id.tvScoreSnakeDetail).text    = topDetail(PrefsManager.GAME_SNAKE)
         findViewById<TextView>(R.id.tvScorePongDetail).text     = ""

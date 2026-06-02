@@ -162,11 +162,11 @@ data class AppBgTheme(val name: String, val swatch: Int, val bg: Int)
 
 object AppBgThemes {
     val ALL = listOf(
-        AppBgTheme("Void",  p("#2a3a52"), p("#0d1117")),  // Classic
-        AppBgTheme("Ember", p("#4a2a10"), p("#1a0e05")),  // Sunset
-        AppBgTheme("Grove", p("#183a14"), p("#080e06")),  // Forest
-        AppBgTheme("Dusk",  p("#3a1038"), p("#100810")),  // Cherry
-        AppBgTheme("Frost", p("#082a3c"), p("#060d16")),  // Ice
-        AppBgTheme("Ink",   p("#1a2a1c"), p("#040a04"))   // Neon
+        AppBgTheme("Void",  p("#2a3a52"), p("#0c1e38")),  // Classic — dark navy blue
+        AppBgTheme("Ember", p("#4a2a10"), p("#221100")),  // Sunset — dark amber
+        AppBgTheme("Grove", p("#183a14"), p("#071e08")),  // Forest — dark green
+        AppBgTheme("Dusk",  p("#3a1038"), p("#1c0628")),  // Cherry — dark purple
+        AppBgTheme("Frost", p("#082a3c"), p("#05182c")),  // Ice — dark blue-teal
+        AppBgTheme("Ink",   p("#1a2a1c"), p("#06180c"))   // Neon — dark lime green
     )
 }

@@ -1,12 +1,6 @@
 package com.pocketarcade
 
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorFilter
-import android.graphics.Paint
-import android.graphics.PixelFormat
-import android.graphics.RectF
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
@@ -236,28 +230,4 @@ class SettingsActivity : AppCompatActivity() {
         billing.disconnect()
     }
 
-    private fun splitOvalDrawable(c1: Int, c2: Int, strokeColor: Int, strokePx: Int): Drawable {
-        return object : Drawable() {
-            private val p1 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = c1 }
-            private val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = c2 }
-            private val ps = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                color = strokeColor
-                strokeWidth = strokePx.toFloat()
-            }
-            override fun draw(canvas: Canvas) {
-                val r = RectF(bounds)
-                canvas.drawArc(r, 90f, 180f, true, p1)
-                canvas.drawArc(r, 270f, 180f, true, p2)
-                if (strokePx > 0) {
-                    val inset = strokePx / 2f
-                    canvas.drawOval(RectF(r.left + inset, r.top + inset, r.right - inset, r.bottom - inset), ps)
-                }
-            }
-            override fun setAlpha(a: Int) {}
-            override fun setColorFilter(cf: ColorFilter?) {}
-            @Suppress("OVERRIDE_DEPRECATION")
-            override fun getOpacity() = PixelFormat.TRANSLUCENT
-        }
-    }
 }

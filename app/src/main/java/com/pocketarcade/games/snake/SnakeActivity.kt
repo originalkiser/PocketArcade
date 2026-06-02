@@ -3,6 +3,7 @@ package com.pocketarcade.games.snake
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import com.pocketarcade.splitOvalDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -392,14 +393,16 @@ class SnakeActivity : AppCompatActivity() {
 
         fun refreshSwatches() {
             tvThemeName.text = Themes.ALL[localThemeIndex].first.name
+            val d = resources.displayMetrics.density
+            val strokePx = (3 * d).toInt()
             swatchIds.forEachIndexed { i, id ->
                 val sw = view.findViewById<View>(id)
-                val d = resources.displayMetrics.density
-                val gd = GradientDrawable()
-                gd.shape = GradientDrawable.OVAL
-                gd.setColor(Themes.ALL[i].first.swatch)
-                if (i == localThemeIndex) gd.setStroke((3 * d).toInt(), Color.WHITE)
-                sw.background = gd
+                val theme = Themes.ALL[i].first
+                val selected = i == localThemeIndex
+                sw.background = splitOvalDrawable(
+                    theme.swatch, theme.rival,
+                    if (selected) Color.WHITE else 0, if (selected) strokePx else 0
+                )
             }
         }
 

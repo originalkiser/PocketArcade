@@ -31,6 +31,13 @@ object UpdateChecker {
     /** Holds the APK URL while waiting for the user to grant install-unknown-apps permission. */
     private var pendingApkUrl: String? = null
 
+    /**
+     * True while the update-available dialog is currently visible.
+     * Used by MainActivity to avoid showing changelog/onboarding on top of it.
+     */
+    @Volatile var updateDialogShown = false
+        private set
+
     /** Auto check: silent, throttled to once per 24 h. */
     fun check(activity: Activity) {
         val elapsed = System.currentTimeMillis() - PrefsManager.getLastUpdateCheck(activity)
@@ -112,12 +119,14 @@ object UpdateChecker {
     }
 
     private fun showUpdateDialog(activity: Activity, tagName: String, apkUrl: String) {
+        updateDialogShown = true
         showStyledDialog(
             activity,
             title    = "UPDATE AVAILABLE",
             message  = "Version $tagName of Pocket Arcade is ready.\nDownload and install now?",
             positive = "DOWNLOAD UPDATE",
-            negative = "LATER"
+            negative = "LATER",
+            onDismiss = { updateDialogShown = false }
         ) { startDownload(activity, apkUrl) }
     }
 
@@ -144,20 +153,30 @@ object UpdateChecker {
         message: String,
         positive: String,
         negative: String,
+        onDismiss: (() -> Unit)? = null,
         onPositive: () -> Unit
     ) {
+        // Guard: never show a dialog on a dead activity
+        if (activity.isFinishing || activity.isDestroyed) return
+
         val view = activity.layoutInflater.inflate(R.layout.dialog_update, null)
         view.findViewById<TextView>(R.id.tvUpdateTitle).text    = title
         view.findViewById<TextView>(R.id.tvUpdateMessage).text  = message
         view.findViewById<TextView>(R.id.btnUpdatePositive).text = positive
         view.findViewById<TextView>(R.id.btnUpdateNegative).text = negative
         val dialog = AlertDialog.Builder(activity).setView(view).create()
+        dialog.setOnDismissListener { onDismiss?.invoke() }
         view.findViewById<TextView>(R.id.btnUpdatePositive).setOnClickListener {
             dialog.dismiss()
             onPositive()
         }
         view.findViewById<TextView>(R.id.btnUpdateNegative).setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        try {
+            dialog.show()
+        } catch (_: Exception) {
+            // Activity window may have been detached by the time show() is called
+            onDismiss?.invoke()
+        }
     }
 
     private fun startDownload(activity: Activity, apkUrl: String) {
@@ -223,17 +242,23 @@ object UpdateChecker {
     }
 
     private fun installApk(activity: Activity, apkFile: File) {
-        val uri = FileProvider.getUriForFile(
-            activity,
-            "${activity.packageName}.fileprovider",
-            apkFile
-        )
-        activity.startActivity(
-            Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/vnd.android.package-archive")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        )
+        if (activity.isFinishing || activity.isDestroyed) return
+        try {
+            val uri = FileProvider.getUriForFile(
+                activity,
+                "${activity.packageName}.fileprovider",
+                apkFile
+            )
+            activity.startActivity(
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("UpdateChecker", "installApk failed", e)
+            toast(activity, "Install failed. Please install manually from Settings.")
+        }
     }
 
     private fun toast(activity: Activity, msg: String) =

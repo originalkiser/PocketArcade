@@ -2,6 +2,7 @@ package com.pocketarcade
 
 import android.app.Dialog
 import android.view.WindowManager
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.storage.PrefsManager
@@ -59,45 +60,80 @@ private val CHANGELOG = mapOf(
 ★ What's New in Settings
   View this changelog any time""",
 
-    6 to """★ Profile view mode
-  Profile opens read-only by default
-  Tap EDIT to make changes; Save
-  appears only when something changed
+    6 to """★ Asteroids controls restored
+  Joystick feel is back to original
 
-★ Score Highlights in Profile
-  See your best scores per game
-  right on your profile page
-  Record Book link at the bottom
+★ Pong — Start button added
+  Game no longer starts on difficulty
+  select; ball goes to AI first so
+  you can get your bearings
 
-★ Tap friends to view their profile
-  Opens full profile with their
-  best global scores
+★ Difficulty locked mid-game
+  Pong & Brick Breaker difficulty
+  cannot change once a game starts
 
-★ Friends leaderboard time periods
-  WEEK / MONTH / ALL TIME filters
-  Calendar-based (Sun–Sat week)
-  Days remaining shown below tabs
-  Gold/silver/bronze for timed periods
+★ Pong best-score format
+  High score shows your best match
+  (e.g. 7–3); difficulty shown during play
 
-★ Real match score for Pong
-  Global boards now show "7–3"
-  instead of a raw number
+★ Pong W/L ratio fixed
+  Profile no longer shows "inf"
 
-★ Game icons replace emoji
-  Leaderboards and rank chips now
-  use the real game icons
+★ Brick Breaker difficulty label
+  Shown next to level during play
 
-★ Difficulty labels on leaderboards
-  "(H) 4,820" format when showing
-  all difficulties together
-  Abbreviated state & country codes
+★ Brick Breaker time reset
+  Inflated demo playtime cleared to zero
 
-★ Leaderboard 5-entry cap per player
-  Each player's top 5 scores kept
-  per game & difficulty combination
+★ Back button polished
+  Arrow replaced with clean chevron,
+  aligned across all games
 
-★ Record Book moved to Profile
-  Removed from the main menu""",
+★ Asteroids leaderboard column
+  Score column widened for 7-digit scores
+
+★ Leaderboards globe button
+  Moved to bottom nav bar as a
+  globe icon circle
+
+★ Global leaderboard — best score only
+  Single best score per game mode shown
+
+★ Personal tab added
+  See your on-device high scores in
+  the global leaderboard
+
+★ Game icons colorized
+  Leaderboard game select icons now
+  colorized and center-aligned
+
+★ Friends — tap your own name
+  Opens your profile directly; no longer
+  requires the Edit button first
+
+★ Game icons on friends leaderboard
+  Colorized independently from mutual
+  friend indicators
+
+★ Friend profile best scores
+  Clean two-column layout
+
+★ Main menu score formatting
+  High scores now show commas
+  (e.g. 52,847)
+
+★ App background themes visible
+  Selected theme now produces a clearly
+  noticeable color change
+
+★ Theme picker split-oval swatches
+  Shows both primary and secondary color;
+  theme selector moved to top of each
+  game's settings menu
+
+★ Scrollable What's New & Settings
+  Long content no longer pushes the
+  close button off screen""",
 
     5 to """★ Global Leaderboard
   Compete with players worldwide!
@@ -149,6 +185,18 @@ private fun showChangelogDialog(activity: AppCompatActivity, log: String, onDone
     val view = activity.layoutInflater.inflate(R.layout.dialog_changelog, null)
     view.findViewById<TextView>(R.id.tvChangelogVersion).text = "v${BuildConfig.VERSION_NAME}"
     view.findViewById<TextView>(R.id.tvChangelog).text = log
+
+    // Cap the scroll area height so the close button is always reachable.
+    val scrollView = view.findViewById<ScrollView>(R.id.scrollChangelog)
+    val maxScrollDp = 240f
+    scrollView.post {
+        val maxPx = (maxScrollDp * activity.resources.displayMetrics.density).toInt()
+        if (scrollView.height > maxPx) {
+            val lp = scrollView.layoutParams
+            lp.height = maxPx
+            scrollView.layoutParams = lp
+        }
+    }
 
     val dialog = Dialog(activity)
     dialog.setContentView(view)

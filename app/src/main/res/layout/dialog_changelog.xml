@@ -39,7 +39,7 @@
                 android:id="@+id/tvChangelogVersion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="v1.4.0"
+                android:text="v1.5.0"
                 android:textColor="@color/muted"
                 android:textSize="9sp"
                 android:fontFamily="monospace" />
@@ -54,17 +54,25 @@
         android:alpha="0.2"
         android:layout_marginBottom="14dp" />
 
-    <!-- Changelog content -->
-    <TextView
-        android:id="@+id/tvChangelog"
+    <!-- Changelog content — wrapped in a ScrollView so long changelogs don't push the close button off screen -->
+    <ScrollView
+        android:id="@+id/scrollChangelog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="@color/text"
-        android:textSize="11sp"
-        android:fontFamily="monospace"
-        android:lineSpacingMultiplier="1.4"
-        android:layout_marginBottom="18dp" />
+        android:layout_marginBottom="18dp"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false">
+
+        <TextView
+            android:id="@+id/tvChangelog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/text"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:lineSpacingMultiplier="1.4" />
+    </ScrollView>
 
     <!-- Close button -->
     <TextView
