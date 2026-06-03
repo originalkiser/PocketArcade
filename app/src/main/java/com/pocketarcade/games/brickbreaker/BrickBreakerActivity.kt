@@ -16,7 +16,9 @@ import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
+import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
+import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
@@ -115,6 +117,10 @@ class BrickBreakerActivity : AppCompatActivity() {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
+                        if (PrefsManager.getGlobalUsername(this) != null) {
+                            showGlobalLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER,
+                                initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
+                        }
                     }
                 }
             }, 1500L)
@@ -149,6 +155,10 @@ class BrickBreakerActivity : AppCompatActivity() {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
+                        if (PrefsManager.getGlobalUsername(this) != null) {
+                            showGlobalLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER,
+                                initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
+                        }
                     }
                 }
             }, 1500L)

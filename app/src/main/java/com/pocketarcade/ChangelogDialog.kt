@@ -197,12 +197,16 @@ fun showChangelogIfNeeded(activity: AppCompatActivity, onDone: () -> Unit = {}) 
     if (lastCode == current) { onDone(); return }
     PrefsManager.setLastVersionCode(activity, current)
 
-    val log = CHANGELOG[current] ?: run { onDone(); return }
+    // CI may have bumped VERSION_CODE past the highest CHANGELOG key — use the
+    // highest key we actually have an entry for.
+    val maxKey = CHANGELOG.keys.maxOrNull() ?: run { onDone(); return }
+    val log    = CHANGELOG[maxKey]           ?: run { onDone(); return }
     showChangelogDialog(activity, log, onDone)
 }
 
 fun showChangelogDialog(activity: AppCompatActivity) {
-    val log = CHANGELOG[BuildConfig.VERSION_CODE] ?: return
+    val maxKey = CHANGELOG.keys.maxOrNull() ?: return
+    val log    = CHANGELOG[maxKey]           ?: return
     showChangelogDialog(activity, log)
 }
 

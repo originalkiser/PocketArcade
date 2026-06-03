@@ -69,7 +69,9 @@ fun showGlobalLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
     mode: String? = null,
-    pendingScore: PendingGlobalScore? = null
+    pendingScore: PendingGlobalScore? = null,
+    initialTab: String = "WORLD",
+    initialTimeRange: TimeRange = TimeRange.ALL_TIME
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_global_leaderboard, null)
     val dialog = Dialog(activity)
@@ -537,7 +539,7 @@ fun showGlobalLeaderboardDialog(
     tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     loadFirstPage() }
     tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    loadFirstPage() }
     tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); loadFirstPage() }
-    setFriendsTimeActive(TimeRange.ALL_TIME)
+    setFriendsTimeActive(initialTimeRange)
 
     btnManageFriends.setOnClickListener {
         val myUsername = PrefsManager.getGlobalUsername(activity) ?: return@setOnClickListener
@@ -553,7 +555,7 @@ fun showGlobalLeaderboardDialog(
     btnLoadMore.setOnClickListener { loadNextPage() }
     view.findViewById<TextView>(R.id.btnGlobalClose).setOnClickListener { dialog.dismiss() }
 
-    setActive("WORLD")
+    setActive(initialTab)
     loadFirstPage()
     dialog.show()
 }
