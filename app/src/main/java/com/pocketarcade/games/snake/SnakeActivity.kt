@@ -126,7 +126,7 @@ class SnakeActivity : AppCompatActivity() {
             // Submit to period leaderboard unconditionally (independent of local top-N).
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
-                GlobalLeaderboard.ensureSignedIn { uid ->
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_SNAKE, score,
                         PrefsManager.getGlobalCountry(this),
@@ -135,7 +135,7 @@ class SnakeActivity : AppCompatActivity() {
                         PrefsManager.getAvatarIndex(this),
                         PrefsManager.getAvatarColor(this)
                     )
-                }
+                })
             }
 
             idleHandler.postDelayed({

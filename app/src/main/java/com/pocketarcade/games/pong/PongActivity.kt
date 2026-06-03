@@ -93,7 +93,7 @@ class PongActivity : AppCompatActivity() {
             // Submit to period leaderboard unconditionally (win or loss).
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
-                GlobalLeaderboard.ensureSignedIn { uid ->
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_PONG, encodedScore,
                         PrefsManager.getGlobalCountry(this),
@@ -102,7 +102,7 @@ class PongActivity : AppCompatActivity() {
                         PrefsManager.getAvatarIndex(this),
                         PrefsManager.getAvatarColor(this)
                     )
-                }
+                })
             }
 
             idleHandler.postDelayed({

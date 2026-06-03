@@ -98,7 +98,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             // Submit to period leaderboard unconditionally.
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
-                GlobalLeaderboard.ensureSignedIn { uid ->
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_BRICKBREAKER, score,
                         PrefsManager.getGlobalCountry(this),
@@ -107,7 +107,7 @@ class BrickBreakerActivity : AppCompatActivity() {
                         PrefsManager.getAvatarIndex(this),
                         PrefsManager.getAvatarColor(this)
                     )
-                }
+                })
             }
 
             idleHandler.postDelayed({
@@ -132,7 +132,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             // Submit to period leaderboard unconditionally.
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
-                GlobalLeaderboard.ensureSignedIn { uid ->
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_BRICKBREAKER, score,
                         PrefsManager.getGlobalCountry(this),
@@ -141,7 +141,7 @@ class BrickBreakerActivity : AppCompatActivity() {
                         PrefsManager.getAvatarIndex(this),
                         PrefsManager.getAvatarColor(this)
                     )
-                }
+                })
             }
 
             idleHandler.postDelayed({
