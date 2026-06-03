@@ -398,9 +398,11 @@ fun showGlobalLeaderboardDialog(
                     myUid = uid
                     FriendsManager.getFollowing(uid) { following ->
                         myFollowingUids = following.map { it.uid }.toSet()
-                        if (following.isEmpty()) { appendEntries(emptyList(), null); return@getFollowing }
+                        // Always include own UID so the user sees their own score
+                        // even when they have no friends yet.
+                        val allUids = (listOf(uid) + following.map { it.uid }).distinct()
                         FriendsManager.fetchFriendsScores(
-                            uids = following.map { it.uid },
+                            uids = allUids,
                             game = currentGame,
                             timeRange = friendsTimeRange,
                             mode = currentMode,
