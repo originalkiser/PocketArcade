@@ -256,43 +256,32 @@ object GlobalLeaderboard {
         fun submit(periodType: String, periodKey: String) {
             val docId = "$uid|$game|$modeKey|$periodType|$periodKey"
             val ref   = db.collection("periodScores").document(docId)
-            ref.get().addOnSuccessListener { snap ->
-                val existing = if (snap.exists()) (snap.getLong("score") ?: 0L).toInt() else 0
-                if (score >= existing) {
-                    val data = hashMapOf<String, Any>(
-                        "uid"         to uid,
-                        "username"    to username,
-                        "game"        to game,
-                        "score"       to score,
-                        "country"     to country,
-                        "state"       to state,
-                        "avatarIndex" to avatarIndex,
-                        "avatarColor" to avatarColor,
-                        "timestamp"   to now,
-                        "periodType"  to periodType,
-                        "periodKey"   to periodKey
-                    )
-                    if (mode != null) data["mode"] = mode
-                    ref.set(data)
+            val data  = hashMapOf<String, Any>(
+                "uid"         to uid,
+                "username"    to username,
+                "game"        to game,
+                "score"       to score,
+                "country"     to country,
+                "state"       to state,
+                "avatarIndex" to avatarIndex,
+                "avatarColor" to avatarColor,
+                "timestamp"   to now,
+                "periodType"  to periodType,
+                "periodKey"   to periodKey
+            )
+            if (mode != null) data["mode"] = mode
+
+            // Write unconditionally — skip the read-first approach which was
+            // silently swallowing write failures (no error handler on ref.set()).
+            // The doc ID already scopes to (uid, game, mode, period) so each
+            // player has exactly one live document per period.
+            ref.set(data)
+                .addOnSuccessListener {
+                    android.util.Log.d("PocketArcade", "periodScore OK  $docId score=$score")
                 }
-            }.addOnFailureListener {
-                // Fail-open: write anyway so scores are never lost on transient errors
-                val data = hashMapOf<String, Any>(
-                    "uid"         to uid,
-                    "username"    to username,
-                    "game"        to game,
-                    "score"       to score,
-                    "country"     to country,
-                    "state"       to state,
-                    "avatarIndex" to avatarIndex,
-                    "avatarColor" to avatarColor,
-                    "timestamp"   to now,
-                    "periodType"  to periodType,
-                    "periodKey"   to periodKey
-                )
-                if (mode != null) data["mode"] = mode
-                ref.set(data)
-            }
+                .addOnFailureListener { e ->
+                    android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                }
         }
 
         submit("week",  currentWeekKey())
