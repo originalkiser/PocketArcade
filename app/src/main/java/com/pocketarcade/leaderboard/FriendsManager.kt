@@ -152,39 +152,55 @@ object FriendsManager {
         if (uids.isEmpty()) { onResult(emptyList()); return }
 
         if (timeRange != TimeRange.ALL_TIME) {
-            // Time-bounded: use the dedicated periodScores collection.
-            // Each document is already the best score per (uid, game, mode, period),
-            // so no groupBy deduplication is needed — just sort.
+            // Time-bounded: fetch periodScores by constructing document IDs directly.
+            // Doc ID format: "$uid|$game|$modeKey|$periodType|$periodKey"
+            // Using whereIn(FieldPath.documentId()) avoids any composite index requirement —
+            // a multi-field equality + whereIn query would silently return nothing without one.
             val periodType = if (timeRange == TimeRange.WEEK) "week" else "month"
             val periodKey  = if (timeRange == TimeRange.WEEK) currentWeekKey() else currentMonthKey()
+            // If a specific mode is selected, only look for that key.
+            // Otherwise fetch all possible mode keys so every game type is covered.
+            val modeKeys = if (mode != null) listOf(mode) else listOf("_", "easy", "medium", "hard")
 
-            var q: Query = db.collection("periodScores")
-                .whereEqualTo("game", game)
-                .whereIn("uid", uids.take(30))
-                .whereEqualTo("periodType", periodType)
-                .whereEqualTo("periodKey", periodKey)
-            if (mode != null) q = q.whereEqualTo("mode", mode)
+            val allDocIds = uids.take(30).flatMap { uid ->
+                modeKeys.map { mk -> "$uid|$game|$mk|$periodType|$periodKey" }
+            }
+            val batches = allDocIds.chunked(30)
+            val entries = mutableListOf<GlobalEntry>()
+            var pending = batches.size
 
-            q.limit(200L).get()
-                .addOnSuccessListener { snap ->
-                    val entries = snap.documents.mapNotNull { doc ->
-                        runCatching {
-                            GlobalEntry(
-                                uid         = doc.getString("uid") ?: "",
-                                username    = doc.getString("username") ?: "???",
-                                score       = (doc.getLong("score") ?: 0L).toInt(),
-                                country     = doc.getString("country") ?: "",
-                                state       = doc.getString("state") ?: "",
-                                mode        = doc.getString("mode"),
-                                timestamp   = doc.getLong("timestamp") ?: 0L,
-                                avatarIndex = (doc.getLong("avatarIndex") ?: 0L).toInt(),
-                                avatarColor = (doc.getLong("avatarColor") ?: 0L).toInt()
-                            )
-                        }.getOrNull()
-                    }.sortedByDescending { it.score }
-                    onResult(entries)
-                }
-                .addOnFailureListener { onResult(emptyList()) }
+            fun finish() {
+                // Keep only the best score per uid, then rank descending.
+                onResult(entries
+                    .groupBy { it.uid }
+                    .map { (_, scores) -> scores.maxByOrNull { it.score }!! }
+                    .sortedByDescending { it.score })
+            }
+
+            batches.forEach { batch ->
+                db.collection("periodScores")
+                    .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
+                    .get()
+                    .addOnSuccessListener { snap ->
+                        snap.documents.forEach { doc ->
+                            runCatching {
+                                entries.add(GlobalEntry(
+                                    uid         = doc.getString("uid") ?: "",
+                                    username    = doc.getString("username") ?: "???",
+                                    score       = (doc.getLong("score") ?: 0L).toInt(),
+                                    country     = doc.getString("country") ?: "",
+                                    state       = doc.getString("state") ?: "",
+                                    mode        = doc.getString("mode"),
+                                    timestamp   = doc.getLong("timestamp") ?: 0L,
+                                    avatarIndex = (doc.getLong("avatarIndex") ?: 0L).toInt(),
+                                    avatarColor = (doc.getLong("avatarColor") ?: 0L).toInt()
+                                ))
+                            }
+                        }
+                        if (--pending == 0) finish()
+                    }
+                    .addOnFailureListener { if (--pending == 0) finish() }
+            }
             return
         }
 
