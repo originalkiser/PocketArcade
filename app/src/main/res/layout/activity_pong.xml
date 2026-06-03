@@ -56,11 +56,34 @@
 
     </LinearLayout>
 
-    <com.pocketarcade.games.pong.PongView
-        android:id="@+id/pongView"
+    <!-- Game board + floating start-game overlay -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2" />
+        android:layout_weight="2">
+
+        <com.pocketarcade.games.pong.PongView
+            android:id="@+id/pongView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/btnStartGame"
+            android:layout_width="200dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:text="▶  START GAME"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/swipeZone"

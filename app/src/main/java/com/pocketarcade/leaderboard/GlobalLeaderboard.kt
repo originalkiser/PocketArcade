@@ -231,6 +231,74 @@ object GlobalLeaderboard {
         }
     }
 
+    /**
+     * Submits the player's score to the period-specific leaderboard collection
+     * (`periodScores`). Called independently on every game-over — does NOT require
+     * the score to qualify for the device-local top-N list.
+     *
+     * One document per (uid, game, mode, periodType, periodKey) is stored; only the
+     * best score for that period is retained to keep the collection lean.
+     */
+    fun submitPeriodScore(
+        uid: String,
+        username: String,
+        game: String,
+        score: Int,
+        country: String,
+        state: String,
+        mode: String? = null,
+        avatarIndex: Int = 0,
+        avatarColor: Int = 0
+    ) {
+        val now     = System.currentTimeMillis()
+        val modeKey = mode ?: "_"
+
+        fun submit(periodType: String, periodKey: String) {
+            val docId = "$uid|$game|$modeKey|$periodType|$periodKey"
+            val ref   = db.collection("periodScores").document(docId)
+            ref.get().addOnSuccessListener { snap ->
+                val existing = if (snap.exists()) (snap.getLong("score") ?: 0L).toInt() else 0
+                if (score >= existing) {
+                    val data = hashMapOf<String, Any>(
+                        "uid"         to uid,
+                        "username"    to username,
+                        "game"        to game,
+                        "score"       to score,
+                        "country"     to country,
+                        "state"       to state,
+                        "avatarIndex" to avatarIndex,
+                        "avatarColor" to avatarColor,
+                        "timestamp"   to now,
+                        "periodType"  to periodType,
+                        "periodKey"   to periodKey
+                    )
+                    if (mode != null) data["mode"] = mode
+                    ref.set(data)
+                }
+            }.addOnFailureListener {
+                // Fail-open: write anyway so scores are never lost on transient errors
+                val data = hashMapOf<String, Any>(
+                    "uid"         to uid,
+                    "username"    to username,
+                    "game"        to game,
+                    "score"       to score,
+                    "country"     to country,
+                    "state"       to state,
+                    "avatarIndex" to avatarIndex,
+                    "avatarColor" to avatarColor,
+                    "timestamp"   to now,
+                    "periodType"  to periodType,
+                    "periodKey"   to periodKey
+                )
+                if (mode != null) data["mode"] = mode
+                ref.set(data)
+            }
+        }
+
+        submit("week",  currentWeekKey())
+        submit("month", currentMonthKey())
+    }
+
     /** Fetch a user's country and state from the users collection. */
     fun fetchUserInfo(uid: String, onResult: (country: String, state: String) -> Unit) {
         db.collection("users").document(uid).get()

@@ -9,11 +9,17 @@ permissions:
 
 jobs:
   build:
+    # Skip the auto-commit that bumps the version to avoid an infinite CI loop.
+    if: "!startsWith(github.event.head_commit.message, '[version-bump]')"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        run: git clone "https://github.com/${{ github.repository }}.git" . && git checkout "${{ github.sha }}"
+      - name: Checkout (on branch, not detached HEAD)
+        run: |
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" .
+          git checkout master
+          git config user.email "ci@pocketarcade.app"
+          git config user.name "PocketArcade CI"
 
       - name: Select Java 17
         run: |
@@ -21,16 +27,29 @@ jobs:
           sudo update-java-alternatives -s "$(update-java-alternatives -l | grep '17' | awk '{print $1}')"
           java -version
 
+      - name: Bump patch version
+        run: |
+          CURRENT_CODE=$(grep -oP '(?<=versionCode = )\d+' app/build.gradle.kts)
+          CURRENT_NAME=$(grep -oP '(?<=versionName = ")[^"]+' app/build.gradle.kts)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
+          NEW_PATCH=$((PATCH + 1))
+          NEW_NAME="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          NEW_CODE=$((CURRENT_CODE + 1))
+          sed -i "s/versionCode = $CURRENT_CODE/versionCode = $NEW_CODE/" app/build.gradle.kts
+          sed -i "s/versionName = \"$CURRENT_NAME\"/versionName = \"$NEW_NAME\"/" app/build.gradle.kts
+          echo "NEW_NAME=$NEW_NAME"   >> $GITHUB_ENV
+          echo "NEW_CODE=$NEW_CODE"   >> $GITHUB_ENV
+          echo "Bumped $CURRENT_NAME ($CURRENT_CODE) → $NEW_NAME ($NEW_CODE)"
+
       - name: Compute version tag
         run: |
           VERSION=$(grep -oP '(?<=versionName = ")[^"]+' app/build.gradle.kts)
-          echo "Extracted versionName: ${VERSION}"
           if [ -z "$VERSION" ]; then
             echo "ERROR: Could not extract versionName from build.gradle.kts"
             exit 1
           fi
           echo "RELEASE_TAG=v${VERSION}" >> $GITHUB_ENV
-          echo "Release tag will be: v${VERSION}"
+          echo "Release tag: v${VERSION}"
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
@@ -54,8 +73,8 @@ jobs:
 
       - name: Write release notes
         run: |
-          cat > notes.md << 'EOF'
-          ## Pocket Arcade - ${{ env.RELEASE_TAG }}
+          cat > notes.md << EOF
+          ## Pocket Arcade - $RELEASE_TAG
 
           ### Install on Android (API 26+)
           1. Download PocketArcade.apk below
@@ -65,11 +84,19 @@ jobs:
           Includes: Snake, Pong, Asteroids, Brick Breaker
           EOF
 
-      - name: Create release
+      - name: Create GitHub release
         run: |
-          # Delete any existing release/tag with this name so re-runs don't fail
           gh release delete "$RELEASE_TAG" --yes 2>/dev/null || true
           git push origin ":refs/tags/$RELEASE_TAG" 2>/dev/null || true
-          gh release create "$RELEASE_TAG" PocketArcade.apk --title "Pocket Arcade $RELEASE_TAG" --notes-file notes.md --latest
+          gh release create "$RELEASE_TAG" PocketArcade.apk \
+            --title "Pocket Arcade $RELEASE_TAG" \
+            --notes-file notes.md \
+            --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push version bump
+        run: |
+          git add app/build.gradle.kts
+          git commit -m "[version-bump] Bump to v${{ env.NEW_NAME }} (code ${{ env.NEW_CODE }})"
+          git push origin master

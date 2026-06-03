@@ -23,6 +23,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.storage.PrefsManager
@@ -121,6 +122,21 @@ class SnakeActivity : AppCompatActivity() {
 
             // Track consecutive low scores for the control-hint system.
             if (score < 15) consecutiveLowScores++ else consecutiveLowScores = 0
+
+            // Submit to period leaderboard unconditionally (independent of local top-N).
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn { uid ->
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, PrefsManager.GAME_SNAKE, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                }
+            }
 
             idleHandler.postDelayed({
                 runOnUiThread {

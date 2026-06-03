@@ -14,6 +14,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
@@ -74,6 +75,22 @@ class AsteroidsActivity : AppCompatActivity() {
             astView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_ASTEROIDS, score)
             runOnUiThread { updateHighScore() }
+
+            // Submit to period leaderboard unconditionally.
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn { uid ->
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, PrefsManager.GAME_ASTEROIDS, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                }
+            }
+
             idleHandler.postDelayed({
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_ASTEROIDS, score) {

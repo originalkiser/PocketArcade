@@ -8,6 +8,31 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.storage.PrefsManager
 
 private val CHANGELOG = mapOf(
+    7 to """★ Friends leaderboard — weekly & monthly
+  Scores now track what you played THIS
+  week / month, not your all-time best
+
+★ Start game button on the board
+  Pong & Brick Breaker now show a
+  START GAME button over the game
+  board after picking difficulty
+
+★ What's New shows version number
+  Title now reads "WHAT'S NEW — v1.5.1"
+
+★ Global leaderboard icon alignment
+  Game icons & labels are now centered
+  together on picker tiles and tab chips
+
+★ Ad-free popup timing improved
+  "Go Ad Free" only appears when you
+  actually finish a game, not on every
+  return to the main menu
+
+★ Auto version bump on every build
+  CI now bumps the patch version each
+  time code is pushed to master""",
+
     3 to """★ Brick Breaker difficulty settings
   Easy / Medium / Hard ball speeds
 
@@ -183,7 +208,7 @@ fun showChangelogDialog(activity: AppCompatActivity) {
 
 private fun showChangelogDialog(activity: AppCompatActivity, log: String, onDone: () -> Unit = {}) {
     val view = activity.layoutInflater.inflate(R.layout.dialog_changelog, null)
-    view.findViewById<TextView>(R.id.tvChangelogVersion).text = "v${BuildConfig.VERSION_NAME}"
+    view.findViewById<TextView>(R.id.tvChangelogHeader).text = "WHAT'S NEW — v${BuildConfig.VERSION_NAME}"
     view.findViewById<TextView>(R.id.tvChangelog).text = log
 
     // Cap the scroll area height so the close button is always reachable.

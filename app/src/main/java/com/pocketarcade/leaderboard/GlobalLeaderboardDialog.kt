@@ -457,7 +457,7 @@ fun showGlobalLeaderboardDialog(
     fun setupGameChips() {
         gameChipsRow.removeAllViews()
         GAMES.forEachIndexed { i, g ->
-            val chip = makeChip(" ${g.label}", g.key == currentGame, g.iconRes, gameChipColors[g.key])
+            val chip = makeChip(g.label, g.key == currentGame, g.iconRes, gameChipColors[g.key])
             if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
             chip.setOnClickListener {
                 currentGame = g.key
@@ -628,7 +628,7 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
 
     GAMES.forEach { g ->
         val tile = TextView(activity).apply {
-            text = "  ${g.label}"
+            text = g.label
             setTextColor(Color.WHITE)
             textSize = 15f
             typeface = Typeface.MONOSPACE

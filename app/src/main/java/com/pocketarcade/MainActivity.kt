@@ -33,6 +33,9 @@ class MainActivity : AppCompatActivity() {
     private var upsellDialog: AlertDialog? = null
     private val blinkHandler = Handler(Looper.getMainLooper())
     private var blinkVisible = true
+    /** Snapshot of games-played count at the START of the last onResume. Used to detect
+     *  whether the user actually finished a game before we offer the upsell dialog. */
+    private var gamesPlayedAtLastResume = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -164,9 +167,16 @@ class MainActivity : AppCompatActivity() {
 
         refreshProfileCircle()
 
-        if (PrefsManager.checkAndConsumeUpsellTrigger(this)) {
-            showUpsellDialog()
+        // Only show upsell when the player actually finished a game since the last resume
+        // (not on cold-start or when returning from Settings/Profile/etc.).
+        val gamesNow = PrefsManager.getGamesPlayedTotal(this)
+        if (gamesPlayedAtLastResume >= 0 && gamesNow > gamesPlayedAtLastResume) {
+            if (PrefsManager.checkAndConsumeUpsellTrigger(this)) {
+                showUpsellDialog()
+            }
         }
+        gamesPlayedAtLastResume = gamesNow
+
         startBlinkPrompt()
 
         val rootFrame = findViewById<FrameLayout>(R.id.rootFrame)

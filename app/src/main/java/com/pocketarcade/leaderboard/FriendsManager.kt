@@ -17,6 +17,18 @@ data class FollowEntry(
 
 enum class TimeRange { WEEK, MONTH, ALL_TIME }
 
+/** "2026-W22" style key for the current calendar week (ISO week-of-year). */
+fun currentWeekKey(): String {
+    val cal = Calendar.getInstance()
+    return "${cal.get(Calendar.YEAR)}-W%02d".format(cal.get(Calendar.WEEK_OF_YEAR))
+}
+
+/** "2026-06" style key for the current calendar month. */
+fun currentMonthKey(): String {
+    val cal = Calendar.getInstance()
+    return "${cal.get(Calendar.YEAR)}-%02d".format(cal.get(Calendar.MONTH) + 1)
+}
+
 /** Midnight of the most recent Sunday (start of current calendar week). */
 fun calendarStartOfWeek(): Long {
     val cal = Calendar.getInstance()
@@ -139,29 +151,51 @@ object FriendsManager {
     ) {
         if (uids.isEmpty()) { onResult(emptyList()); return }
 
-        val cutoff = when (timeRange) {
-            TimeRange.WEEK     -> calendarStartOfWeek()
-            TimeRange.MONTH    -> calendarStartOfMonth()
-            TimeRange.ALL_TIME -> 0L
+        if (timeRange != TimeRange.ALL_TIME) {
+            // Time-bounded: use the dedicated periodScores collection.
+            // Each document is already the best score per (uid, game, mode, period),
+            // so no groupBy deduplication is needed — just sort.
+            val periodType = if (timeRange == TimeRange.WEEK) "week" else "month"
+            val periodKey  = if (timeRange == TimeRange.WEEK) currentWeekKey() else currentMonthKey()
+
+            var q: Query = db.collection("periodScores")
+                .whereEqualTo("game", game)
+                .whereIn("uid", uids.take(30))
+                .whereEqualTo("periodType", periodType)
+                .whereEqualTo("periodKey", periodKey)
+            if (mode != null) q = q.whereEqualTo("mode", mode)
+
+            q.limit(200L).get()
+                .addOnSuccessListener { snap ->
+                    val entries = snap.documents.mapNotNull { doc ->
+                        runCatching {
+                            GlobalEntry(
+                                uid         = doc.getString("uid") ?: "",
+                                username    = doc.getString("username") ?: "???",
+                                score       = (doc.getLong("score") ?: 0L).toInt(),
+                                country     = doc.getString("country") ?: "",
+                                state       = doc.getString("state") ?: "",
+                                mode        = doc.getString("mode"),
+                                timestamp   = doc.getLong("timestamp") ?: 0L,
+                                avatarIndex = (doc.getLong("avatarIndex") ?: 0L).toInt(),
+                                avatarColor = (doc.getLong("avatarColor") ?: 0L).toInt()
+                            )
+                        }.getOrNull()
+                    }.sortedByDescending { it.score }
+                    onResult(entries)
+                }
+                .addOnFailureListener { onResult(emptyList()) }
+            return
         }
 
+        // ALL_TIME: query globalScores (one best-per-player entry per game+mode).
         var q: Query = db.collection("globalScores")
             .whereEqualTo("game", game)
             .whereIn("uid", uids.take(30))
         if (mode != null) q = q.whereEqualTo("mode", mode)
+        q = q.orderBy("score", Query.Direction.DESCENDING)
 
-        // For time-bounded ranges, filter at the DB level so we fetch every score
-        // submitted in the period — not just the all-time top entries, which would
-        // cause recent lower scores to be silently excluded by the query limit.
-        if (cutoff > 0L) {
-            q = q.whereGreaterThanOrEqualTo("timestamp", cutoff)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-        } else {
-            q = q.orderBy("score", Query.Direction.DESCENDING)
-        }
-
-        q.limit(if (cutoff > 0L) 500L else 200L)
-            .get()
+        q.limit(200L).get()
             .addOnSuccessListener { snap ->
                 val entries = snap.documents.mapNotNull { doc ->
                     runCatching {
@@ -178,8 +212,6 @@ object FriendsManager {
                         )
                     }.getOrNull()
                 }
-                // Pick each friend's single best score within the fetched window,
-                // then rank the friend list by that score descending.
                 val best = entries
                     .groupBy { it.uid }
                     .map { (_, scores) -> scores.maxByOrNull { it.score }!! }

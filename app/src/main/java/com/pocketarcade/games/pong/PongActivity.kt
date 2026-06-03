@@ -15,6 +15,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.formatGlobalScore
 import com.pocketarcade.leaderboard.showLeaderboardDialog
@@ -31,6 +32,7 @@ class PongActivity : AppCompatActivity() {
     private lateinit var btnLeaderboard: TextView
     private lateinit var btnSound: TextView
     private lateinit var btnLightMode: TextView
+    private lateinit var btnStartGame: TextView
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
     private var gameStartTime = 0L
@@ -57,6 +59,12 @@ class PongActivity : AppCompatActivity() {
         btnSound       = findViewById(R.id.btnSound)
         btnLightMode   = findViewById(R.id.btnLightMode)
         swipeZone      = findViewById(R.id.swipeZone)
+        btnStartGame   = findViewById(R.id.btnStartGame)
+
+        btnStartGame.setOnClickListener {
+            btnStartGame.visibility = View.GONE
+            pongView.startGame(false)
+        }
 
         updateHighScore()
         showDifficultyDialog(cancelable = false)
@@ -64,7 +72,10 @@ class PongActivity : AppCompatActivity() {
         pongView.onScoreUpdate = { p, ai ->
             runOnUiThread { tvScore.text = "P:$p  AI:$ai" }
         }
-        pongView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
+        pongView.onGameStarted = {
+            gameStartTime = System.currentTimeMillis()
+            runOnUiThread { btnStartGame.visibility = View.GONE }
+        }
         pongView.onMatchEnd = { playerWon, playerScore, aiScore ->
             val encodedScore = playerScore * 100 + (99 - aiScore)
             val duration = System.currentTimeMillis() - gameStartTime
@@ -78,10 +89,27 @@ class PongActivity : AppCompatActivity() {
                 PrefsManager.recordPongWin(this)
                 runOnUiThread { updateHighScore() }
             }
+
+            // Submit to period leaderboard unconditionally (win or loss).
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn { uid ->
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, PrefsManager.GAME_PONG, encodedScore,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                }
+            }
+
             idleHandler.postDelayed({
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, encodedScore, mode = mode) {
                         pongView.readyForRestart = true
+                        runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                     }
                 }
             }, 1500L)
@@ -112,17 +140,12 @@ class PongActivity : AppCompatActivity() {
             setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
         }
 
-        val btnStartGame = view.findViewById<TextView>(R.id.btnStartGame)
-
         fun pick(diff: PongDifficulty) {
             pongView.difficulty = diff
             updateHighScore()
-            btnStartGame.visibility = View.VISIBLE
-        }
-
-        btnStartGame.setOnClickListener {
-            pongView.startGame(false)
             dialog.dismiss()
+            // Show the START GAME button floating over the game board.
+            btnStartGame.visibility = View.VISIBLE
         }
 
         view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener {

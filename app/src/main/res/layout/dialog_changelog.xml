@@ -20,30 +20,16 @@
             android:background="@color/accent_yellow"
             android:layout_marginEnd="12dp" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvChangelogHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WHAT'S NEW"
-                android:textColor="@color/accent_yellow"
-                android:textSize="14sp"
-                android:fontFamily="monospace"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvChangelogVersion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="v1.5.0"
-                android:textColor="@color/muted"
-                android:textSize="9sp"
-                android:fontFamily="monospace" />
-        </LinearLayout>
+            android:text="WHAT'S NEW — v1.5.0"
+            android:textColor="@color/accent_yellow"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Divider -->

@@ -15,6 +15,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
@@ -32,6 +33,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var btnLeaderboard: TextView
     private lateinit var btnSound: TextView
     private lateinit var btnLightMode: TextView
+    private lateinit var btnStartGame: TextView
     private lateinit var swipeZone: View
     private val idleHandler = Handler(Looper.getMainLooper())
     private var gameStartTime = 0L
@@ -61,6 +63,12 @@ class BrickBreakerActivity : AppCompatActivity() {
         btnSound       = findViewById(R.id.btnSound)
         btnLightMode   = findViewById(R.id.btnLightMode)
         swipeZone      = findViewById(R.id.swipeZone)
+        btnStartGame   = findViewById(R.id.btnStartGame)
+
+        btnStartGame.setOnClickListener {
+            btnStartGame.visibility = View.GONE
+            bbView.startGame(demo = false)
+        }
 
         updateHighScore()
 
@@ -74,7 +82,10 @@ class BrickBreakerActivity : AppCompatActivity() {
             currentLevel = level
             runOnUiThread { updateLevelDisplay() }
         }
-        bbView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
+        bbView.onGameStarted = {
+            gameStartTime = System.currentTimeMillis()
+            runOnUiThread { btnStartGame.visibility = View.GONE }
+        }
         bbView.onGameOver = { score ->
             val duration = System.currentTimeMillis() - gameStartTime
             val mode = bbView.difficulty.name.lowercase()
@@ -83,10 +94,27 @@ class BrickBreakerActivity : AppCompatActivity() {
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
+
+            // Submit to period leaderboard unconditionally.
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn { uid ->
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, PrefsManager.GAME_BRICKBREAKER, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                }
+            }
+
             idleHandler.postDelayed({
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
+                        runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                     }
                 }
             }, 1500L)
@@ -100,10 +128,27 @@ class BrickBreakerActivity : AppCompatActivity() {
             bbView.readyForRestart = false
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
+
+            // Submit to period leaderboard unconditionally.
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn { uid ->
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, PrefsManager.GAME_BRICKBREAKER, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                }
+            }
+
             idleHandler.postDelayed({
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_BRICKBREAKER, score, mode = mode) {
                         bbView.readyForRestart = true
+                        runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                     }
                 }
             }, 1500L)
@@ -140,8 +185,9 @@ class BrickBreakerActivity : AppCompatActivity() {
         fun pick(diff: BBDifficulty, index: Int) {
             PrefsManager.setBBDifficulty(this, index)
             bbView.difficulty = diff
-            bbView.startGame(demo = false)
             dialog.dismiss()
+            // Show the START GAME button floating over the game board.
+            btnStartGame.visibility = View.VISIBLE
         }
 
         view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { dialog.dismiss(); finish() }

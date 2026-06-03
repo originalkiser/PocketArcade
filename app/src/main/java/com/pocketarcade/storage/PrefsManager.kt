@@ -259,6 +259,8 @@ object PrefsManager {
         prefs(ctx).edit { putInt(KEY_GAMES_PLAYED, count) }
     }
 
+    fun getGamesPlayedTotal(ctx: Context): Int = prefs(ctx).getInt(KEY_GAMES_PLAYED, 0)
+
     /** Returns true (once) every 3rd game played, never on first launch. */
     fun checkAndConsumeUpsellTrigger(ctx: Context): Boolean {
         if (isAdFree(ctx)) return false
