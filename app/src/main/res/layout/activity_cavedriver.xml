@@ -47,6 +47,20 @@
             android:fontFamily="monospace"
             android:letterSpacing="0.15" />
 
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="⚙"
+            android:textColor="#00FFCC"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
 
     <!-- Game canvas: square (onMeasure forces height=width) -->

@@ -306,16 +306,33 @@ object GlobalLeaderboard {
             )
             if (mode != null) data["mode"] = mode
 
-            // Write unconditionally — skip the read-first approach which was
-            // silently swallowing write failures (no error handler on ref.set()).
-            // The doc ID already scopes to (uid, game, mode, period) so each
-            // player has exactly one live document per period.
-            ref.set(data)
-                .addOnSuccessListener {
-                    android.util.Log.d("PocketArcade", "periodScore OK  $docId score=$score")
+            // Read first — only overwrite if the new score is strictly better.
+            // This prevents a worse run from displacing a player's period best.
+            ref.get()
+                .addOnSuccessListener { snap ->
+                    val existing = if (snap.exists()) (snap.getLong("score") ?: 0L).toInt() else 0
+                    if (score > existing) {
+                        ref.set(data)
+                            .addOnSuccessListener {
+                                android.util.Log.d("PocketArcade", "periodScore OK  $docId score=$score")
+                            }
+                            .addOnFailureListener { e ->
+                                android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                            }
+                    } else {
+                        android.util.Log.d("PocketArcade",
+                            "periodScore SKIP $docId score=$score <= existing=$existing")
+                    }
                 }
-                .addOnFailureListener { e ->
-                    android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                .addOnFailureListener {
+                    // Read failed — write anyway so we don't silently lose scores
+                    ref.set(data)
+                        .addOnSuccessListener {
+                            android.util.Log.d("PocketArcade", "periodScore OK(fallback) $docId score=$score")
+                        }
+                        .addOnFailureListener { e ->
+                            android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                        }
                 }
         }
 

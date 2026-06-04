@@ -19,19 +19,50 @@
         android:layout_gravity="bottom"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Back button overlaid top-left -->
-    <TextView
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:padding="14dp"
-        android:text="&#8592;"
-        android:textColor="@color/muted"
-        android:textSize="22sp"
-        android:fontFamily="monospace"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground" />
+    <!-- Header row overlaid top -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_gravity="top"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp"
+        android:gravity="center_vertical"
+        android:background="#AA0A0A0F">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="&lt; MENU"
+            android:textColor="#00FF96"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="⚙"
+            android:textColor="#00FF96"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
 
 </FrameLayout>

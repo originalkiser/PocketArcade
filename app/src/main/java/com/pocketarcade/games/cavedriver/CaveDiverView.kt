@@ -7,6 +7,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import com.pocketarcade.GameTheme
+import com.pocketarcade.withAlpha
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -26,13 +28,13 @@ class CaveDiverView @JvmOverloads constructor(
         private const val LOG_W = 480f
         private const val LOG_H = 320f
 
-        // Physics — identical to JSX constants
-        private const val GRAVITY       = 0.225f
+        // Physics — +25% speed and gravity from previous values
+        private const val GRAVITY       = 0.281f   // was 0.225 → +25%
         private const val THRUST        = -0.456f
         private const val DAMPING       = 0.92f
         private const val VY_MIN        = -5f
         private const val VY_MAX        = 6f
-        private const val PIPE_SPEED    = 2.88f
+        private const val PIPE_SPEED    = 3.60f    // was 2.88 → +25%
         private const val PIPE_INTERVAL = 110
 
         /** Logical pixels to extend above/below the 480×320 area to fill the square view.
@@ -59,6 +61,28 @@ class CaveDiverView @JvmOverloads constructor(
         private val THRUST_B  = Color.parseColor("#FFCC00")
         private val HUD_COL   = Color.parseColor("#8888CC")
         private val DEAD_COL  = Color.parseColor("#FF4466")
+    }
+
+    // ── Themed colours (updated by applyTheme; defaults match the original palette) ──
+    private var themeShipColor   = SHIP_COL
+    private var themeShipGlow    = SHIP_GLOW
+    private var themeHudLabel    = HUD_COL
+    private var themeHudValue    = SHIP_COL
+
+    fun applyTheme(theme: GameTheme) {
+        themeShipColor  = theme.player
+        themeShipGlow   = theme.player.withAlpha(68)
+        themeHudLabel   = theme.muted
+        themeHudValue   = theme.player
+        // Update paints used outside the per-frame draw path
+        hudLabelPaint.color  = themeHudLabel
+        hudValuePaint.color  = themeHudValue
+        titlePaint.color     = themeShipColor
+        titlePaint.setShadowLayer(14f, 0f, 0f, themeShipColor.withAlpha(136))
+        crashScorePaint.color = themeShipColor
+        crashScorePaint.setShadowLayer(16f, 0f, 0f, themeShipColor.withAlpha(136))
+        glowCirclePaint.color = themeShipGlow
+        cockpitStrokePaint.color = themeShipColor.withAlpha(136)
     }
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -467,17 +491,18 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     private fun drawShip(canvas: Canvas, x: Float, y: Float, showFlame: Boolean) {
-        // Radial glow (soft blurred circle matching JSX's radial gradient)
+        // Radial glow (soft blurred circle; colour follows theme)
+        glowCirclePaint.color = themeShipGlow
         canvas.drawCircle(x, y, 28f, glowCirclePaint)
 
         // Thrust flame — gradient triangle with flickering tip length
         if (showFlame) {
-            val t      = time * 4f  // faster clock: ~0.2/frame ≈ Date.now()/80 per frame
+            val t      = time * 4f
             val tipX   = x - SHIP_W / 2f - 10f - sin(t) * 5f
             val baseX  = x - SHIP_W / 2f + 4f
             flamePaint.shader = LinearGradient(
                 baseX, y, tipX, y,
-                THRUST_B, Color.argb(0, 255, 102, 0),   // FFCC00 → transparent FF6600
+                THRUST_B, Color.argb(0, 255, 102, 0),
                 Shader.TileMode.CLAMP
             )
             flamePath.rewind()
@@ -488,11 +513,12 @@ class CaveDiverView @JvmOverloads constructor(
             canvas.drawPath(flamePath, flamePaint)
         }
 
-        // Ship body — linear gradient #AAFFEE → #00BBAA (matching JSX)
+        // Ship body — gradient from lightened theme colour → theme colour
+        val shipLight = lightenColor(themeShipColor, 0.55f)
         shipPaint.shader = LinearGradient(
             x - SHIP_W / 2f, y - SHIP_H / 2f,
             x + SHIP_W / 2f, y + SHIP_H / 2f,
-            Color.parseColor("#AAFFEE"), Color.parseColor("#00BBAA"),
+            shipLight, themeShipColor,
             Shader.TileMode.CLAMP
         )
         shipPath.rewind()
@@ -550,6 +576,13 @@ class CaveDiverView @JvmOverloads constructor(
         canvas.drawText("TAP TO RETRY", cx, cy + 116f, crashRetryPaint)
         crashRetryPaint.alpha = 255
     }
+
+    /** Blend [color] toward white by factor [f] (0=original, 1=white). */
+    private fun lightenColor(color: Int, f: Float): Int = Color.rgb(
+        (Color.red(color)   + (255 - Color.red(color))   * f).toInt().coerceIn(0, 255),
+        (Color.green(color) + (255 - Color.green(color)) * f).toInt().coerceIn(0, 255),
+        (Color.blue(color)  + (255 - Color.blue(color))  * f).toInt().coerceIn(0, 255)
+    )
 
     private fun drawScanlines(canvas: Canvas) {
         var y = -EXTRA_H

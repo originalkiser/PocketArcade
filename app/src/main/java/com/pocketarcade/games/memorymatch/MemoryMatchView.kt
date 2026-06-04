@@ -8,6 +8,9 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.pocketarcade.GameTheme
+import com.pocketarcade.darken
+import com.pocketarcade.withAlpha
 
 enum class Difficulty(
     val cols: Int, val rows: Int,
@@ -52,6 +55,28 @@ class MemoryMatchView @JvmOverloads constructor(
         private const val TEXT_WHITE   = 0xFFFFFFFF.toInt()
         private const val TEXT_DIM     = 0xFF1A3A2A.toInt()
         private const val GOLD         = 0xFFFFD700.toInt()
+    }
+
+    // ── Theme colours (updated by applyTheme) ─────────────────────────────────
+
+    private var tAccent       = GREEN_GLOW
+    private var tCardFlip     = CARD_FLIP
+    private var tCardMatch    = CARD_MATCH
+    private var tBorderFlip   = BORDER_FLIP
+    private var tBorderMatch  = BORDER_MATCH
+    private var tBorderDef    = BORDER_DEF
+
+    fun applyTheme(theme: GameTheme) {
+        tAccent      = theme.accent
+        tCardFlip    = theme.surface or 0xFF000000.toInt()
+        tCardMatch   = theme.player.darken(0.20f)
+        tBorderFlip  = theme.accent.withAlpha(0x99)
+        tBorderMatch = theme.accent
+        tBorderDef   = theme.accent.withAlpha(0x44)
+        labelPaint.color     = theme.accent
+        diffLabelPaint.color = theme.accent
+        winTitlePaint.color  = theme.accent
+        invalidate()
     }
 
     // ── Card state ────────────────────────────────────────────────────────────
@@ -214,11 +239,8 @@ class MemoryMatchView @JvmOverloads constructor(
             } else {
                 mismatched.addAll(selected)
                 invalidate()
-                handler.postDelayed({
-                    cA.flipped = false; cB.flipped = false
-                    mismatched.clear(); selected.clear(); locked = false
-                    invalidate()
-                }, FLIP_BACK_DELAY)
+                // After the "red" display pause, animate the cards back face-down
+                handler.postDelayed({ animateFlipBack(cA, cB) }, FLIP_BACK_DELAY)
             }
         } else {
             invalidate()
@@ -238,6 +260,35 @@ class MemoryMatchView @JvmOverloads constructor(
                 invalidate()
                 if (step < steps) handler.postDelayed(this, 16)
                 else { card.animScale = 1f; invalidate() }
+            }
+        }
+        handler.post(anim)
+    }
+
+    /** Squish both cards to 0 (still showing face), flip them back at the midpoint,
+     *  then grow them back to full size showing the card-back face. */
+    private fun animateFlipBack(cA: Card, cB: Card) {
+        val steps = (FLIP_ANIM_DURATION / 16).toInt().coerceAtLeast(2)
+        val half  = steps / 2
+        var step  = 0
+        val anim  = object : Runnable {
+            override fun run() {
+                step++
+                val scale = if (step <= half) 1f - step.toFloat() / half
+                            else (step - half).toFloat() / half
+                // At the midpoint: switch to the face-down state
+                if (step == half) {
+                    cA.flipped = false; cB.flipped = false
+                    mismatched.clear()
+                }
+                cA.animScale = scale; cB.animScale = scale
+                invalidate()
+                if (step < steps) handler.postDelayed(this, 16)
+                else {
+                    cA.animScale = 1f; cB.animScale = 1f
+                    selected.clear(); locked = false
+                    invalidate()
+                }
             }
         }
         handler.post(anim)
@@ -376,17 +427,17 @@ class MemoryMatchView @JvmOverloads constructor(
 
             cardPaint.color = when {
                 isMiss       -> CARD_MISS
-                card.matched -> CARD_MATCH
-                isFlip       -> CARD_FLIP
+                card.matched -> tCardMatch
+                isFlip       -> tCardFlip
                 else         -> CARD_DARK
             }
             canvas.drawRoundRect(scaledRect, cornerRadius, cornerRadius, cardPaint)
 
             borderPaint.color = when {
                 isMiss       -> BORDER_MISS
-                card.matched -> BORDER_MATCH
-                isFlip       -> BORDER_FLIP
-                else         -> BORDER_DEF
+                card.matched -> tBorderMatch
+                isFlip       -> tBorderFlip
+                else         -> tBorderDef
             }
             canvas.drawRoundRect(scaledRect, cornerRadius, cornerRadius, borderPaint)
 
@@ -412,7 +463,7 @@ class MemoryMatchView @JvmOverloads constructor(
         )
         cardPaint.color = 0xFF0D1F14.toInt()
         canvas.drawRoundRect(boxRect, 32f, 32f, cardPaint)
-        borderPaint.color = GREEN_GLOW
+        borderPaint.color = tAccent
         canvas.drawRoundRect(boxRect, 32f, 32f, borderPaint)
 
         val cx = w / 2f
@@ -431,7 +482,7 @@ class MemoryMatchView @JvmOverloads constructor(
         val btnH   = boxH * 0.17f
         val btnTop = boxRect.bottom - boxH * 0.22f - btnH
         val btnRect = RectF(cx - btnW / 2f, btnTop, cx + btnW / 2f, btnTop + btnH)
-        cardPaint.color = GREEN_GLOW
+        cardPaint.color = tAccent
         canvas.drawRoundRect(btnRect, 16f, 16f, cardPaint)
         canvas.drawText("PLAY AGAIN",
             cx, btnRect.centerY() + playAgainBtnPaint.textSize * 0.35f, playAgainBtnPaint)

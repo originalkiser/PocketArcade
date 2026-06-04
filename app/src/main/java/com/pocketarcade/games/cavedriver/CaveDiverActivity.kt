@@ -1,19 +1,25 @@
 package com.pocketarcade.games.cavedriver
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
 import com.pocketarcade.ScoreSyncManager
+import com.pocketarcade.ThemeManager
+import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
+import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
 class CaveDiverActivity : AppCompatActivity() {
@@ -39,6 +45,10 @@ class CaveDiverActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
 
         cdView.loadBestScore(PrefsManager.getHighScore(this, GAME_KEY))
+
+        applyTheme()
+
+        findViewById<TextView>(R.id.btnSettings).setOnClickListener { showSettingsDialog() }
 
         cdView.onGameStarted = {
             gameStartTime = System.currentTimeMillis()
@@ -106,6 +116,32 @@ class CaveDiverActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
+        applyTheme()
+    }
+
+    private fun applyTheme() {
+        cdView.applyTheme(ThemeManager.currentTheme(this, GAME_KEY))
+    }
+
+    private fun showSettingsDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_simple_settings, null)
+        val dialog = Dialog(this)
+        dialog.setContentView(view)
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+
+        val themeIndex = ThemeManager.effectiveThemeIndex(this, GAME_KEY)
+        view.findViewById<TextView>(R.id.tvCurrentTheme).text =
+            Themes.ALL.getOrNull(themeIndex)?.first?.name ?: "Classic"
+
+        view.findViewById<LinearLayout>(R.id.rowTheme).setOnClickListener {
+            dialog.dismiss()
+            showThemePickerDialog(this, GAME_KEY) { applyTheme() }
+        }
+        view.findViewById<TextView>(R.id.btnDone).setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     override fun onPause() {
