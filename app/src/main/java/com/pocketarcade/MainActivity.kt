@@ -20,6 +20,7 @@ import com.pocketarcade.games.asteroids.AsteroidsActivity
 import com.pocketarcade.games.brickbreaker.BrickBreakerActivity
 import com.pocketarcade.games.cavedriver.CaveDiverActivity
 import com.pocketarcade.games.pong.PongActivity
+import com.pocketarcade.games.memorymatch.Difficulty
 import com.pocketarcade.games.memorymatch.MemoryMatchActivity
 import com.pocketarcade.games.snake.SnakeActivity
 import com.pocketarcade.leaderboard.LeaderboardManager
@@ -61,12 +62,13 @@ class MainActivity : AppCompatActivity() {
         )
         billing.connect()
 
-        bindTile(R.id.tileSnake,       SnakeActivity::class.java)
-        bindTile(R.id.tilePong,        PongActivity::class.java)
-        bindTile(R.id.tileAsteroids,   AsteroidsActivity::class.java)
-        bindTile(R.id.tileCaveDiver,   CaveDiverActivity::class.java)
+        bindTile(R.id.tileSnake,        SnakeActivity::class.java)
+        bindTile(R.id.tilePong,         PongActivity::class.java)
+        bindTile(R.id.tileAsteroids,    AsteroidsActivity::class.java)
         bindTile(R.id.tileBrickBreaker, BrickBreakerActivity::class.java)
-        bindTile(R.id.tileMemoryMatch,  MemoryMatchActivity::class.java)
+        bindTile(R.id.tileCaveDiver,    CaveDiverActivity::class.java)
+        // Memory Match shows difficulty picker before launching
+        findViewById<View>(R.id.tileMemoryMatch).setOnClickListener { showMemoryMatchPicker() }
 
         applyTileBorders()
 
@@ -237,9 +239,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER))
 
-        val mmHi = PrefsManager.getHighScore(this, MemoryMatchActivity.GAME_KEY)
+        fun mmStat(diff: String): String {
+            val moves = PrefsManager.getMmBestMoves(this, diff)
+            if (moves == 0) return "--"
+            val t  = PrefsManager.getMmBestTimeSecs(this, diff)
+            val mm = t / 60; val ss = t % 60
+            return "${moves}mv %02d:%02d".format(mm, ss)
+        }
         findViewById<TextView>(R.id.tvScoreMemoryMatch).text =
-            if (mmHi > 0) "Best: ${1000 - mmHi} moves" else "Best: --"
+            "E: ${mmStat("easy")}   M: ${mmStat("medium")}"
+        findViewById<TextView>(R.id.tvScoreMemoryMatchDetail).text =
+            "H: ${mmStat("hard")}"
 
         findViewById<TextView>(R.id.tvScoreSnakeDetail).text      = topDetail(PrefsManager.GAME_SNAKE)
         findViewById<TextView>(R.id.tvScorePongDetail).text      = ""
@@ -275,6 +285,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return "TOP SCORES  ✦  ${parts.joinToString("  ✦  ")}  ✦  "
+    }
+
+    // ── Memory Match difficulty picker ────────────────────────────────────────
+
+    private fun showMemoryMatchPicker() {
+        val items = arrayOf(
+            "Easy   (4×4)    8 pairs",
+            "Medium (8×8)   32 pairs",
+            "Hard   (12×12) 72 pairs"
+        )
+        AlertDialog.Builder(this)
+            .setTitle("MEMORY MATCH")
+            .setItems(items) { _, which ->
+                val diff = Difficulty.values()[which]
+                startActivity(
+                    Intent(this, MemoryMatchActivity::class.java)
+                        .putExtra(MemoryMatchActivity.EXTRA_DIFFICULTY, diff.name)
+                )
+            }
+            .show()
     }
 
     // ── Upsell dialog ──────────────────────────────────────────────────────────

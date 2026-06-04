@@ -1,37 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="#03030E">
 
-    <!-- Game canvas — leaves room for ad at bottom -->
-    <com.pocketarcade.games.cavedriver.CaveDiverView
-        android:id="@+id/caveDiverView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="50dp" />
-
-    <!-- Banner ad at bottom -->
+    <!-- Banner ad -->
     <FrameLayout
         android:id="@+id/adContainer"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_gravity="bottom"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Back button overlaid top-left -->
-    <TextView
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:padding="14dp"
-        android:text="&#8592;"
-        android:textColor="@color/muted"
-        android:textSize="22sp"
-        android:fontFamily="monospace"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground" />
+    <!-- Header: back + title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:gravity="center_vertical"
+        android:background="#08081A">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="&lt; MENU"
+            android:textColor="#00FFCC"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="16dp"
+            android:layout_gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="CAVE DIVER"
+            android:textColor="#00FFCC"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.15" />
+
+    </LinearLayout>
+
+    <!-- Game canvas (letterboxed 480×320 logical canvas) -->
+    <com.pocketarcade.games.cavedriver.CaveDiverView
+        android:id="@+id/caveDiverView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Control zone: hold here (or in game) to thrust -->
+    <FrameLayout
+        android:id="@+id/thrustZone"
+        android:layout_width="match_parent"
+        android:layout_height="155dp"
+        android:background="#070715"
+        android:clickable="true"
+        android:focusable="true">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1A2050" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="HOLD TO THRUST"
+            android:textColor="#22AAFFCC"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.2" />
+
+    </FrameLayout>
+
+</LinearLayout>

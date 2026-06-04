@@ -1,6 +1,10 @@
 package com.pocketarcade.games.cavedriver
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.view.MotionEvent
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
@@ -14,26 +18,26 @@ import com.pocketarcade.storage.PrefsManager
 
 class CaveDiverActivity : AppCompatActivity() {
 
-    private lateinit var cdView:  CaveDiverView
-    private lateinit var btnBack: TextView
-
+    private lateinit var cdView:     CaveDiverView
+    private lateinit var thrustZone: FrameLayout
     private var gameStartTime = 0L
 
     companion object {
         const val GAME_KEY = "cavedriver"
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cavedriver)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
-        cdView  = findViewById(R.id.caveDiverView)
-        btnBack = findViewById(R.id.btnBack)
-        btnBack.setOnClickListener { finish() }
+        cdView     = findViewById(R.id.caveDiverView)
+        thrustZone = findViewById(R.id.thrustZone)
 
-        // Seed the view with the persisted best score so it shows on the dead screen
+        findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
+
         cdView.loadBestScore(PrefsManager.getHighScore(this, GAME_KEY))
 
         cdView.onGameStarted = {
@@ -73,11 +77,29 @@ class CaveDiverActivity : AppCompatActivity() {
             runOnUiThread {
                 checkAndShowLeaderboard(this, GAME_KEY, score) {
                     if (PrefsManager.getGlobalUsername(this) != null) {
-                        showGlobalLeaderboardDialog(this, GAME_KEY,
-                            initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
+                        showGlobalLeaderboardDialog(
+                            this, GAME_KEY,
+                            initialTab = "FRIENDS",
+                            initialTimeRange = TimeRange.WEEK
+                        )
                     }
                 }
             }
+        }
+
+        // Control zone: hold here to thrust (mirrors in-canvas touch)
+        thrustZone.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    v.setBackgroundColor(Color.parseColor("#101128"))
+                    cdView.setThrusting(true)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    v.setBackgroundColor(Color.parseColor("#070715"))
+                    cdView.setThrusting(false)
+                }
+            }
+            true
         }
     }
 
@@ -88,9 +110,6 @@ class CaveDiverActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+        cdView.setThrusting(false)
     }
 }

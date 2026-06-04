@@ -9,26 +9,36 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
+enum class Difficulty(
+    val cols: Int, val rows: Int,
+    val star3: Int, val star2: Int,
+    val label: String
+) {
+    EASY  (4,  4,  12,  20,  "EASY"),
+    MEDIUM(8,  8,  40,  60,  "MEDIUM"),
+    HARD  (12, 12, 90, 130,  "HARD")
+}
+
 @SuppressLint("ClickableViewAccessibility")
 class MemoryMatchView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    // ── Constants ─────────────────────────────────────────────────────────────
-
     companion object {
-        private val ICONS = listOf(
-            "⚡", "💎", "🔥", "⭐", "🚀", "👾",
-            "🎯", "💀", "🍄", "🎮", "🔮", "🏆"
+        // 84 unique emoji — enough for Hard (72 pairs)
+        private val ICON_POOL = listOf(
+            "⚡","💎","🔥","⭐","🚀","👾","🎯","💀","🍄","🎮","🔮","🏆",
+            "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮",
+            "🐷","🐸","🐵","🐔","🐧","🐦","🦆","🦅","🦉","🦇","🐝","🐛",
+            "🌸","🌺","🌻","🌹","🌷","🌴","🌵","🍀","🍁","🌈","⛄","❄",
+            "🍎","🍊","🍋","🍇","🍓","🍒","🍑","🥝","🍕","🍔","🌮","🍩",
+            "🎲","🎸","🎺","🎵","🎭","🎨","🔑","💡","🎃","🎄","🎆","🎈",
+            "🏀","⚽","🏈","⚾","🎾","🏐","🎱","🏓","🥊","🎿","🏹","🎣"
         )
-        private const val COLS  = 4
-        private const val ROWS  = 4
-        private const val TOTAL = COLS * ROWS   // 16 cards, 8 pairs
 
-        private const val FLIP_BACK_DELAY    = 900L   // ms before mismatch flips back
-        private const val FLIP_ANIM_DURATION = 200L   // ms per full flip animation
+        private const val FLIP_BACK_DELAY    = 900L
+        private const val FLIP_ANIM_DURATION = 200L
 
-        // Colour constants
         private const val BG           = 0xFF0A0A0F.toInt()
         private const val CARD_DARK    = 0xFF0D1F14.toInt()
         private const val CARD_FLIP    = 0xFF0D2E1A.toInt()
@@ -47,31 +57,42 @@ class MemoryMatchView @JvmOverloads constructor(
     // ── Card state ────────────────────────────────────────────────────────────
 
     data class Card(
-        val id: Int,
-        val icon: String,
+        val id: Int, val icon: String,
         var flipped: Boolean = false,
         var matched: Boolean = false,
-        var animScale: Float = 1f   // 1f = full width, 0f = edge-on (mid-flip)
+        var animScale: Float = 1f
     )
 
     private var cards      = mutableListOf<Card>()
-    private var selected   = mutableListOf<Int>()   // card ids face-up & unmatched
+    private var selected   = mutableListOf<Int>()
     private var mismatched = mutableListOf<Int>()
 
-    private var moves       = 0
-    private var matchCount  = 0
-    private var elapsed     = 0     // seconds
-    private var running     = false
-    private var won         = false
-    private var locked      = false // board locked during mismatch delay
+    private var moves      = 0
+    private var matchCount = 0
+    private var elapsed    = 0
+    private var running    = false
+    private var won        = false
+    private var locked     = false
+
+    // ── Difficulty ────────────────────────────────────────────────────────────
+
+    var difficulty: Difficulty = Difficulty.EASY
+        set(value) {
+            field = value
+            newGame()
+            updateLayout(width, height)
+            invalidate()
+        }
+
+    private val cols  get() = difficulty.cols
+    private val rows  get() = difficulty.rows
+    private val total get() = cols * rows
 
     // ── Callbacks ─────────────────────────────────────────────────────────────
 
-    /** Fires on the first card tap of a new game. */
     var onGameStarted: (() -> Unit)? = null
-
-    /** Fires when all pairs are matched; [moves] = total flips used. */
-    var onGameWon: ((moves: Int) -> Unit)? = null
+    /** [moves] = total flips, [elapsedSecs] = seconds on the clock */
+    var onGameWon: ((moves: Int, elapsedSecs: Int) -> Unit)? = null
 
     // ── Timer ─────────────────────────────────────────────────────────────────
 
@@ -89,7 +110,7 @@ class MemoryMatchView @JvmOverloads constructor(
     fun pauseTimer()  { running = false; handler.removeCallbacks(tickRunnable) }
     fun resumeTimer() { if (!won && moves > 0) { running = true; handler.post(tickRunnable) } }
 
-    // ── Paints (all initialized once) ────────────────────────────────────────
+    // ── Paints ────────────────────────────────────────────────────────────────
 
     private val bgPaint     = Paint().apply { color = BG }
     private val cardPaint   = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -97,61 +118,47 @@ class MemoryMatchView @JvmOverloads constructor(
         style = Paint.Style.STROKE; strokeWidth = 3f
     }
     private val iconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textAlign = Paint.Align.CENTER
-        color     = TEXT_WHITE
+        textAlign = Paint.Align.CENTER; color = TEXT_WHITE
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color     = GREEN_GLOW
-        textAlign = Paint.Align.CENTER
-        typeface  = Typeface.MONOSPACE
+        color = GREEN_GLOW; textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
     private val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color          = TEXT_WHITE
-        textAlign      = Paint.Align.CENTER
-        typeface       = Typeface.MONOSPACE
-        isFakeBoldText = true
+        color = TEXT_WHITE; textAlign = Paint.Align.CENTER
+        typeface = Typeface.MONOSPACE; isFakeBoldText = true
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color          = TEXT_WHITE
-        textAlign      = Paint.Align.CENTER
-        typeface       = Typeface.MONOSPACE
-        isFakeBoldText = true
+        color = TEXT_WHITE; textAlign = Paint.Align.CENTER
+        typeface = Typeface.MONOSPACE; isFakeBoldText = true
+    }
+    private val diffLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = GREEN_GLOW; textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
     private val winTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color          = GREEN_GLOW
-        textAlign      = Paint.Align.CENTER
-        typeface       = Typeface.MONOSPACE
-        isFakeBoldText = true
+        color = GREEN_GLOW; textAlign = Paint.Align.CENTER
+        typeface = Typeface.MONOSPACE; isFakeBoldText = true
     }
     private val dimOverlayPaint = Paint().apply { color = 0xCC000000.toInt() }
-
-    // Win overlay — separate paints so they don't bleed into the HUD paints
     private val winStarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textAlign = Paint.Align.CENTER
-        typeface  = Typeface.MONOSPACE
-        color     = GOLD
+        textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE; color = GOLD
     }
     private val winStatPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color     = 0xFFAAAAAA.toInt()
-        textAlign = Paint.Align.CENTER
-        typeface  = Typeface.MONOSPACE
+        color = 0xFFAAAAAA.toInt(); textAlign = Paint.Align.CENTER; typeface = Typeface.MONOSPACE
     }
     private val playAgainBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color          = Color.BLACK
-        textAlign      = Paint.Align.CENTER
-        typeface       = Typeface.MONOSPACE
-        isFakeBoldText = true
+        color = Color.BLACK; textAlign = Paint.Align.CENTER
+        typeface = Typeface.MONOSPACE; isFakeBoldText = true
     }
 
-    // ── Layout (computed once in onSizeChanged) ───────────────────────────────
+    // ── Layout ────────────────────────────────────────────────────────────────
 
-    private var headerRect   = RectF()
-    private var statsRect    = RectF()
-    private var gridRect     = RectF()
-    private var cardSize     = 0f
-    private var cardGap      = 0f
-    private val cardRects    = Array(TOTAL) { RectF() }
-    private var cornerRadius = 0f
+    private var headerRect    = RectF()
+    private var statsRect     = RectF()
+    private var gridRect      = RectF()
+    private var cardSize      = 0f
+    private var cardGap       = 0f
+    private var cornerRadius  = 0f
+    private var cardRects     = emptyArray<RectF>()
     private var playAgainRect: RectF? = null
 
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -159,17 +166,13 @@ class MemoryMatchView @JvmOverloads constructor(
     init { newGame() }
 
     private fun newGame() {
-        val icons = ICONS.shuffled().take(TOTAL / 2)
+        val pairsNeeded = total / 2
+        val icons = ICON_POOL.shuffled().take(pairsNeeded)
         val deck  = (icons + icons).shuffled()
         cards = deck.mapIndexed { i, icon -> Card(id = i, icon = icon) }.toMutableList()
-        selected.clear()
-        mismatched.clear()
-        moves      = 0
-        matchCount = 0
-        elapsed    = 0
-        running    = false
-        won        = false
-        locked     = false
+        selected.clear(); mismatched.clear()
+        moves = 0; matchCount = 0; elapsed = 0
+        running = false; won = false; locked = false
         playAgainRect = null
         handler.removeCallbacks(tickRunnable)
         invalidate()
@@ -181,7 +184,6 @@ class MemoryMatchView @JvmOverloads constructor(
         val card = cards[index]
         if (locked || card.flipped || card.matched) return
 
-        // Start timer on first tap
         if (!running) {
             running = true
             handler.post(tickRunnable)
@@ -199,30 +201,22 @@ class MemoryMatchView @JvmOverloads constructor(
             val cB = cards.first { it.id == selected[1] }
 
             if (cA.icon == cB.icon) {
-                // Match!
-                cA.matched = true
-                cB.matched = true
+                cA.matched = true; cB.matched = true
                 matchCount++
-                selected.clear()
-                locked = false
+                selected.clear(); locked = false
 
-                if (matchCount == TOTAL / 2) {
-                    won     = true
-                    running = false
+                if (matchCount == total / 2) {
+                    won = true; running = false
                     handler.removeCallbacks(tickRunnable)
-                    onGameWon?.invoke(moves)
+                    onGameWon?.invoke(moves, elapsed)
                 }
                 invalidate()
             } else {
-                // Mismatch — flash red, then flip back
                 mismatched.addAll(selected)
                 invalidate()
                 handler.postDelayed({
-                    cA.flipped = false
-                    cB.flipped = false
-                    mismatched.clear()
-                    selected.clear()
-                    locked = false
+                    cA.flipped = false; cB.flipped = false
+                    mismatched.clear(); selected.clear(); locked = false
                     invalidate()
                 }, FLIP_BACK_DELAY)
             }
@@ -231,7 +225,6 @@ class MemoryMatchView @JvmOverloads constructor(
         }
     }
 
-    /** Horizontal-scale animation: squish to 0, then expand back. */
     private fun animateFlip(index: Int) {
         val card  = cards[index]
         val steps = (FLIP_ANIM_DURATION / 16).toInt().coerceAtLeast(2)
@@ -240,11 +233,8 @@ class MemoryMatchView @JvmOverloads constructor(
             override fun run() {
                 step++
                 val half = steps / 2
-                card.animScale = if (step <= half) {
-                    1f - step.toFloat() / half
-                } else {
-                    (step - half).toFloat() / half
-                }
+                card.animScale = if (step <= half) 1f - step.toFloat() / half
+                                 else (step - half).toFloat() / half
                 invalidate()
                 if (step < steps) handler.postDelayed(this, 16)
                 else { card.animScale = 1f; invalidate() }
@@ -256,43 +246,80 @@ class MemoryMatchView @JvmOverloads constructor(
     // ── Layout ────────────────────────────────────────────────────────────────
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val pad     = w * 0.04f
-        val headerH = h * 0.12f
-        val statsH  = h * 0.10f
-        cardGap     = w * 0.025f
-        cardSize    = (w - pad * 2f - cardGap * (COLS - 1)) / COLS
+        updateLayout(w, h)
+    }
+
+    private fun updateLayout(w: Int, h: Int) {
+        if (w == 0 || h == 0) return
+
+        // Gap and padding scale down for denser grids so more cards fit
+        val pad = w * when (difficulty) {
+            Difficulty.EASY   -> 0.04f
+            Difficulty.MEDIUM -> 0.03f
+            Difficulty.HARD   -> 0.02f
+        }
+        cardGap = w * when (difficulty) {
+            Difficulty.EASY   -> 0.025f
+            Difficulty.MEDIUM -> 0.015f
+            Difficulty.HARD   -> 0.008f
+        }
+        cardSize     = (w - pad * 2f - cardGap * (cols - 1)) / cols
         cornerRadius = cardSize * 0.12f
+
+        val headerH = h * when (difficulty) {
+            Difficulty.EASY   -> 0.10f
+            Difficulty.MEDIUM -> 0.08f
+            Difficulty.HARD   -> 0.07f
+        }
+        val statsH = h * when (difficulty) {
+            Difficulty.EASY   -> 0.09f
+            Difficulty.MEDIUM -> 0.08f
+            Difficulty.HARD   -> 0.07f
+        }
 
         headerRect = RectF(pad, pad, w - pad, pad + headerH)
         statsRect  = RectF(
             pad,
-            headerRect.bottom + pad * 0.5f,
+            headerRect.bottom + pad * 0.4f,
             w - pad,
-            headerRect.bottom + pad * 0.5f + statsH
+            headerRect.bottom + pad * 0.4f + statsH
         )
-        val gridTop = statsRect.bottom + pad
+        val gridTop = statsRect.bottom + pad * 0.6f
         gridRect = RectF(
             pad, gridTop,
-            pad + COLS * cardSize + (COLS - 1) * cardGap,
-            gridTop + ROWS * cardSize + (ROWS - 1) * cardGap
+            pad + cols * cardSize + (cols - 1) * cardGap,
+            gridTop + rows * cardSize + (rows - 1) * cardGap
         )
-        for (i in 0 until TOTAL) {
-            val col  = i % COLS
-            val row  = i / COLS
+
+        cardRects = Array(total) { RectF() }
+        for (i in 0 until total) {
+            val col  = i % cols
+            val row  = i / cols
             val left = gridRect.left + col * (cardSize + cardGap)
             val top  = gridRect.top  + row * (cardSize + cardGap)
             cardRects[i] = RectF(left, top, left + cardSize, top + cardSize)
         }
 
-        // Text sizes in physical pixels
-        titlePaint.textSize         = h * 0.040f
-        labelPaint.textSize         = h * 0.016f
-        valuePaint.textSize         = h * 0.030f
-        iconPaint.textSize          = cardSize * 0.50f
-        winTitlePaint.textSize      = h * 0.048f
-        winStarPaint.textSize       = h * 0.048f
-        winStatPaint.textSize       = h * 0.024f
-        playAgainBtnPaint.textSize  = h * 0.024f
+        val titleSize = h * when (difficulty) {
+            Difficulty.EASY   -> 0.038f
+            Difficulty.MEDIUM -> 0.030f
+            Difficulty.HARD   -> 0.025f
+        }
+        titlePaint.textSize        = titleSize
+        diffLabelPaint.textSize    = titleSize * 0.60f
+        labelPaint.textSize        = h * when (difficulty) {
+            Difficulty.EASY -> 0.016f; Difficulty.MEDIUM -> 0.014f; else -> 0.013f
+        }
+        valuePaint.textSize        = h * when (difficulty) {
+            Difficulty.EASY -> 0.028f; Difficulty.MEDIUM -> 0.024f; else -> 0.022f
+        }
+        iconPaint.textSize         = cardSize * 0.55f
+        winTitlePaint.textSize     = h * 0.046f
+        winStarPaint.textSize      = h * 0.044f
+        winStatPaint.textSize      = h * 0.022f
+        playAgainBtnPaint.textSize = h * 0.022f
+
+        borderPaint.strokeWidth = (cardSize * 0.04f).coerceAtLeast(2f)
     }
 
     // ── Drawing ───────────────────────────────────────────────────────────────
@@ -308,11 +335,12 @@ class MemoryMatchView @JvmOverloads constructor(
     }
 
     private fun drawHeader(canvas: Canvas, w: Float) {
-        canvas.drawText("MEMORY MATCH", w / 2f, headerRect.centerY() + titlePaint.textSize * 0.35f, titlePaint)
+        val cy = headerRect.centerY()
+        canvas.drawText("MEMORY MATCH", w / 2f, cy - titlePaint.textSize * 0.1f, titlePaint)
+        canvas.drawText(difficulty.label, w / 2f, cy + diffLabelPaint.textSize * 1.1f, diffLabelPaint)
     }
 
     private fun drawStats(canvas: Canvas) {
-        // Background pill
         cardPaint.color = 0xFF111111.toInt()
         canvas.drawRoundRect(statsRect, 16f, 16f, cardPaint)
 
@@ -320,13 +348,10 @@ class MemoryMatchView @JvmOverloads constructor(
         val labelY = statsRect.top + statsRect.height() * 0.38f
         val valueY = statsRect.top + statsRect.height() * 0.78f
 
-        val mm      = elapsed / 60
-        val ss      = elapsed % 60
-        val timeStr  = "%02d:%02d".format(mm, ss)
-        val movesStr = "%03d".format(moves)
-        val pairsStr = "$matchCount/${TOTAL / 2}"
-
-        listOf("TIME" to timeStr, "MOVES" to movesStr, "PAIRS" to pairsStr)
+        val mm = elapsed / 60; val ss = elapsed % 60
+        listOf("TIME" to "%02d:%02d".format(mm, ss),
+               "MOVES" to "%04d".format(moves),
+               "PAIRS" to "$matchCount/${total / 2}")
             .forEachIndexed { i, (label, value) ->
                 val cx = statsRect.left + third * i + third / 2f
                 canvas.drawText(label, cx, labelY, labelPaint)
@@ -336,12 +361,12 @@ class MemoryMatchView @JvmOverloads constructor(
 
     private fun drawGrid(canvas: Canvas) {
         for (i in cards.indices) {
-            val card      = cards[i]
-            val rect      = cardRects[i]
-            val isFlipped = card.flipped || card.matched
-            val isMiss    = mismatched.contains(card.id)
+            if (i >= cardRects.size) break
+            val card   = cards[i]
+            val rect   = cardRects[i]
+            val isFlip = card.flipped || card.matched
+            val isMiss = mismatched.contains(card.id)
 
-            // Horizontal scale animation (squish around the card center)
             val sx = card.animScale
             val cx = rect.centerX()
             val scaledRect = RectF(
@@ -349,28 +374,25 @@ class MemoryMatchView @JvmOverloads constructor(
                 cx + rect.width() / 2f * sx, rect.bottom
             )
 
-            // Card fill
             cardPaint.color = when {
                 isMiss       -> CARD_MISS
                 card.matched -> CARD_MATCH
-                isFlipped    -> CARD_FLIP
+                isFlip       -> CARD_FLIP
                 else         -> CARD_DARK
             }
             canvas.drawRoundRect(scaledRect, cornerRadius, cornerRadius, cardPaint)
 
-            // Border
             borderPaint.color = when {
                 isMiss       -> BORDER_MISS
                 card.matched -> BORDER_MATCH
-                isFlipped    -> BORDER_FLIP
+                isFlip       -> BORDER_FLIP
                 else         -> BORDER_DEF
             }
             canvas.drawRoundRect(scaledRect, cornerRadius, cornerRadius, borderPaint)
 
-            // Icon / question mark
             val textY = rect.centerY() + iconPaint.textSize * 0.35f
-            if (isFlipped) {
-                iconPaint.color = TEXT_WHITE  // neutral; emoji use built-in colors
+            if (isFlip) {
+                iconPaint.color = TEXT_WHITE
                 canvas.drawText(card.icon, rect.centerX(), textY, iconPaint)
             } else {
                 iconPaint.color = TEXT_DIM
@@ -382,13 +404,12 @@ class MemoryMatchView @JvmOverloads constructor(
     private fun drawWinOverlay(canvas: Canvas, w: Float, h: Float) {
         canvas.drawRect(0f, 0f, w, h, dimOverlayPaint)
 
-        val boxW = w * 0.72f
-        val boxH = h * 0.38f
+        val boxW = w * 0.78f
+        val boxH = h * 0.40f
         val boxRect = RectF(
             (w - boxW) / 2f, (h - boxH) / 2f,
             (w + boxW) / 2f, (h + boxH) / 2f
         )
-
         cardPaint.color = 0xFF0D1F14.toInt()
         canvas.drawRoundRect(boxRect, 32f, 32f, cardPaint)
         borderPaint.color = GREEN_GLOW
@@ -396,34 +417,24 @@ class MemoryMatchView @JvmOverloads constructor(
 
         val cx = w / 2f
 
-        // "GAME CLEAR!"
-        canvas.drawText("GAME CLEAR!", cx, boxRect.top + boxH * 0.28f, winTitlePaint)
+        canvas.drawText("${difficulty.label} CLEAR!", cx, boxRect.top + boxH * 0.24f, winTitlePaint)
 
-        // Stars (3 = ≤12 moves, 2 = ≤20, 1 = more)
-        val stars = when { moves <= 12 -> 3; moves <= 20 -> 2; else -> 1 }
-        val starStr = "★".repeat(stars) + "☆".repeat(3 - stars)
-        canvas.drawText(starStr, cx, boxRect.top + boxH * 0.52f, winStarPaint)
+        val stars    = when { moves <= difficulty.star3 -> 3; moves <= difficulty.star2 -> 2; else -> 1 }
+        canvas.drawText("★".repeat(stars) + "☆".repeat(3 - stars),
+            cx, boxRect.top + boxH * 0.44f, winStarPaint)
 
-        // Time + moves stat line
         val mm = elapsed / 60; val ss = elapsed % 60
-        canvas.drawText(
-            "%02d:%02d   %d MOVES".format(mm, ss, moves),
-            cx, boxRect.top + boxH * 0.70f, winStatPaint
-        )
+        canvas.drawText("%02d:%02d   %d moves".format(mm, ss, moves),
+            cx, boxRect.top + boxH * 0.60f, winStatPaint)
 
-        // "PLAY AGAIN" button
-        val btnW = boxW * 0.55f
-        val btnH = boxH * 0.18f
-        val btnTop  = boxRect.bottom - boxH * 0.20f - btnH
+        val btnW   = boxW * 0.55f
+        val btnH   = boxH * 0.17f
+        val btnTop = boxRect.bottom - boxH * 0.22f - btnH
         val btnRect = RectF(cx - btnW / 2f, btnTop, cx + btnW / 2f, btnTop + btnH)
         cardPaint.color = GREEN_GLOW
         canvas.drawRoundRect(btnRect, 16f, 16f, cardPaint)
-        canvas.drawText(
-            "PLAY AGAIN",
-            cx, btnRect.centerY() + playAgainBtnPaint.textSize * 0.35f,
-            playAgainBtnPaint
-        )
-
+        canvas.drawText("PLAY AGAIN",
+            cx, btnRect.centerY() + playAgainBtnPaint.textSize * 0.35f, playAgainBtnPaint)
         playAgainRect = btnRect
     }
 
@@ -439,10 +450,7 @@ class MemoryMatchView @JvmOverloads constructor(
         }
 
         for (i in cardRects.indices) {
-            if (cardRects[i].contains(x, y)) {
-                onCardTap(i)
-                return true
-            }
+            if (cardRects[i].contains(x, y)) { onCardTap(i); return true }
         }
         return true
     }

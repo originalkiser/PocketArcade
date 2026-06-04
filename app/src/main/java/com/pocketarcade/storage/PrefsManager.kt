@@ -296,6 +296,26 @@ object PrefsManager {
     fun setLastDisplacementCheck(ctx: Context, t: Long) =
         prefs(ctx).edit { putLong("last_displacement_check", t) }
 
+    // ── Memory Match per-difficulty best tracking ─────────────────────────────
+    // diff = "easy" | "medium" | "hard"
+
+    fun getMmBestMoves(ctx: Context, diff: String): Int =
+        prefs(ctx).getInt("mm_best_moves_$diff", 0)
+
+    fun getMmBestTimeSecs(ctx: Context, diff: String): Int =
+        prefs(ctx).getInt("mm_best_time_$diff", 0)
+
+    /** Updates only when [moves] is strictly less than the current best (lower = better). */
+    fun setMmBest(ctx: Context, diff: String, moves: Int, timeSecs: Int) {
+        val current = getMmBestMoves(ctx, diff)
+        if (current == 0 || moves < current) {
+            prefs(ctx).edit {
+                putInt("mm_best_moves_$diff", moves)
+                putInt("mm_best_time_$diff", timeSecs)
+            }
+        }
+    }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

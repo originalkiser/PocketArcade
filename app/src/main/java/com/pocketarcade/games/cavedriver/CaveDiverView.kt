@@ -14,62 +14,65 @@ private enum class CDState { IDLE, PLAYING, DEAD }
 
 /**
  * Cave Diver — SurfaceView with a background-thread game loop at 60fps.
- *
- * All gameplay values are in the 480×320 logical canvas; a scale matrix
- * maps logical → physical pixels while preserving aspect ratio (letterbox).
+ * Logical canvas 480×320 (landscape) — letterboxed into whatever view size is given.
+ * Physics and colours match the reference JSX implementation.
  */
 @Suppress("ClickableViewAccessibility")
 class CaveDiverView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : SurfaceView(context, attrs, defStyle), SurfaceHolder.Callback {
 
-    // ── Constants ─────────────────────────────────────────────────────────────
-
     companion object {
-        // Logical canvas size (the "design resolution" — scales to fill the view)
         private const val LOG_W = 480f
         private const val LOG_H = 320f
 
-        // Physics (logical units / frame)
+        // Physics — identical to JSX constants
         private const val GRAVITY       = 0.225f
         private const val THRUST        = -0.38f
         private const val DAMPING       = 0.92f
         private const val VY_MIN        = -5f
         private const val VY_MAX        = 6f
         private const val PIPE_SPEED    = 2.4f
-        private const val PIPE_INTERVAL = 110     // frames between spawns
+        private const val PIPE_INTERVAL = 110
 
-        // Dimensions (logical units = dp at mdpi reference)
+        // Geometry
         private const val PIPE_W   = 44f
         private const val GAP      = 110f
         private const val TIP_H    = 8f
         private const val SHIP_W   = 32f
         private const val SHIP_H   = 16f
-        private const val SHIP_X   = 80f          // fixed logical X (≈17 % of canvas)
-
+        private const val SHIP_X   = 80f
         private const val STAR_COUNT = 40
+
+        // Palette (matches JSX colour constants)
+        private val BG1       = Color.parseColor("#0D0D2B")
+        private val BG2       = Color.parseColor("#050510")
+        private val CAVE      = Color.parseColor("#1A1A3A")
+        private val CAVE_EDGE = Color.parseColor("#4444AA")
+        private val SHIP_COL  = Color.parseColor("#00FFCC")
+        private val SHIP_GLOW = Color.argb(68, 0, 255, 204)  // #4400FFCC
+        private val THRUST_A  = Color.parseColor("#FF6600")
+        private val THRUST_B  = Color.parseColor("#FFCC00")
+        private val HUD_COL   = Color.parseColor("#8888CC")
+        private val DEAD_COL  = Color.parseColor("#FF4466")
     }
 
     // ── State ─────────────────────────────────────────────────────────────────
 
-    private var state      = CDState.IDLE
-    private var shipY      = LOG_H / 2f
-    private var vy         = 0f
-    private var score      = 0
-    private var bestScore  = 0
-    private var thrusting  = false
-    private var frameCount = 0
-    private var time       = 0f
+    private var state        = CDState.IDLE
+    private var shipY        = LOG_H / 2f
+    private var vy           = 0f
+    private var score        = 0
+    private var bestScore    = 0
+    private var thrusting    = false
+    private var thrustFrames = 0   // flame persistence (match JSX thrustFrames=6)
+    private var frameCount   = 0
+    private var time         = 0f  // animation clock (0.05 / frame)
 
-    // ── Internal data holders ─────────────────────────────────────────────────
+    // ── Data ──────────────────────────────────────────────────────────────────
 
     private inner class PipeState(var x: Float, val topH: Float, var scored: Boolean = false)
-
-    private inner class StarState(
-        var x: Float, var y: Float,
-        val radius: Float, val speed: Float,
-        var twinkle: Float
-    )
+    private inner class StarState(var x: Float, var y: Float, val r: Float, val spd: Float, var tw: Float)
 
     private val pipes = mutableListOf<PipeState>()
     private val stars = mutableListOf<StarState>()
@@ -82,7 +85,17 @@ class CaveDiverView @JvmOverloads constructor(
     fun isUserPlaying() = state == CDState.PLAYING
     fun loadBestScore(b: Int) { bestScore = b }
 
-    // ── Canvas transform (logical → screen) ───────────────────────────────────
+    /** Called by CaveDiverActivity for both in-canvas touch and control-zone touch. */
+    fun setThrusting(pressed: Boolean) {
+        if (pressed && state != CDState.PLAYING) {
+            resetGame()
+            state = CDState.PLAYING
+            onGameStarted?.invoke()
+        }
+        thrusting = pressed
+    }
+
+    // ── Scale / letterbox ─────────────────────────────────────────────────────
 
     private var scale   = 1f
     private var offsetX = 0f
@@ -93,110 +106,100 @@ class CaveDiverView @JvmOverloads constructor(
     @Volatile private var running = false
     private var gameThread: Thread? = null
 
-    // ── Paints (initialized once) ─────────────────────────────────────────────
+    // ── Paints ────────────────────────────────────────────────────────────────
 
-    private val bgPaint = Paint().apply { color = Color.parseColor("#03030E") }
+    private val bgPaint = Paint()  // shader assigned in surfaceChanged
 
-    private val starPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val starPaint  = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val scanPaint  = Paint().apply { color = Color.argb(46, 0, 0, 20) }
+    private val dimPaint   = Paint().apply { color = Color.argb(140, 3, 3, 14) }
+    private val wallPaint  = Paint()  // shader set per-pipe each frame
 
-    private val scanPaint = Paint().apply { color = Color.argb(46, 0, 0, 20) }
-
-    private val overlayPaint = Paint().apply { color = Color.argb(140, 3, 3, 14) }
+    private val tipEdgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style      = Paint.Style.STROKE
+        strokeWidth = 1.5f
+        color       = CAVE_EDGE
+    }
+    private val tipGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style       = Paint.Style.STROKE
+        color       = CAVE_EDGE
+    }
 
     // Ship
-    private val shipFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00FFCC")
-        style = Paint.Style.FILL
+    private val glowCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color       = SHIP_GLOW
+        style       = Paint.Style.FILL
     }
-    private val shipGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4000FFCC")
-        style = Paint.Style.FILL
-        maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
-    }
+    private val shipPaint  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val flamePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val cockpitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#007755")
+        color = Color.parseColor("#001A14")
         style = Paint.Style.FILL
     }
-    private val flamePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FF6600")
-        style = Paint.Style.FILL
-    }
-
-    // Walls
-    private val wallPaint = Paint().apply {
-        color = Color.parseColor("#0D0D2B")
-        style = Paint.Style.FILL
-    }
-    private val tipPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#1A1A3A")
-        style = Paint.Style.FILL
-    }
-    private val glowStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#AA4444AA")
-        style = Paint.Style.STROKE
-        strokeWidth = 3f
-    }
-    private val tipEdgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4444AA")
-        style = Paint.Style.STROKE
-        strokeWidth = 1.5f
+    private val cockpitStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color       = Color.argb(136, 0, 255, 204)  // #8800FFCC
+        style       = Paint.Style.STROKE
+        strokeWidth = 1f
     }
 
     // HUD / text
     private val hudLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#8888CC")
+        color    = HUD_COL
         typeface = Typeface.MONOSPACE
     }
     private val hudValuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00FFCC")
-        typeface = Typeface.MONOSPACE
+        color          = SHIP_COL
+        typeface       = Typeface.MONOSPACE
         isFakeBoldText = true
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00FFCC")
-        typeface = Typeface.MONOSPACE
-        textAlign = Paint.Align.CENTER
+        color          = SHIP_COL
+        typeface       = Typeface.MONOSPACE
+        textAlign      = Paint.Align.CENTER
         isFakeBoldText = true
-        setShadowLayer(14f, 0f, 0f, Color.parseColor("#8800FFCC"))
+        setShadowLayer(14f, 0f, 0f, Color.argb(136, 0, 255, 204))
     }
     private val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#8888CC")
-        typeface = Typeface.MONOSPACE
+        color     = HUD_COL
+        typeface  = Typeface.MONOSPACE
         textAlign = Paint.Align.CENTER
     }
     private val promptPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        typeface = Typeface.MONOSPACE
-        textAlign = Paint.Align.CENTER
+        color          = Color.WHITE
+        typeface       = Typeface.MONOSPACE
+        textAlign      = Paint.Align.CENTER
         isFakeBoldText = true
+        setShadowLayer(8f, 0f, 0f, Color.WHITE)
     }
     private val subPromptPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#8888CC")
-        typeface = Typeface.MONOSPACE
+        color     = HUD_COL
+        typeface  = Typeface.MONOSPACE
         textAlign = Paint.Align.CENTER
     }
     private val crashPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FF4466")
-        typeface = Typeface.MONOSPACE
-        textAlign = Paint.Align.CENTER
+        color          = DEAD_COL
+        typeface       = Typeface.MONOSPACE
+        textAlign      = Paint.Align.CENTER
         isFakeBoldText = true
-        setShadowLayer(14f, 0f, 0f, Color.parseColor("#88FF4466"))
+        setShadowLayer(20f, 0f, 0f, Color.argb(136, 255, 68, 102))
     }
     private val crashSubPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#8888CC")
-        typeface = Typeface.MONOSPACE
+        color     = HUD_COL
+        typeface  = Typeface.MONOSPACE
         textAlign = Paint.Align.CENTER
     }
     private val crashScorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00FFCC")
-        typeface = Typeface.MONOSPACE
-        textAlign = Paint.Align.CENTER
+        color          = SHIP_COL
+        typeface       = Typeface.MONOSPACE
+        textAlign      = Paint.Align.CENTER
         isFakeBoldText = true
+        setShadowLayer(16f, 0f, 0f, Color.argb(136, 0, 255, 204))
     }
     private val crashRetryPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        typeface = Typeface.MONOSPACE
-        textAlign = Paint.Align.CENTER
+        color          = Color.WHITE
+        typeface       = Typeface.MONOSPACE
+        textAlign      = Paint.Align.CENTER
+        isFakeBoldText = true
     }
 
     // Reusable paths
@@ -211,27 +214,35 @@ class CaveDiverView @JvmOverloads constructor(
     override fun surfaceCreated(h: SurfaceHolder) { startThread() }
 
     override fun surfaceChanged(h: SurfaceHolder, fmt: Int, w: Int, h2: Int) {
-        val sx = w / LOG_W
+        val sx = w  / LOG_W
         val sy = h2 / LOG_H
         scale   = minOf(sx, sy)
         offsetX = (w  - LOG_W * scale) / 2f
         offsetY = (h2 - LOG_H * scale) / 2f
 
-        // Scale text/stroke sizes so they are correct in physical pixels
         val s = scale
-        titlePaint.textSize      = 36f * s
-        subtitlePaint.textSize   = 13f * s
-        promptPaint.textSize     = 13f * s
-        subPromptPaint.textSize  = 10f * s
-        hudLabelPaint.textSize   = 10f * s
-        hudValuePaint.textSize   = 15f * s
-        crashPaint.textSize      = 36f * s
-        crashSubPaint.textSize   = 12f * s
-        crashScorePaint.textSize = 20f * s
-        crashRetryPaint.textSize = 13f * s
-        glowStrokePaint.strokeWidth = 3f * s
-        tipEdgePaint.strokeWidth    = 1.5f * s
-        shipGlowPaint.maskFilter    = BlurMaskFilter(10f * s, BlurMaskFilter.Blur.NORMAL)
+
+        // Text sizes (set in physical px; drawn on pre-scaled logical canvas)
+        titlePaint.textSize       = 36f * s
+        subtitlePaint.textSize    = 13f * s
+        promptPaint.textSize      = 14f * s
+        subPromptPaint.textSize   = 11f * s
+        hudLabelPaint.textSize    = 10f * s
+        hudValuePaint.textSize    = 15f * s
+        crashPaint.textSize       = 38f * s
+        crashSubPaint.textSize    = 13f * s
+        crashScorePaint.textSize  = 36f * s
+        crashRetryPaint.textSize  = 14f * s
+
+        // Stroke widths in physical px
+        tipEdgePaint.strokeWidth  = 1.5f * s
+        tipGlowPaint.strokeWidth  = 4f   * s
+        tipGlowPaint.maskFilter   = BlurMaskFilter(4f * s, BlurMaskFilter.Blur.NORMAL)
+        glowCirclePaint.maskFilter = BlurMaskFilter(20f * s, BlurMaskFilter.Blur.NORMAL)
+        cockpitStrokePaint.strokeWidth = 1f * s
+
+        // Background gradient (logical coords — drawn on scaled canvas)
+        bgPaint.shader = LinearGradient(0f, 0f, 0f, LOG_H, BG1, BG2, Shader.TileMode.CLAMP)
 
         initStars()
         if (state == CDState.IDLE) { shipY = LOG_H / 2f; vy = 0f }
@@ -239,7 +250,7 @@ class CaveDiverView @JvmOverloads constructor(
 
     override fun surfaceDestroyed(h: SurfaceHolder) { stopThread() }
 
-    // ── Thread management ─────────────────────────────────────────────────────
+    // ── Thread ────────────────────────────────────────────────────────────────
 
     private fun startThread() {
         running = true
@@ -253,7 +264,7 @@ class CaveDiverView @JvmOverloads constructor(
                     finally { holder.unlockCanvasAndPost(canvas) }
                 }
                 val elapsed = System.currentTimeMillis() - t0
-                val sleep = 1000L / 60 - elapsed
+                val sleep   = 1000L / 60 - elapsed
                 if (sleep > 0) Thread.sleep(sleep)
             }
         }.also { it.start() }
@@ -265,29 +276,31 @@ class CaveDiverView @JvmOverloads constructor(
         gameThread = null
     }
 
-    // ── Initialization helpers ────────────────────────────────────────────────
+    // ── Init helpers ──────────────────────────────────────────────────────────
 
     private fun initStars() {
         stars.clear()
         repeat(STAR_COUNT) {
             stars.add(StarState(
-                x       = Random.nextFloat() * LOG_W,
-                y       = Random.nextFloat() * LOG_H,
-                radius  = 0.3f + Random.nextFloat() * 1.2f,
-                speed   = 0.1f + Random.nextFloat() * 0.3f,
-                twinkle = Random.nextFloat() * 2f * PI.toFloat()
+                x   = Random.nextFloat() * LOG_W,
+                y   = Random.nextFloat() * LOG_H,
+                r   = 0.3f + Random.nextFloat() * 1.2f,
+                spd = 0.1f + Random.nextFloat() * 0.3f,
+                tw  = Random.nextFloat() * 2f * PI.toFloat()
             ))
         }
     }
 
     private fun resetGame() {
-        score      = 0
-        frameCount = 0
-        time       = 0f
-        shipY      = LOG_H / 2f
-        vy         = 0f
-        thrusting  = false
+        score        = 0
+        frameCount   = 0
+        time         = 0f
+        shipY        = LOG_H / 2f
+        vy           = 0f
+        thrusting    = false
+        thrustFrames = 0
         pipes.clear()
+        initStars()
     }
 
     // ── Touch ─────────────────────────────────────────────────────────────────
@@ -295,66 +308,60 @@ class CaveDiverView @JvmOverloads constructor(
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                thrusting = true
-                if (state != CDState.PLAYING) {
-                    resetGame()
-                    state = CDState.PLAYING
-                    onGameStarted?.invoke()
-                }
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> thrusting = false
+            MotionEvent.ACTION_DOWN                      -> setThrusting(true)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> setThrusting(false)
         }
         return true
     }
 
-    // ── Update (called every frame from game thread) ──────────────────────────
+    // ── Update ────────────────────────────────────────────────────────────────
 
     private fun update() {
         time += 0.05f
 
-        // Stars animate every frame regardless of state
         for (s in stars) {
-            s.x -= s.speed
-            if (s.x < 0f) s.x = LOG_W
-            s.twinkle += 0.05f
+            s.x -= s.spd
+            if (s.x < 0f) { s.x = LOG_W; s.y = Random.nextFloat() * LOG_H }
+            s.tw += 0.05f
         }
 
         if (state != CDState.PLAYING) return
 
         frameCount++
 
-        // Ship physics
-        vy += if (thrusting) THRUST else GRAVITY
+        // Physics: match JSX order — gravity+damping always, thrust added on top
+        vy += GRAVITY
         vy *= DAMPING
-        vy  = vy.coerceIn(VY_MIN, VY_MAX)
+        if (thrusting) {
+            vy += THRUST
+            thrustFrames = 6
+        } else if (thrustFrames > 0) {
+            thrustFrames--
+        }
+        vy    = vy.coerceIn(VY_MIN, VY_MAX)
         shipY += vy
 
-        // Spawn obstacle pair
         if (frameCount % PIPE_INTERVAL == 0) spawnPipe()
 
-        // Move pipes, score, cull
-        val toRemove = mutableListOf<PipeState>()
-        for (p in pipes) {
+        val iter = pipes.iterator()
+        while (iter.hasNext()) {
+            val p = iter.next()
             p.x -= PIPE_SPEED
-            if (p.x + PIPE_W < 0f) { toRemove.add(p); continue }
+            if (p.x + PIPE_W < 0f)  { iter.remove(); continue }
             if (!p.scored && p.x + PIPE_W < SHIP_X) { p.scored = true; score++ }
         }
-        pipes.removeAll(toRemove)
 
-        // Collision detection
         if (checkCollision()) {
-            state     = CDState.DEAD
-            thrusting = false
+            state        = CDState.DEAD
+            thrusting    = false
+            thrustFrames = 0
             if (score > bestScore) bestScore = score
             onGameOver?.invoke(score)
         }
     }
 
     private fun spawnPipe() {
-        val minTop  = 40f
-        val maxTop  = LOG_H - GAP - 80f   // = 90f
-        val topH    = minTop + Random.nextFloat() * (maxTop - minTop)
+        val topH = 40f + Random.nextFloat() * (LOG_H - GAP - 120f)
         pipes.add(PipeState(x = LOG_W + 10f, topH = topH))
     }
 
@@ -362,30 +369,15 @@ class CaveDiverView @JvmOverloads constructor(
         val halfH     = SHIP_H / 2f
         val shipLeft  = SHIP_X - SHIP_W / 2f
         val shipRight = SHIP_X + SHIP_W / 2f
-
-        // Ceiling / floor
         if (shipY - halfH < 0f || shipY + halfH > LOG_H) return true
-
         for (p in pipes) {
             val botY = p.topH + GAP
-
-            // X overlap?
             if (shipRight <= p.x || shipLeft >= p.x + PIPE_W) continue
-
-            // Wall rect collision
             if (shipY - halfH < p.topH || shipY + halfH > botY) return true
-
-            // Ship is in the gap — check pointed tips
             val t    = ((SHIP_X - p.x) / PIPE_W).coerceIn(0f, 1f)
             val triT = if (t < 0.5f) t * 2f else (1f - t) * 2f
-
-            // Top tip points downward: hit if ship center above edge
-            val topEdge = p.topH + TIP_H * triT
-            if (shipY < topEdge + 4f) return true
-
-            // Bottom tip points upward: hit if ship center below edge
-            val botEdge = botY - TIP_H * triT
-            if (shipY > botEdge - 4f) return true
+            if (shipY < p.topH  + TIP_H * triT + 4f) return true
+            if (shipY > botY    - TIP_H * triT - 4f) return true
         }
         return false
     }
@@ -398,22 +390,19 @@ class CaveDiverView @JvmOverloads constructor(
         canvas.scale(scale, scale)
         canvas.clipRect(0f, 0f, LOG_W, LOG_H)
 
-        // Background
         canvas.drawRect(0f, 0f, LOG_W, LOG_H, bgPaint)
         drawStars(canvas)
 
         when (state) {
-            CDState.IDLE -> {
-                drawIdle(canvas)
-            }
+            CDState.IDLE    -> drawIdle(canvas)
             CDState.PLAYING -> {
                 drawPipes(canvas)
-                drawShip(canvas, SHIP_X, shipY, showFlame = thrusting)
+                drawShip(canvas, SHIP_X, shipY, thrustFrames > 0)
                 drawHud(canvas)
             }
-            CDState.DEAD -> {
+            CDState.DEAD    -> {
                 drawPipes(canvas)
-                drawShip(canvas, SHIP_X, shipY, showFlame = false)
+                drawShip(canvas, SHIP_X, shipY, false)
                 drawDead(canvas)
             }
         }
@@ -424,115 +413,113 @@ class CaveDiverView @JvmOverloads constructor(
 
     private fun drawStars(canvas: Canvas) {
         for (s in stars) {
-            val alpha = (0.4f + 0.4f * sin(s.twinkle)).coerceIn(0f, 1f)
+            val alpha = (0.4f + 0.4f * sin(s.tw)).coerceIn(0f, 1f)
             starPaint.color = Color.argb((255 * alpha).toInt(), 160, 170, 220)
-            canvas.drawCircle(s.x, s.y, s.radius, starPaint)
+            canvas.drawCircle(s.x, s.y, s.r, starPaint)
         }
     }
 
     private fun drawPipes(canvas: Canvas) {
         for (p in pipes) {
-            val x    = p.x
             val botY = p.topH + GAP
 
-            // Solid wall blocks
-            canvas.drawRect(x, 0f, x + PIPE_W, p.topH, wallPaint)
-            canvas.drawRect(x, botY, x + PIPE_W, LOG_H, wallPaint)
+            // Top wall: bg1 → (70%) cave → cave_edge
+            wallPaint.shader = LinearGradient(
+                p.x, 0f, p.x, p.topH,
+                intArrayOf(BG1, CAVE, CAVE_EDGE),
+                floatArrayOf(0f, 0.7f, 1f),
+                Shader.TileMode.CLAMP
+            )
+            canvas.drawRect(p.x, 0f, p.x + PIPE_W, p.topH, wallPaint)
 
-            // Top stalactite tip (triangle pointing down into gap)
+            // Bottom wall: cave_edge → (30%) cave → bg1
+            wallPaint.shader = LinearGradient(
+                p.x, botY, p.x, LOG_H,
+                intArrayOf(CAVE_EDGE, CAVE, BG1),
+                floatArrayOf(0f, 0.3f, 1f),
+                Shader.TileMode.CLAMP
+            )
+            canvas.drawRect(p.x, botY, p.x + PIPE_W, LOG_H, wallPaint)
+
+            // Stalactite tip: V-stroke pointing down (glow then sharp edge)
             tipPath.rewind()
-            tipPath.moveTo(x,              p.topH)
-            tipPath.lineTo(x + PIPE_W / 2f, p.topH + TIP_H)
-            tipPath.lineTo(x + PIPE_W,     p.topH)
-            tipPath.close()
-            // Glow border (slightly larger, drawn first)
-            canvas.drawPath(tipPath, glowStrokePaint)
-            canvas.drawPath(tipPath, tipPaint)
+            tipPath.moveTo(p.x,              p.topH)
+            tipPath.lineTo(p.x + PIPE_W / 2f, p.topH + TIP_H)
+            tipPath.lineTo(p.x + PIPE_W,     p.topH)
+            canvas.drawPath(tipPath, tipGlowPaint)
             canvas.drawPath(tipPath, tipEdgePaint)
 
-            // Bottom stalagmite tip (triangle pointing up into gap)
+            // Stalagmite tip: V-stroke pointing up
             tipPath.rewind()
-            tipPath.moveTo(x,              botY)
-            tipPath.lineTo(x + PIPE_W / 2f, botY - TIP_H)
-            tipPath.lineTo(x + PIPE_W,     botY)
-            tipPath.close()
-            canvas.drawPath(tipPath, glowStrokePaint)
-            canvas.drawPath(tipPath, tipPaint)
+            tipPath.moveTo(p.x,              botY)
+            tipPath.lineTo(p.x + PIPE_W / 2f, botY - TIP_H)
+            tipPath.lineTo(p.x + PIPE_W,     botY)
+            canvas.drawPath(tipPath, tipGlowPaint)
             canvas.drawPath(tipPath, tipEdgePaint)
         }
     }
 
-    /**
-     * Draws the dart-shaped ship.
-     * [x] and [y] are the ship center in logical coordinates.
-     */
     private fun drawShip(canvas: Canvas, x: Float, y: Float, showFlame: Boolean) {
-        // Thrust flame (triangle behind ship, flickering)
+        // Radial glow (soft blurred circle matching JSX's radial gradient)
+        canvas.drawCircle(x, y, 28f, glowCirclePaint)
+
+        // Thrust flame — gradient triangle with flickering tip length
         if (showFlame) {
-            val flicker = 1f + 0.3f * sin(time * 8f).toFloat()
-            val fLen    = SHIP_H * 0.8f * flicker
+            val t      = time * 4f  // faster clock: ~0.2/frame ≈ Date.now()/80 per frame
+            val tipX   = x - SHIP_W / 2f - 10f - sin(t) * 5f
+            val baseX  = x - SHIP_W / 2f + 4f
+            flamePaint.shader = LinearGradient(
+                baseX, y, tipX, y,
+                THRUST_B, Color.argb(0, 255, 102, 0),   // FFCC00 → transparent FF6600
+                Shader.TileMode.CLAMP
+            )
             flamePath.rewind()
-            flamePath.moveTo(x - SHIP_W / 2f,        y - SHIP_H / 4f)
-            flamePath.lineTo(x - SHIP_W / 2f - fLen, y)
-            flamePath.lineTo(x - SHIP_W / 2f,        y + SHIP_H / 4f)
+            flamePath.moveTo(baseX, y - 4f)
+            flamePath.lineTo(tipX,  y)
+            flamePath.lineTo(baseX, y + 4f)
             flamePath.close()
             canvas.drawPath(flamePath, flamePaint)
         }
 
-        // Glow halo (soft larger shape drawn first)
-        shipPath.rewind()
-        val gw = 3f
-        shipPath.moveTo(x + SHIP_W / 2f + gw, y)
-        shipPath.lineTo(x - SHIP_W / 2f - gw, y - SHIP_H / 2f - gw)
-        shipPath.lineTo(x - SHIP_W / 2f + 4f, y)
-        shipPath.lineTo(x - SHIP_W / 2f - gw, y + SHIP_H / 2f + gw)
-        shipPath.close()
-        canvas.drawPath(shipPath, shipGlowPaint)
-
-        // Ship body — dart / arrowhead pointing right (4 vertices)
-        // Nose:        (x + SHIP_W/2, y)
-        // Top back:    (x - SHIP_W/2, y - SHIP_H/2)
-        // Engine notch:(x - SHIP_W/2 + 4, y)
-        // Bottom back: (x - SHIP_W/2, y + SHIP_H/2)
+        // Ship body — linear gradient #AAFFEE → #00BBAA (matching JSX)
+        shipPaint.shader = LinearGradient(
+            x - SHIP_W / 2f, y - SHIP_H / 2f,
+            x + SHIP_W / 2f, y + SHIP_H / 2f,
+            Color.parseColor("#AAFFEE"), Color.parseColor("#00BBAA"),
+            Shader.TileMode.CLAMP
+        )
         shipPath.rewind()
         shipPath.moveTo(x + SHIP_W / 2f,      y)
         shipPath.lineTo(x - SHIP_W / 2f,      y - SHIP_H / 2f)
         shipPath.lineTo(x - SHIP_W / 2f + 4f, y)
         shipPath.lineTo(x - SHIP_W / 2f,      y + SHIP_H / 2f)
         shipPath.close()
-        canvas.drawPath(shipPath, shipFillPaint)
+        canvas.drawPath(shipPath, shipPaint)
 
-        // Cockpit: darker ellipse at (x+4, y), size 14×10 logical units
-        canvas.drawOval(
-            x + 4f - 7f, y - 5f,
-            x + 4f + 7f, y + 5f,
-            cockpitPaint
-        )
+        // Cockpit (dark fill + translucent teal stroke)
+        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitPaint)
+        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitStrokePaint)
     }
 
     private fun drawHud(canvas: Canvas) {
-        canvas.drawText("SCORE",               12f, 18f, hudLabelPaint)
-        canvas.drawText("%05d".format(score),  12f, 34f, hudValuePaint)
+        canvas.drawText("SCORE",              12f, 16f, hudLabelPaint)
+        canvas.drawText("%05d".format(score), 12f, 32f, hudValuePaint)
     }
 
     private fun drawIdle(canvas: Canvas) {
         val cx = LOG_W / 2f
         val cy = LOG_H / 2f
 
-        // Title
-        canvas.drawText("CAVE DIVER", cx, cy - 66f, titlePaint)
-        // Subtitle
-        canvas.drawText("navigate the crystal caverns", cx, cy - 48f, subtitlePaint)
+        canvas.drawText("CAVE DIVER",                  cx, cy - 70f, titlePaint)
+        canvas.drawText("navigate the crystal caverns", cx, cy - 42f, subtitlePaint)
 
-        // Ship preview (centered, static)
         drawShip(canvas, cx, cy, showFlame = false)
 
-        // Pulsing thrust prompt
         val pulse = (0.4f + 0.6f * sin(time * 2.0).toFloat()).coerceIn(0f, 1f)
         promptPaint.alpha    = (255 * pulse).toInt()
         subPromptPaint.alpha = (200 * pulse).toInt()
-        canvas.drawText("TAP AND HOLD TO THRUST", cx, cy + 50f, promptPaint)
-        canvas.drawText("release to dive",        cx, cy + 65f, subPromptPaint)
+        canvas.drawText("TAP AND HOLD TO THRUST",  cx, cy + 106f, promptPaint)
+        canvas.drawText("release to dive",          cx, cy + 122f, subPromptPaint)
         promptPaint.alpha    = 255
         subPromptPaint.alpha = 255
     }
@@ -541,21 +528,19 @@ class CaveDiverView @JvmOverloads constructor(
         val cx = LOG_W / 2f
         val cy = LOG_H / 2f
 
-        // Semi-transparent dim
-        canvas.drawRect(0f, 0f, LOG_W, LOG_H, overlayPaint)
+        canvas.drawRect(0f, 0f, LOG_W, LOG_H, dimPaint)
 
-        canvas.drawText("CRASHED",            cx, cy - 54f, crashPaint)
-        canvas.drawText("FINAL SCORE",        cx, cy - 22f, crashSubPaint)
-        canvas.drawText("%05d".format(score), cx, cy + 4f,  crashScorePaint)
+        canvas.drawText("CRASHED",            cx, cy - 75f, crashPaint)
+        canvas.drawText("FINAL SCORE",        cx, cy - 30f, crashSubPaint)
+        canvas.drawText("%05d".format(score), cx, cy + 15f, crashScorePaint)
 
         if (bestScore > 0) {
-            canvas.drawText("BEST  %05d".format(bestScore), cx, cy + 24f, crashSubPaint)
+            canvas.drawText("BEST  %05d".format(bestScore), cx, cy + 45f, crashSubPaint)
         }
 
-        // Pulsing retry prompt
         val pulse = (0.4f + 0.6f * sin(time * 2.0).toFloat()).coerceIn(0f, 1f)
         crashRetryPaint.alpha = (255 * pulse).toInt()
-        canvas.drawText("TAP TO RETRY", cx, cy + 52f, crashRetryPaint)
+        canvas.drawText("TAP TO RETRY", cx, cy + 116f, crashRetryPaint)
         crashRetryPaint.alpha = 255
     }
 
