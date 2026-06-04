@@ -639,11 +639,8 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
     })
 
     GAMES.forEach { g ->
-        val tile = TextView(activity).apply {
-            text = g.label
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            typeface = Typeface.MONOSPACE
+        val tile = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             background = activity.getDrawable(R.drawable.bg_game_tile)
             isClickable = true
@@ -651,12 +648,23 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 48.px()
             ).apply { topMargin = 8.px() }
-            val iconSize = 20.px()
-            val d = activity.getDrawable(g.iconRes)
-            d?.setBounds(0, 0, iconSize, iconSize)
-            setCompoundDrawablesRelative(d, null, null, null)
-            compoundDrawablePadding = 8.px()
         }
+        val iconSize = 20.px()
+        tile.addView(ImageView(activity).apply {
+            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+            setImageResource(g.iconRes)
+        })
+        tile.addView(TextView(activity).apply {
+            text = g.label
+            setTextColor(Color.WHITE)
+            textSize = 15f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginStart = 8.px() }
+        })
         tile.setOnClickListener {
             dialog.dismiss()
             showGlobalLeaderboardDialog(activity, g.key)
