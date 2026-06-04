@@ -45,12 +45,12 @@ class CaveDiverView @JvmOverloads constructor(
          *  Exact formula: (LOG_W - LOG_H) / 2 = (480 - 320) / 2 = 80. */
         private const val EXTRA_H = (LOG_W - LOG_H) / 2  // = 80f
 
-        // Geometry — ship doubled (32×16 → 64×32), obstacle width doubled (44 → 88)
+        // Geometry — obstacle width doubled (44 → 88); ship back to original size
         private const val PIPE_W   = 88f
         private const val GAP      = 110f
         private const val TIP_H    = 8f
-        private const val SHIP_W   = 64f
-        private const val SHIP_H   = 32f
+        private const val SHIP_W   = 32f
+        private const val SHIP_H   = 16f
         private const val SHIP_X   = 80f
         private const val STAR_COUNT = 40
 
@@ -429,7 +429,7 @@ class CaveDiverView @JvmOverloads constructor(
             if (shipY - halfH < p.topH || shipY + halfH > botY) return true
             val t    = ((SHIP_X - p.x) / PIPE_W).coerceIn(0f, 1f)
             val triT = if (t < 0.5f) t * 2f else (1f - t) * 2f
-            val tipTol = SHIP_H / 4f   // scales with ship: was 4f at H=16, now 8f at H=32
+            val tipTol = SHIP_H / 4f   // = 4f at SHIP_H=16 — tip collision tolerance
             if (shipY < p.topH  + TIP_H * triT + tipTol) return true
             if (shipY > botY    - TIP_H * triT - tipTol) return true
         }
@@ -514,53 +514,47 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     private fun drawShip(canvas: Canvas, x: Float, y: Float, showFlame: Boolean) {
-        val hw = SHIP_W / 2f   // half-width
-        val hh = SHIP_H / 2f   // half-height
-
-        // Radial glow — radius proportional to ship half-width
+        // Radial glow (soft blurred circle; colour follows theme)
         glowCirclePaint.color = themeShipGlow
-        canvas.drawCircle(x, y, hw * 1.75f, glowCirclePaint)
+        canvas.drawCircle(x, y, 28f, glowCirclePaint)
 
-        // Thrust flame — all offsets proportional to ship dimensions
+        // Thrust flame — gradient triangle with flickering tip length
         if (showFlame) {
-            val t     = time * 4f
-            val tipX  = x - hw - hw * 0.3125f - sin(t) * hw * 0.15625f
-            val baseX = x - hw + hw * 0.125f
+            val t      = time * 4f
+            val tipX   = x - SHIP_W / 2f - 10f - sin(t) * 5f
+            val baseX  = x - SHIP_W / 2f + 4f
             flamePaint.shader = LinearGradient(
                 baseX, y, tipX, y,
                 THRUST_B, Color.argb(0, 255, 102, 0),
                 Shader.TileMode.CLAMP
             )
             flamePath.rewind()
-            flamePath.moveTo(baseX, y - hh * 0.5f)
+            flamePath.moveTo(baseX, y - 4f)
             flamePath.lineTo(tipX,  y)
-            flamePath.lineTo(baseX, y + hh * 0.5f)
+            flamePath.lineTo(baseX, y + 4f)
             flamePath.close()
             canvas.drawPath(flamePath, flamePaint)
         }
 
-        // Ship body — dart shape, proportional indentation at rear
+        // Ship body — gradient from lightened theme colour → theme colour
         val shipLight = lightenColor(themeShipColor, 0.55f)
         shipPaint.shader = LinearGradient(
-            x - hw, y - hh, x + hw, y + hh,
+            x - SHIP_W / 2f, y - SHIP_H / 2f,
+            x + SHIP_W / 2f, y + SHIP_H / 2f,
             shipLight, themeShipColor,
             Shader.TileMode.CLAMP
         )
         shipPath.rewind()
-        shipPath.moveTo(x + hw,              y)
-        shipPath.lineTo(x - hw,              y - hh)
-        shipPath.lineTo(x - hw + hw * 0.25f, y)       // rear indent = ¼ of hw
-        shipPath.lineTo(x - hw,              y + hh)
+        shipPath.moveTo(x + SHIP_W / 2f,      y)
+        shipPath.lineTo(x - SHIP_W / 2f,      y - SHIP_H / 2f)
+        shipPath.lineTo(x - SHIP_W / 2f + 4f, y)
+        shipPath.lineTo(x - SHIP_W / 2f,      y + SHIP_H / 2f)
         shipPath.close()
         canvas.drawPath(shipPath, shipPaint)
 
-        // Cockpit — offsets proportional to SHIP_W / SHIP_H (verified at 32×16 original)
-        val cxL = x - SHIP_W * 0.09375f   //  x − 3  when SHIP_W=32
-        val cxR = x + SHIP_W * 0.34375f   //  x + 11 when SHIP_W=32
-        val cyT = y - SHIP_H * 0.3125f    //  y − 5  when SHIP_H=16
-        val cyB = y + SHIP_H * 0.3125f    //  y + 5  when SHIP_H=16
-        canvas.drawOval(cxL, cyT, cxR, cyB, cockpitPaint)
-        canvas.drawOval(cxL, cyT, cxR, cyB, cockpitStrokePaint)
+        // Cockpit (dark fill + translucent teal stroke)
+        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitPaint)
+        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitStrokePaint)
     }
 
     private fun drawHud(canvas: Canvas) {
