@@ -15,8 +15,8 @@ enum class Difficulty(
     val label: String
 ) {
     EASY  (4,  4,  12,  20,  "EASY"),
-    MEDIUM(8,  8,  40,  60,  "MEDIUM"),
-    HARD  (12, 12, 90, 130,  "HARD")
+    MEDIUM(6,  6,  25,  40,  "MEDIUM"),
+    HARD  (8,  8,  45,  65,  "HARD")
 }
 
 @SuppressLint("ClickableViewAccessibility")

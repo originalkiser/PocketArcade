@@ -28,11 +28,11 @@ class CaveDiverView @JvmOverloads constructor(
 
         // Physics — identical to JSX constants
         private const val GRAVITY       = 0.225f
-        private const val THRUST        = -0.38f
+        private const val THRUST        = -0.456f
         private const val DAMPING       = 0.92f
         private const val VY_MIN        = -5f
         private const val VY_MAX        = 6f
-        private const val PIPE_SPEED    = 2.4f
+        private const val PIPE_SPEED    = 2.88f
         private const val PIPE_INTERVAL = 110
 
         // Geometry
@@ -211,6 +211,11 @@ class CaveDiverView @JvmOverloads constructor(
 
     init { holder.addCallback(this) }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val w = MeasureSpec.getSize(widthMeasureSpec)
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY))
+    }
+
     override fun surfaceCreated(h: SurfaceHolder) { startThread() }
 
     override fun surfaceChanged(h: SurfaceHolder, fmt: Int, w: Int, h2: Int) {
@@ -231,7 +236,7 @@ class CaveDiverView @JvmOverloads constructor(
         hudValuePaint.textSize    = 15f * s
         crashPaint.textSize       = 38f * s
         crashSubPaint.textSize    = 13f * s
-        crashScorePaint.textSize  = 36f * s
+        crashScorePaint.textSize  = 22f * s
         crashRetryPaint.textSize  = 14f * s
 
         // Stroke widths in physical px

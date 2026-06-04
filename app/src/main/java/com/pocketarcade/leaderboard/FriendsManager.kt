@@ -308,7 +308,7 @@ object FriendsManager {
         onResult: (Map<String, Int>) -> Unit
     ) {
         if (uids.isEmpty()) { onResult(emptyMap()); return }
-        val games    = listOf("snake", "pong", "asteroids", "brickbreaker")
+        val games    = listOf("snake", "pong", "asteroids", "brickbreaker", "cavedriver", "memorymatch")
         val modeKeys = listOf("_", "easy", "medium", "hard")
         val allDocIds = uids.take(30).flatMap { uid ->
             games.flatMap { game -> modeKeys.map { mk -> "$uid|$game|$mk|$periodType|$periodKey" } }

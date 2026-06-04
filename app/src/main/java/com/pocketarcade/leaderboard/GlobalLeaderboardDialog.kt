@@ -30,7 +30,9 @@ private val GAMES = listOf(
     GameInfo("snake",        R.drawable.ic_snake,        "SNAKE"),
     GameInfo("pong",         R.drawable.ic_pong,         "PONG"),
     GameInfo("asteroids",    R.drawable.ic_asteroids,    "ASTEROIDS"),
-    GameInfo("brickbreaker", R.drawable.ic_brickbreaker, "BRICKBREAKER")
+    GameInfo("brickbreaker", R.drawable.ic_brickbreaker, "BRICKBREAKER"),
+    GameInfo("cavedriver",   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+    GameInfo("memorymatch",  R.drawable.ic_memorymatch,  "MEMORY")
 )
 
 private fun pongScoreColor(game: String, score: Int): Int? {
@@ -325,10 +327,14 @@ fun showGlobalLeaderboardDialog(
 
         data class PersonalGame(val key: String, val label: String, val iconRes: Int, val color: Int)
         val personalGames = listOf(
-            PersonalGame("snake",        "SNAKE",        R.drawable.ic_snake,        Color.parseColor("#4f8ef7")),
-            PersonalGame("pong",         "PONG",         R.drawable.ic_pong,         Color.parseColor("#e74c3c")),
-            PersonalGame("asteroids",    "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
-            PersonalGame("brickbreaker", "BRKR BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f"))
+            PersonalGame("snake",              "SNAKE",        R.drawable.ic_snake,        Color.parseColor("#4f8ef7")),
+            PersonalGame("pong",               "PONG",         R.drawable.ic_pong,         Color.parseColor("#e74c3c")),
+            PersonalGame("asteroids",          "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
+            PersonalGame("brickbreaker",       "BRKR BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f")),
+            PersonalGame("cavedriver",         "CAVE DIVER",   R.drawable.ic_cavedriver,   Color.parseColor("#00FFCC")),
+            PersonalGame("memorymatch_easy",   "MEMORY (E)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
+            PersonalGame("memorymatch_medium", "MEMORY (M)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
+            PersonalGame("memorymatch_hard",   "MEMORY (H)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96"))
         )
 
         var hasAny = false
@@ -432,7 +438,7 @@ fun showGlobalLeaderboardDialog(
     // ── Chip setup ────────────────────────────────────────────────────────────
 
     fun setupModeChips() {
-        if (currentGame != "brickbreaker") {
+        if (currentGame != "brickbreaker" && currentGame != "memorymatch") {
             modeChipsScroll.visibility = View.GONE
             return
         }
@@ -455,7 +461,9 @@ fun showGlobalLeaderboardDialog(
         "snake"        to Color.parseColor("#4f8ef7"),
         "pong"         to Color.parseColor("#e74c3c"),
         "asteroids"    to Color.parseColor("#00d4ff"),
-        "brickbreaker" to Color.parseColor("#f1c40f")
+        "brickbreaker" to Color.parseColor("#f1c40f"),
+        "cavedriver"   to Color.parseColor("#00FFCC"),
+        "memorymatch"  to Color.parseColor("#00FF96")
     )
 
     fun setupGameChips() {

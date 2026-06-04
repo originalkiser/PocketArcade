@@ -49,18 +49,18 @@
 
     </LinearLayout>
 
-    <!-- Game canvas (letterboxed 480×320 logical canvas) -->
+    <!-- Game canvas: square (onMeasure forces height=width) -->
     <com.pocketarcade.games.cavedriver.CaveDiverView
         android:id="@+id/caveDiverView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content" />
 
-    <!-- Control zone: hold here (or in game) to thrust -->
+    <!-- Control zone: fills all remaining space below the game area -->
     <FrameLayout
         android:id="@+id/thrustZone"
         android:layout_width="match_parent"
-        android:layout_height="155dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="#070715"
         android:clickable="true"
         android:focusable="true">

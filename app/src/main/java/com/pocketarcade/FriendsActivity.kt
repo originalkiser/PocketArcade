@@ -33,7 +33,9 @@ class FriendsActivity : AppCompatActivity() {
         GameInfo(PrefsManager.GAME_SNAKE,        R.drawable.ic_snake,        "SNAKE"),
         GameInfo(PrefsManager.GAME_PONG,         R.drawable.ic_pong,         "PONG"),
         GameInfo(PrefsManager.GAME_ASTEROIDS,    R.drawable.ic_asteroids,    "ASTEROIDS"),
-        GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRKR BREAKER")
+        GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRKR BREAKER"),
+        GameInfo("cavedriver",                   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+        GameInfo("memorymatch",                  R.drawable.ic_memorymatch,  "MEMORY")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -280,6 +282,8 @@ class FriendsActivity : AppCompatActivity() {
             PrefsManager.GAME_PONG         -> Color.parseColor("#e74c3c")
             PrefsManager.GAME_ASTEROIDS    -> Color.parseColor("#00d4ff")
             PrefsManager.GAME_BRICKBREAKER -> Color.parseColor("#f1c40f")
+            "cavedriver"                   -> Color.parseColor("#00FFCC")
+            "memorymatch"                  -> Color.parseColor("#00FF96")
             else -> getColor(R.color.muted)
         }
         val container = LinearLayout(this).apply {
