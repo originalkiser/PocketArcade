@@ -4,8 +4,12 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.R
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
+import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
+import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
 import com.pocketarcade.storage.PrefsManager
 
 class CaveDiverActivity : AppCompatActivity() {
@@ -42,14 +46,44 @@ class CaveDiverActivity : AppCompatActivity() {
             PrefsManager.recordGameStat(this, GAME_KEY, score, duration)
             PrefsManager.setHighScore(this, GAME_KEY, score)
 
+            ScoreSyncManager.recordGameScore(this, GAME_KEY, "_", score)
+
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, GAME_KEY, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, GAME_KEY, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                })
+            }
+
             runOnUiThread {
-                checkAndShowLeaderboard(this, GAME_KEY, score) {}
+                checkAndShowLeaderboard(this, GAME_KEY, score) {
+                    if (PrefsManager.getGlobalUsername(this) != null) {
+                        showGlobalLeaderboardDialog(this, GAME_KEY,
+                            initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
+                    }
+                }
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
+        AdManager.populateBannerContainer(findViewById(R.id.adContainer))
     }
 
     override fun onPause() {

@@ -7,7 +7,7 @@
     <!-- Face-down card (top-left) -->
     <path android:fillColor="#0D1F14"
         android:pathData="M2,2 L22,2 L22,22 L2,22 Z" />
-    <path android:fillColor="none"
+    <path android:fillColor="#00000000"
         android:strokeColor="#1A3A2A"
         android:strokeWidth="2"
         android:pathData="M2,2 L22,2 L22,22 L2,22 Z" />
@@ -17,7 +17,7 @@
     <!-- Face-up card (bottom-right) -->
     <path android:fillColor="#0D2E1A"
         android:pathData="M26,26 L46,26 L46,46 L26,46 Z" />
-    <path android:fillColor="none"
+    <path android:fillColor="#00000000"
         android:strokeColor="#00FF96"
         android:strokeWidth="2"
         android:pathData="M26,26 L46,26 L46,46 L26,46 Z" />

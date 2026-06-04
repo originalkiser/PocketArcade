@@ -1,7 +1,10 @@
 package com.pocketarcade
 
 import android.content.Context
-import com.pocketarcade.leaderboard.FriendsManager
+import com.pocketarcade.leaderboard.calendarStartOfMonth
+import com.pocketarcade.leaderboard.calendarStartOfWeek
+import com.pocketarcade.leaderboard.currentMonthKey
+import com.pocketarcade.leaderboard.currentWeekKey
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.storage.PrefsManager
 
@@ -76,10 +79,10 @@ object ScoreSyncManager {
     // ── Period (week / month) ─────────────────────────────────────────────────
 
     private fun syncPeriods(context: Context, uid: String, username: String) {
-        val weekKey    = FriendsManager.currentWeekKey()
-        val monthKey   = FriendsManager.currentMonthKey()
-        val weekStart  = FriendsManager.calendarStartOfWeek()
-        val monthStart = FriendsManager.calendarStartOfMonth()
+        val weekKey    = currentWeekKey()
+        val monthKey   = currentMonthKey()
+        val weekStart  = calendarStartOfWeek()
+        val monthStart = calendarStartOfMonth()
 
         val country     = PrefsManager.getGlobalCountry(context)
         val state       = PrefsManager.getGlobalState(context)
