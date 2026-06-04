@@ -28,25 +28,28 @@ class CaveDiverView @JvmOverloads constructor(
         private const val LOG_W = 480f
         private const val LOG_H = 320f
 
-        // Physics — +25% speed and gravity from previous values
-        private const val GRAVITY       = 0.281f   // was 0.225 → +25%
-        private const val THRUST        = -0.456f
+        // Physics
+        // GRAVITY doubled (×2 from 0.281).  Terminal fall ≈ GRAVITY/(1−DAMPING) = 7.0 px/frame.
+        // THRUST = −2×GRAVITY so terminal rise matches terminal fall in magnitude.
+        // VY_MIN/MAX = ±8 to give headroom above terminal ~7.
+        private const val GRAVITY       = 0.562f
+        private const val THRUST        = -1.124f
         private const val DAMPING       = 0.92f
-        private const val VY_MIN        = -5f
-        private const val VY_MAX        = 6f
-        private const val PIPE_SPEED    = 3.60f    // was 2.88 → +25%
-        private const val PIPE_INTERVAL = 110
+        private const val VY_MIN        = -8f
+        private const val VY_MAX        = 8f
+        private const val PIPE_SPEED    = 3.60f
+        private const val PIPE_INTERVAL = 73   // −33% from 110 → tighter spacing
 
         /** Logical pixels to extend above/below the 480×320 area to fill the square view.
          *  Exact formula: (LOG_W - LOG_H) / 2 = (480 - 320) / 2 = 80. */
         private const val EXTRA_H = (LOG_W - LOG_H) / 2  // = 80f
 
-        // Geometry
-        private const val PIPE_W   = 44f
+        // Geometry — ship doubled (32×16 → 64×32), obstacle width doubled (44 → 88)
+        private const val PIPE_W   = 88f
         private const val GAP      = 110f
         private const val TIP_H    = 8f
-        private const val SHIP_W   = 32f
-        private const val SHIP_H   = 16f
+        private const val SHIP_W   = 64f
+        private const val SHIP_H   = 32f
         private const val SHIP_X   = 80f
         private const val STAR_COUNT = 40
 
@@ -407,8 +410,9 @@ class CaveDiverView @JvmOverloads constructor(
             if (shipY - halfH < p.topH || shipY + halfH > botY) return true
             val t    = ((SHIP_X - p.x) / PIPE_W).coerceIn(0f, 1f)
             val triT = if (t < 0.5f) t * 2f else (1f - t) * 2f
-            if (shipY < p.topH  + TIP_H * triT + 4f) return true
-            if (shipY > botY    - TIP_H * triT - 4f) return true
+            val tipTol = SHIP_H / 4f   // scales with ship: was 4f at H=16, now 8f at H=32
+            if (shipY < p.topH  + TIP_H * triT + tipTol) return true
+            if (shipY > botY    - TIP_H * triT - tipTol) return true
         }
         return false
     }
@@ -491,47 +495,53 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     private fun drawShip(canvas: Canvas, x: Float, y: Float, showFlame: Boolean) {
-        // Radial glow (soft blurred circle; colour follows theme)
-        glowCirclePaint.color = themeShipGlow
-        canvas.drawCircle(x, y, 28f, glowCirclePaint)
+        val hw = SHIP_W / 2f   // half-width
+        val hh = SHIP_H / 2f   // half-height
 
-        // Thrust flame — gradient triangle with flickering tip length
+        // Radial glow — radius proportional to ship half-width
+        glowCirclePaint.color = themeShipGlow
+        canvas.drawCircle(x, y, hw * 1.75f, glowCirclePaint)
+
+        // Thrust flame — all offsets proportional to ship dimensions
         if (showFlame) {
-            val t      = time * 4f
-            val tipX   = x - SHIP_W / 2f - 10f - sin(t) * 5f
-            val baseX  = x - SHIP_W / 2f + 4f
+            val t     = time * 4f
+            val tipX  = x - hw - hw * 0.3125f - sin(t) * hw * 0.15625f
+            val baseX = x - hw + hw * 0.125f
             flamePaint.shader = LinearGradient(
                 baseX, y, tipX, y,
                 THRUST_B, Color.argb(0, 255, 102, 0),
                 Shader.TileMode.CLAMP
             )
             flamePath.rewind()
-            flamePath.moveTo(baseX, y - 4f)
+            flamePath.moveTo(baseX, y - hh * 0.5f)
             flamePath.lineTo(tipX,  y)
-            flamePath.lineTo(baseX, y + 4f)
+            flamePath.lineTo(baseX, y + hh * 0.5f)
             flamePath.close()
             canvas.drawPath(flamePath, flamePaint)
         }
 
-        // Ship body — gradient from lightened theme colour → theme colour
+        // Ship body — dart shape, proportional indentation at rear
         val shipLight = lightenColor(themeShipColor, 0.55f)
         shipPaint.shader = LinearGradient(
-            x - SHIP_W / 2f, y - SHIP_H / 2f,
-            x + SHIP_W / 2f, y + SHIP_H / 2f,
+            x - hw, y - hh, x + hw, y + hh,
             shipLight, themeShipColor,
             Shader.TileMode.CLAMP
         )
         shipPath.rewind()
-        shipPath.moveTo(x + SHIP_W / 2f,      y)
-        shipPath.lineTo(x - SHIP_W / 2f,      y - SHIP_H / 2f)
-        shipPath.lineTo(x - SHIP_W / 2f + 4f, y)
-        shipPath.lineTo(x - SHIP_W / 2f,      y + SHIP_H / 2f)
+        shipPath.moveTo(x + hw,              y)
+        shipPath.lineTo(x - hw,              y - hh)
+        shipPath.lineTo(x - hw + hw * 0.25f, y)       // rear indent = ¼ of hw
+        shipPath.lineTo(x - hw,              y + hh)
         shipPath.close()
         canvas.drawPath(shipPath, shipPaint)
 
-        // Cockpit (dark fill + translucent teal stroke)
-        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitPaint)
-        canvas.drawOval(x - 3f, y - 5f, x + 11f, y + 5f, cockpitStrokePaint)
+        // Cockpit — offsets proportional to SHIP_W / SHIP_H (verified at 32×16 original)
+        val cxL = x - SHIP_W * 0.09375f   //  x − 3  when SHIP_W=32
+        val cxR = x + SHIP_W * 0.34375f   //  x + 11 when SHIP_W=32
+        val cyT = y - SHIP_H * 0.3125f    //  y − 5  when SHIP_H=16
+        val cyB = y + SHIP_H * 0.3125f    //  y + 5  when SHIP_H=16
+        canvas.drawOval(cxL, cyT, cxR, cyB, cockpitPaint)
+        canvas.drawOval(cxL, cyT, cxR, cyB, cockpitStrokePaint)
     }
 
     private fun drawHud(canvas: Canvas) {
