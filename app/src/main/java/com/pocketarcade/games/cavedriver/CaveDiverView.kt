@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -116,12 +117,12 @@ class CaveDiverView @JvmOverloads constructor(
     fun isUserPlaying() = state == CDState.PLAYING
     fun loadBestScore(b: Int) { bestScore = b }
 
-    /** Called by CaveDiverActivity for both in-canvas touch and control-zone touch. */
+    /** Called by CaveDiverActivity for both in-canvas touch and control-zone touch.
+     *  IMPORTANT: may be called from the main thread — do NOT call resetGame() here;
+     *  instead set startPending so the game thread performs the reset safely. */
     fun setThrusting(pressed: Boolean) {
         if (pressed && state != CDState.PLAYING) {
-            resetGame()
-            state = CDState.PLAYING
-            onGameStarted?.invoke()
+            startPending = true   // game thread will call resetGame() + transition to PLAYING
         }
         thrusting = pressed
     }
@@ -134,7 +135,8 @@ class CaveDiverView @JvmOverloads constructor(
 
     // ── Thread ────────────────────────────────────────────────────────────────
 
-    @Volatile private var running = false
+    @Volatile private var running     = false
+    @Volatile private var startPending = false   // set from main thread; consumed in update()
     private var gameThread: Thread? = null
 
     // ── Paints ────────────────────────────────────────────────────────────────
@@ -292,16 +294,23 @@ class CaveDiverView @JvmOverloads constructor(
         running = true
         gameThread = Thread {
             while (running) {
-                val t0 = System.currentTimeMillis()
-                update()
-                val canvas = holder.lockCanvas()
-                if (canvas != null) {
-                    try { drawFrame(canvas) }
-                    finally { holder.unlockCanvasAndPost(canvas) }
+                try {
+                    val t0 = System.currentTimeMillis()
+                    update()
+                    val canvas = holder.lockCanvas()
+                    if (canvas != null) {
+                        try { drawFrame(canvas) }
+                        finally { holder.unlockCanvasAndPost(canvas) }
+                    }
+                    val elapsed = System.currentTimeMillis() - t0
+                    val sleep   = 1000L / 60 - elapsed
+                    if (sleep > 0) {
+                        try { Thread.sleep(sleep) }
+                        catch (_: InterruptedException) { Thread.currentThread().interrupt() }
+                    }
+                } catch (e: Exception) {
+                    Log.e("CaveDiver", "Game loop error: ${e.message}", e)
                 }
-                val elapsed = System.currentTimeMillis() - t0
-                val sleep   = 1000L / 60 - elapsed
-                if (sleep > 0) Thread.sleep(sleep)
             }
         }.also { it.start() }
     }
@@ -334,7 +343,8 @@ class CaveDiverView @JvmOverloads constructor(
         time         = 0f
         shipY        = LOG_H / 2f
         vy           = 0f
-        thrusting    = false
+        // NOTE: thrusting is intentionally NOT reset here — it is owned by the touch
+        // callbacks in setThrusting() and should reflect the current hardware state.
         thrustFrames = 0
         pipes.clear()
         initStars()
@@ -354,6 +364,15 @@ class CaveDiverView @JvmOverloads constructor(
     // ── Update ────────────────────────────────────────────────────────────────
 
     private fun update() {
+        // Consume a pending game-start request.  resetGame() modifies pipes and stars, so it
+        // MUST run on the game thread — never call it from the main thread.
+        if (startPending) {
+            startPending = false
+            resetGame()
+            state = CDState.PLAYING
+            post { onGameStarted?.invoke() }   // invoke callback on main thread
+        }
+
         time += 0.05f
 
         val totalH = LOG_H + 2 * EXTRA_H
