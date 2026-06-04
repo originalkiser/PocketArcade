@@ -20,6 +20,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.pocketarcade.HintManager
 import com.pocketarcade.R
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
@@ -125,10 +126,19 @@ class SnakeActivity : AppCompatActivity() {
             // Track consecutive low scores for the control-hint system.
             if (score < 15) consecutiveLowScores++ else consecutiveLowScores = 0
 
-            // Submit to period leaderboard unconditionally (independent of local top-N).
+            // Record local best for offline sync, then push to both leaderboards.
+            ScoreSyncManager.recordGameScore(this, PrefsManager.GAME_SNAKE, "_", score)
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, PrefsManager.GAME_SNAKE, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_SNAKE, score,
                         PrefsManager.getGlobalCountry(this),

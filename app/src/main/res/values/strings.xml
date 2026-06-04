@@ -8,6 +8,8 @@
     <string name="game_pong">PONG</string>
     <string name="game_asteroids">ASTEROIDS</string>
     <string name="game_brickbreaker">BRICK BREAKER</string>
+    <string name="game_cavedriver">CAVE DIVER</string>
+    <string name="game_memorymatch">MEMORY MATCH</string>
 
     <!-- Common -->
     <string name="high_score">HI: %d</string>

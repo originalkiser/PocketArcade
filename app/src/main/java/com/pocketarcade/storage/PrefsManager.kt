@@ -252,6 +252,50 @@ object PrefsManager {
     fun getNudgeSnapshot(ctx: Context): String?    = prefs(ctx).getString(KEY_NUDGE_SNAPSHOT, null)
     fun setNudgeSnapshot(ctx: Context, json: String) = prefs(ctx).edit { putString(KEY_NUDGE_SNAPSHOT, json) }
 
+    // ── Local period best-score tracking (for offline sync) ───────────────────
+    // Keys: "lpb_${game}_${modeKey}" (Int score) and "lpb_ts_${game}_${modeKey}" (Long timestamp).
+
+    fun getLocalPeriodBest(ctx: Context, game: String, modeKey: String): Pair<Int, Long> {
+        val p = prefs(ctx)
+        return Pair(
+            p.getInt("lpb_${game}_${modeKey}", 0),
+            p.getLong("lpb_ts_${game}_${modeKey}", 0L)
+        )
+    }
+
+    /** Updates the stored local best only when [score] exceeds the current record. */
+    fun updateLocalPeriodBest(ctx: Context, game: String, modeKey: String, score: Int) {
+        val current = prefs(ctx).getInt("lpb_${game}_${modeKey}", 0)
+        if (score > current) {
+            prefs(ctx).edit {
+                putInt("lpb_${game}_${modeKey}", score)
+                putLong("lpb_ts_${game}_${modeKey}", System.currentTimeMillis())
+            }
+        }
+    }
+
+    // ── Displacement popup dedup ───────────────────────────────────────────────
+
+    fun getDismissedDisplacementIds(ctx: Context): Set<String> {
+        val raw = prefs(ctx).getString("dismissed_displacements", null) ?: return emptySet()
+        return try {
+            val arr = org.json.JSONArray(raw)
+            buildSet { for (i in 0 until arr.length()) add(arr.getString(i)) }
+        } catch (_: Exception) { emptySet() }
+    }
+
+    /** Merges [ids] into the stored set, capped at 500 entries to bound storage. */
+    fun addDismissedDisplacementIds(ctx: Context, ids: Collection<String>) {
+        val merged = (getDismissedDisplacementIds(ctx) + ids).toList()
+        val capped = if (merged.size > 500) merged.takeLast(500) else merged
+        prefs(ctx).edit { putString("dismissed_displacements", org.json.JSONArray(capped).toString()) }
+    }
+
+    fun getLastDisplacementCheck(ctx: Context): Long =
+        prefs(ctx).getLong("last_displacement_check", 0L)
+    fun setLastDisplacementCheck(ctx: Context, t: Long) =
+        prefs(ctx).edit { putLong("last_displacement_check", t) }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

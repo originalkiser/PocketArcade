@@ -18,10 +18,14 @@ import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
 import com.pocketarcade.games.asteroids.AsteroidsActivity
 import com.pocketarcade.games.brickbreaker.BrickBreakerActivity
+import com.pocketarcade.games.cavedriver.CaveDiverActivity
 import com.pocketarcade.games.pong.PongActivity
+import com.pocketarcade.games.memorymatch.MemoryMatchActivity
 import com.pocketarcade.games.snake.SnakeActivity
 import com.pocketarcade.leaderboard.LeaderboardManager
 import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
+import com.pocketarcade.DisplacementManager
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.leaderboard.showRegistrationPromptIfNeeded
 import com.pocketarcade.leaderboard.showUsernameSetupDialog
 import com.pocketarcade.leaderboard.GlobalLeaderboard
@@ -60,7 +64,9 @@ class MainActivity : AppCompatActivity() {
         bindTile(R.id.tileSnake,       SnakeActivity::class.java)
         bindTile(R.id.tilePong,        PongActivity::class.java)
         bindTile(R.id.tileAsteroids,   AsteroidsActivity::class.java)
+        bindTile(R.id.tileCaveDiver,   CaveDiverActivity::class.java)
         bindTile(R.id.tileBrickBreaker, BrickBreakerActivity::class.java)
+        bindTile(R.id.tileMemoryMatch,  MemoryMatchActivity::class.java)
 
         applyTileBorders()
 
@@ -111,6 +117,8 @@ class MainActivity : AppCompatActivity() {
                 if (!UpdateChecker.updateDialogShown) {
                     showChangelogIfNeeded(this) {
                         showRegistrationPromptIfNeeded(this)
+                        // Displacement popup appears after What's New and update dialogs.
+                        DisplacementManager.checkAndShowIfNeeded(this)
                     }
                 }
             }
@@ -141,7 +149,9 @@ class MainActivity : AppCompatActivity() {
         border(findViewById(R.id.tileSnake),        getColor(R.color.accent_blue))
         border(findViewById(R.id.tilePong),         getColor(R.color.accent_red))
         border(findViewById(R.id.tileAsteroids),    getColor(R.color.accent_cyan))
+        border(findViewById(R.id.tileCaveDiver),    Color.parseColor("#00FFCC"))
         border(findViewById(R.id.tileBrickBreaker), getColor(R.color.accent_yellow))
+        border(findViewById(R.id.tileMemoryMatch),  Color.parseColor("#00FF96"))
     }
 
     private fun startBlinkPrompt() {
@@ -160,6 +170,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         UpdateChecker.checkResumeDownload(this)
         FriendNudgeManager.checkOnOpen(this)
+        ScoreSyncManager.syncOnLaunch(this)
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
@@ -221,13 +232,21 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScorePong).text = "Wins: $pongWins  W/L: $wlRatio"
         findViewById<TextView>(R.id.tvScoreAsteroids).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS))
+        findViewById<TextView>(R.id.tvScoreCaveDiver).text =
+            "High Score: %,d".format(PrefsManager.getHighScore(this, CaveDiverActivity.GAME_KEY))
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER))
 
-        findViewById<TextView>(R.id.tvScoreSnakeDetail).text    = topDetail(PrefsManager.GAME_SNAKE)
-        findViewById<TextView>(R.id.tvScorePongDetail).text     = ""
-        findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text = topDetail(PrefsManager.GAME_ASTEROIDS)
-        findViewById<TextView>(R.id.tvScoreBBDetail).text       = topDetail(PrefsManager.GAME_BRICKBREAKER)
+        val mmHi = PrefsManager.getHighScore(this, MemoryMatchActivity.GAME_KEY)
+        findViewById<TextView>(R.id.tvScoreMemoryMatch).text =
+            if (mmHi > 0) "Best: ${1000 - mmHi} moves" else "Best: --"
+
+        findViewById<TextView>(R.id.tvScoreSnakeDetail).text      = topDetail(PrefsManager.GAME_SNAKE)
+        findViewById<TextView>(R.id.tvScorePongDetail).text      = ""
+        findViewById<TextView>(R.id.tvScoreAsteroidsDetail).text  = topDetail(PrefsManager.GAME_ASTEROIDS)
+        findViewById<TextView>(R.id.tvScoreCaveDiverDetail).text  = topDetail(CaveDiverActivity.GAME_KEY)
+        findViewById<TextView>(R.id.tvScoreBBDetail).text        = topDetail(PrefsManager.GAME_BRICKBREAKER)
+        findViewById<TextView>(R.id.tvScoreMemoryMatchDetail).text = ""
 
         // Update score ticker
         val tvMarquee = findViewById<TextView>(R.id.tvMarquee)
@@ -238,10 +257,11 @@ class MainActivity : AppCompatActivity() {
     private fun buildMarqueeTicker(): String {
         data class G(val key: String, val label: String, val isPong: Boolean)
         val games = listOf(
-            G(PrefsManager.GAME_SNAKE,        "SNAKE",     false),
-            G(PrefsManager.GAME_PONG,         "PONG",      true),
-            G(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS", false),
-            G(PrefsManager.GAME_BRICKBREAKER, "BRKR",      false)
+            G(PrefsManager.GAME_SNAKE,         "SNAKE",     false),
+            G(PrefsManager.GAME_PONG,          "PONG",      true),
+            G(PrefsManager.GAME_ASTEROIDS,     "ASTEROIDS", false),
+            G(CaveDiverActivity.GAME_KEY,      "CAVE",      false),
+            G(PrefsManager.GAME_BRICKBREAKER,  "BRKR",      false)
         )
         val parts = games.map { (key, label, isPong) ->
             val top = LeaderboardManager.getEntries(this, key).firstOrNull()

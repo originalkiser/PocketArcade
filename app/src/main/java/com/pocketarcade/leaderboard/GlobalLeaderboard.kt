@@ -232,6 +232,41 @@ object GlobalLeaderboard {
     }
 
     /**
+     * Submits a score to a single specific period bucket (week OR month).
+     * Used by ScoreSyncManager to re-submit locally-cached scores after an offline session.
+     */
+    fun submitPeriodScoreForPeriod(
+        uid: String, username: String, game: String, score: Int,
+        country: String, state: String, mode: String? = null,
+        avatarIndex: Int = 0, avatarColor: Int = 0,
+        periodType: String, periodKey: String
+    ) {
+        val modeKey = mode ?: "_"
+        val docId   = "$uid|$game|$modeKey|$periodType|$periodKey"
+        val data    = hashMapOf<String, Any>(
+            "uid"         to uid,
+            "username"    to username,
+            "game"        to game,
+            "score"       to score,
+            "country"     to country,
+            "state"       to state,
+            "avatarIndex" to avatarIndex,
+            "avatarColor" to avatarColor,
+            "timestamp"   to System.currentTimeMillis(),
+            "periodType"  to periodType,
+            "periodKey"   to periodKey
+        )
+        if (mode != null) data["mode"] = mode
+        db.collection("periodScores").document(docId).set(data)
+            .addOnSuccessListener {
+                android.util.Log.d("PocketArcade", "syncPeriod OK  $docId score=$score")
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("PocketArcade", "syncPeriod FAIL $docId", e)
+            }
+    }
+
+    /**
      * Submits the player's score to the period-specific leaderboard collection
      * (`periodScores`). Called independently on every game-over — does NOT require
      * the score to qualify for the device-local top-N list.

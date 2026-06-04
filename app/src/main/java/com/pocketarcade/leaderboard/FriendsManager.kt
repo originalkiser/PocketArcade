@@ -296,6 +296,45 @@ object FriendsManager {
         ))
     }
 
+    /**
+     * Fetches all periodScores entries for the given UIDs and a single period, returning a
+     * map of "uid|game" → best score (best across all mode keys for that game).
+     * Uses document-ID batch lookups to avoid composite-index requirements.
+     */
+    fun fetchAllPeriodScores(
+        uids: List<String>,
+        periodType: String,
+        periodKey: String,
+        onResult: (Map<String, Int>) -> Unit
+    ) {
+        if (uids.isEmpty()) { onResult(emptyMap()); return }
+        val games    = listOf("snake", "pong", "asteroids", "brickbreaker")
+        val modeKeys = listOf("_", "easy", "medium", "hard")
+        val allDocIds = uids.take(30).flatMap { uid ->
+            games.flatMap { game -> modeKeys.map { mk -> "$uid|$game|$mk|$periodType|$periodKey" } }
+        }
+        val result  = mutableMapOf<String, Int>()  // "uid|game" → best score
+        val batches = allDocIds.chunked(30)
+        var pending = batches.size
+
+        batches.forEach { batch ->
+            db.collection("periodScores")
+                .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
+                .get()
+                .addOnSuccessListener { snap ->
+                    snap.documents.forEach { doc ->
+                        val uid   = doc.getString("uid")  ?: return@forEach
+                        val game  = doc.getString("game") ?: return@forEach
+                        val score = (doc.getLong("score") ?: 0L).toInt()
+                        val key   = "$uid|$game"
+                        if (score > (result[key] ?: 0)) result[key] = score
+                    }
+                    if (--pending == 0) onResult(result)
+                }
+                .addOnFailureListener { if (--pending == 0) onResult(result) }
+        }
+    }
+
     fun fetchAllGroupScores(
         uids: List<String>,
         onResult: (Map<String, Map<String, Int>>) -> Unit

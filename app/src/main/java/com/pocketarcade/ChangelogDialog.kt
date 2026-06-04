@@ -8,6 +8,35 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.storage.PrefsManager
 
 private val CHANGELOG = mapOf(
+    13 to """★ New Game: Memory Match
+  Flip cards to find matching pairs.
+  Beat the board in as few moves as
+  possible to earn a 3-star rating.
+
+★ New Game: Cave Diver
+  Navigate a spacecraft through an
+  endless crystal cavern. Tap to
+  thrust, release to dive.
+
+★ Offline score sync
+  Scores reach leaderboards the next
+  time you're online — no offline
+  score goes missing.
+
+★ Period scores cached locally
+  Weekly & monthly friend scores are
+  tracked offline and pushed to the
+  correct time period when you reconnect.
+
+★ Leaderboard fix (Pong & Brick Breaker)
+  Qualifying scores now reach the
+  global leaderboard correctly.
+
+★ Friend displacement alerts
+  Get notified when a friend takes
+  your spot — tap Jump In to go
+  straight to that game.""",
+
     7 to """★ Friends leaderboard — weekly & monthly
   Scores now track what you played THIS
   week / month, not your all-time best

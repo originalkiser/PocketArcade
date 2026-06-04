@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.HintManager
 import com.pocketarcade.R
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
@@ -78,10 +79,19 @@ class AsteroidsActivity : AppCompatActivity() {
             PrefsManager.setHighScore(this, PrefsManager.GAME_ASTEROIDS, score)
             runOnUiThread { updateHighScore() }
 
-            // Submit to period leaderboard unconditionally.
+            // Record local best for offline sync, then push to both leaderboards.
+            ScoreSyncManager.recordGameScore(this, PrefsManager.GAME_ASTEROIDS, "_", score)
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, PrefsManager.GAME_ASTEROIDS, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        null,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_ASTEROIDS, score,
                         PrefsManager.getGlobalCountry(this),

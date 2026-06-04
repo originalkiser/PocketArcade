@@ -15,6 +15,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
@@ -92,10 +93,19 @@ class PongActivity : AppCompatActivity() {
                 runOnUiThread { updateHighScore() }
             }
 
-            // Submit to period leaderboard unconditionally (win or loss).
+            // Record local best for offline sync, then push to both leaderboards.
+            ScoreSyncManager.recordGameScore(this, PrefsManager.GAME_PONG, mode, encodedScore)
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, PrefsManager.GAME_PONG, encodedScore,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_PONG, encodedScore,
                         PrefsManager.getGlobalCountry(this),

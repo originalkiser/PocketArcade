@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Face-down card (top-left) -->
+    <path android:fillColor="#0D1F14"
+        android:pathData="M2,2 L22,2 L22,22 L2,22 Z" />
+    <path android:fillColor="none"
+        android:strokeColor="#1A3A2A"
+        android:strokeWidth="2"
+        android:pathData="M2,2 L22,2 L22,22 L2,22 Z" />
+    <!-- Diamond pattern on face-down card -->
+    <path android:fillColor="#1A3A2A"
+        android:pathData="M12,6 L17,12 L12,18 L7,12 Z" />
+    <!-- Face-up card (bottom-right) -->
+    <path android:fillColor="#0D2E1A"
+        android:pathData="M26,26 L46,26 L46,46 L26,46 Z" />
+    <path android:fillColor="none"
+        android:strokeColor="#00FF96"
+        android:strokeWidth="2"
+        android:pathData="M26,26 L46,26 L46,46 L26,46 Z" />
+    <!-- Star on face-up card -->
+    <path android:fillColor="#00FF96"
+        android:pathData="M36,30 L37.5,34.5 L42,34.5 L38.5,37.2 L39.8,42 L36,39.3 L32.2,42 L33.5,37.2 L30,34.5 L34.5,34.5 Z" />
+</vector>

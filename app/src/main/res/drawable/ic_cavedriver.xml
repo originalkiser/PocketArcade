@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Top cave wall -->
+    <path android:fillColor="#1A1A3A"
+        android:pathData="M0,0 L48,0 L48,14 L24,18 L0,14 Z" />
+    <!-- Bottom cave wall -->
+    <path android:fillColor="#1A1A3A"
+        android:pathData="M0,48 L48,48 L48,34 L24,30 L0,34 Z" />
+    <!-- Cave glow edges -->
+    <path android:fillColor="#4444AA"
+        android:pathData="M0,14 L24,18 L48,14 L48,16 L24,20 L0,16 Z" />
+    <path android:fillColor="#4444AA"
+        android:pathData="M0,34 L24,30 L48,34 L48,32 L24,28 L0,32 Z" />
+    <!-- Dart/ship (cyan, pointing right) -->
+    <path android:fillColor="#00FFCC"
+        android:pathData="M36,24 L16,18 L19,24 L16,30 Z" />
+    <!-- Cockpit -->
+    <path android:fillColor="#007755"
+        android:pathData="M26,21.5 A5,2.5 0 1 1 26,26.5 A5,2.5 0 1 1 26,21.5 Z" />
+</vector>

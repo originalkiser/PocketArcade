@@ -15,6 +15,7 @@ import com.pocketarcade.R
 import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
+import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
@@ -97,10 +98,19 @@ class BrickBreakerActivity : AppCompatActivity() {
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
 
-            // Submit to period leaderboard unconditionally.
+            // Record local best for offline sync, then push to both leaderboards.
+            ScoreSyncManager.recordGameScore(this, PrefsManager.GAME_BRICKBREAKER, mode, score)
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, PrefsManager.GAME_BRICKBREAKER, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_BRICKBREAKER, score,
                         PrefsManager.getGlobalCountry(this),
@@ -135,10 +145,19 @@ class BrickBreakerActivity : AppCompatActivity() {
             PrefsManager.setHighScore(this, PrefsManager.GAME_BRICKBREAKER, score)
             runOnUiThread { updateHighScore() }
 
-            // Submit to period leaderboard unconditionally.
+            // Record local best for offline sync, then push to both leaderboards.
+            ScoreSyncManager.recordGameScore(this, PrefsManager.GAME_BRICKBREAKER, mode, score)
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, PrefsManager.GAME_BRICKBREAKER, score,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        mode,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
                     GlobalLeaderboard.submitPeriodScore(
                         uid, username, PrefsManager.GAME_BRICKBREAKER, score,
                         PrefsManager.getGlobalCountry(this),
