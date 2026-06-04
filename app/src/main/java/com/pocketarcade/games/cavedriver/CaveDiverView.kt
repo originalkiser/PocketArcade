@@ -35,6 +35,10 @@ class CaveDiverView @JvmOverloads constructor(
         private const val PIPE_SPEED    = 2.88f
         private const val PIPE_INTERVAL = 110
 
+        /** Logical pixels to extend above/below the 480×320 area to fill the square view.
+         *  Exact formula: (LOG_W - LOG_H) / 2 = (480 - 320) / 2 = 80. */
+        private const val EXTRA_H = (LOG_W - LOG_H) / 2  // = 80f
+
         // Geometry
         private const val PIPE_W   = 44f
         private const val GAP      = 110f
@@ -225,32 +229,32 @@ class CaveDiverView @JvmOverloads constructor(
         offsetX = (w  - LOG_W * scale) / 2f
         offsetY = (h2 - LOG_H * scale) / 2f
 
-        val s = scale
+        // Text sizes in logical canvas pixels — canvas.scale() handles physical sizing.
+        // Do NOT multiply by scale; that would double-scale the text (textSize × scale²).
+        titlePaint.textSize       = 36f
+        subtitlePaint.textSize    = 13f
+        promptPaint.textSize      = 14f
+        subPromptPaint.textSize   = 11f
+        hudLabelPaint.textSize    = 13f
+        hudValuePaint.textSize    = 20f
+        // Crash screen: ~50% of JSX reference sizes for portrait comfort
+        crashPaint.textSize       = 20f
+        crashSubPaint.textSize    = 11f
+        crashScorePaint.textSize  = 22f
+        crashRetryPaint.textSize  = 12f
 
-        // Text sizes (set in physical px; drawn on pre-scaled logical canvas)
-        titlePaint.textSize       = 36f * s
-        subtitlePaint.textSize    = 13f * s
-        promptPaint.textSize      = 14f * s
-        subPromptPaint.textSize   = 11f * s
-        hudLabelPaint.textSize    = 10f * s
-        hudValuePaint.textSize    = 15f * s
-        crashPaint.textSize       = 38f * s
-        crashSubPaint.textSize    = 13f * s
-        crashScorePaint.textSize  = 22f * s
-        crashRetryPaint.textSize  = 14f * s
+        // Stroke/blur widths — also in logical pixels (scaled by canvas transform)
+        tipEdgePaint.strokeWidth       = 1.5f
+        tipGlowPaint.strokeWidth       = 4f
+        tipGlowPaint.maskFilter        = BlurMaskFilter(4f, BlurMaskFilter.Blur.NORMAL)
+        glowCirclePaint.maskFilter     = BlurMaskFilter(20f, BlurMaskFilter.Blur.NORMAL)
+        cockpitStrokePaint.strokeWidth = 1f
 
-        // Stroke widths in physical px
-        tipEdgePaint.strokeWidth  = 1.5f * s
-        tipGlowPaint.strokeWidth  = 4f   * s
-        tipGlowPaint.maskFilter   = BlurMaskFilter(4f * s, BlurMaskFilter.Blur.NORMAL)
-        glowCirclePaint.maskFilter = BlurMaskFilter(20f * s, BlurMaskFilter.Blur.NORMAL)
-        cockpitStrokePaint.strokeWidth = 1f * s
-
-        // Background gradient (logical coords — drawn on scaled canvas)
-        bgPaint.shader = LinearGradient(0f, 0f, 0f, LOG_H, BG1, BG2, Shader.TileMode.CLAMP)
+        // Background gradient covering the full square view (game area + letterbox bands)
+        bgPaint.shader = LinearGradient(0f, -EXTRA_H, 0f, LOG_H + EXTRA_H, BG1, BG2, Shader.TileMode.CLAMP)
 
         initStars()
-        if (state == CDState.IDLE) { shipY = LOG_H / 2f; vy = 0f }
+        if (state == CDState.IDLE || state == CDState.DEAD) { shipY = LOG_H / 2f; vy = 0f }
     }
 
     override fun surfaceDestroyed(h: SurfaceHolder) { stopThread() }
@@ -285,10 +289,11 @@ class CaveDiverView @JvmOverloads constructor(
 
     private fun initStars() {
         stars.clear()
+        val totalH = LOG_H + 2 * EXTRA_H
         repeat(STAR_COUNT) {
             stars.add(StarState(
                 x   = Random.nextFloat() * LOG_W,
-                y   = Random.nextFloat() * LOG_H,
+                y   = -EXTRA_H + Random.nextFloat() * totalH,
                 r   = 0.3f + Random.nextFloat() * 1.2f,
                 spd = 0.1f + Random.nextFloat() * 0.3f,
                 tw  = Random.nextFloat() * 2f * PI.toFloat()
@@ -324,9 +329,10 @@ class CaveDiverView @JvmOverloads constructor(
     private fun update() {
         time += 0.05f
 
+        val totalH = LOG_H + 2 * EXTRA_H
         for (s in stars) {
             s.x -= s.spd
-            if (s.x < 0f) { s.x = LOG_W; s.y = Random.nextFloat() * LOG_H }
+            if (s.x < 0f) { s.x = LOG_W; s.y = -EXTRA_H + Random.nextFloat() * totalH }
             s.tw += 0.05f
         }
 
@@ -334,16 +340,12 @@ class CaveDiverView @JvmOverloads constructor(
 
         frameCount++
 
-        // Physics: match JSX order — gravity+damping always, thrust added on top
+        // Physics: match JSX exactly — thrust and thrustFrames are independent checks
         vy += GRAVITY
         vy *= DAMPING
-        if (thrusting) {
-            vy += THRUST
-            thrustFrames = 6
-        } else if (thrustFrames > 0) {
-            thrustFrames--
-        }
-        vy    = vy.coerceIn(VY_MIN, VY_MAX)
+        if (thrusting) { vy += THRUST; thrustFrames = 6 }
+        if (thrustFrames > 0) thrustFrames--   // JSX: always decrement, not else-if
+        vy = vy.coerceIn(VY_MIN, VY_MAX)
         shipY += vy
 
         if (frameCount % PIPE_INTERVAL == 0) spawnPipe()
@@ -393,9 +395,9 @@ class CaveDiverView @JvmOverloads constructor(
         canvas.save()
         canvas.translate(offsetX, offsetY)
         canvas.scale(scale, scale)
-        canvas.clipRect(0f, 0f, LOG_W, LOG_H)
+        // No clipRect — drawing extends ±EXTRA_H to fill the full square view seamlessly
 
-        canvas.drawRect(0f, 0f, LOG_W, LOG_H, bgPaint)
+        canvas.drawRect(0f, -EXTRA_H, LOG_W, LOG_H + EXTRA_H, bgPaint)
         drawStars(canvas)
 
         when (state) {
@@ -428,23 +430,23 @@ class CaveDiverView @JvmOverloads constructor(
         for (p in pipes) {
             val botY = p.topH + GAP
 
-            // Top wall: bg1 → (70%) cave → cave_edge
+            // Top wall extended upward by EXTRA_H to fill the letterbox band
             wallPaint.shader = LinearGradient(
-                p.x, 0f, p.x, p.topH,
+                p.x, -EXTRA_H, p.x, p.topH,
                 intArrayOf(BG1, CAVE, CAVE_EDGE),
                 floatArrayOf(0f, 0.7f, 1f),
                 Shader.TileMode.CLAMP
             )
-            canvas.drawRect(p.x, 0f, p.x + PIPE_W, p.topH, wallPaint)
+            canvas.drawRect(p.x, -EXTRA_H, p.x + PIPE_W, p.topH, wallPaint)
 
-            // Bottom wall: cave_edge → (30%) cave → bg1
+            // Bottom wall extended downward by EXTRA_H to fill the letterbox band
             wallPaint.shader = LinearGradient(
-                p.x, botY, p.x, LOG_H,
+                p.x, botY, p.x, LOG_H + EXTRA_H,
                 intArrayOf(CAVE_EDGE, CAVE, BG1),
                 floatArrayOf(0f, 0.3f, 1f),
                 Shader.TileMode.CLAMP
             )
-            canvas.drawRect(p.x, botY, p.x + PIPE_W, LOG_H, wallPaint)
+            canvas.drawRect(p.x, botY, p.x + PIPE_W, LOG_H + EXTRA_H, wallPaint)
 
             // Stalactite tip: V-stroke pointing down (glow then sharp edge)
             tipPath.rewind()
@@ -507,8 +509,8 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     private fun drawHud(canvas: Canvas) {
-        canvas.drawText("SCORE",              12f, 16f, hudLabelPaint)
-        canvas.drawText("%05d".format(score), 12f, 32f, hudValuePaint)
+        canvas.drawText("SCORE",              12f, 22f, hudLabelPaint)
+        canvas.drawText("%05d".format(score), 12f, 46f, hudValuePaint)
     }
 
     private fun drawIdle(canvas: Canvas) {
@@ -550,8 +552,8 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     private fun drawScanlines(canvas: Canvas) {
-        var y = 0f
-        while (y < LOG_H) {
+        var y = -EXTRA_H
+        while (y < LOG_H + EXTRA_H) {
             canvas.drawRect(0f, y, LOG_W, y + 2f, scanPaint)
             y += 4f
         }

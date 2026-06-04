@@ -4,21 +4,62 @@
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <!-- Top cave wall -->
+
+    <!-- Dark navy background -->
+    <path android:fillColor="#0D0D2B"
+        android:pathData="M0,0 H48 V48 H0 Z" />
+    <!-- Slightly darker bottom half for depth -->
+    <path android:fillColor="#050510"
+        android:pathData="M0,32 H48 V48 H0 Z" />
+
+    <!-- Stars -->
+    <path android:fillColor="#AABBCC"
+        android:pathData="M6,12 m-0.7,0 a0.7,0.7 0 1,0 1.4,0 a0.7,0.7 0 1,0 -1.4,0 Z" />
+    <path android:fillColor="#8899BB"
+        android:pathData="M22,5 m-0.6,0 a0.6,0.6 0 1,0 1.2,0 a0.6,0.6 0 1,0 -1.2,0 Z" />
+    <path android:fillColor="#AABBCC"
+        android:pathData="M9,37 m-0.8,0 a0.8,0.8 0 1,0 1.6,0 a0.8,0.8 0 1,0 -1.6,0 Z" />
+    <path android:fillColor="#8899BB"
+        android:pathData="M28,42 m-0.6,0 a0.6,0.6 0 1,0 1.2,0 a0.6,0.6 0 1,0 -1.2,0 Z" />
+    <path android:fillColor="#7788AA"
+        android:pathData="M4,28 m-0.5,0 a0.5,0.5 0 1,0 1.0,0 a0.5,0.5 0 1,0 -1.0,0 Z" />
+    <path android:fillColor="#AABBCC"
+        android:pathData="M16,44 m-0.5,0 a0.5,0.5 0 1,0 1.0,0 a0.5,0.5 0 1,0 -1.0,0 Z" />
+
+    <!-- Cave pipe top wall (x=33..44, y=0..22) — dark cave column -->
     <path android:fillColor="#1A1A3A"
-        android:pathData="M0,0 L48,0 L48,14 L24,18 L0,14 Z" />
-    <!-- Bottom cave wall -->
+        android:pathData="M33,0 H44 V22 H33 Z" />
+    <!-- Stalactite tip glow (V pointing down into gap) -->
+    <path android:fillColor="#4444AA"
+        android:pathData="M33,20 L38.5,25 L44,20 L44,22 L38.5,27 L33,22 Z" />
+
+    <!-- Cave pipe bottom wall (x=33..44, y=29..48) -->
     <path android:fillColor="#1A1A3A"
-        android:pathData="M0,48 L48,48 L48,34 L24,30 L0,34 Z" />
-    <!-- Cave glow edges -->
+        android:pathData="M33,29 H44 V48 H33 Z" />
+    <!-- Stalagmite tip glow (V pointing up) -->
     <path android:fillColor="#4444AA"
-        android:pathData="M0,14 L24,18 L48,14 L48,16 L24,20 L0,16 Z" />
-    <path android:fillColor="#4444AA"
-        android:pathData="M0,34 L24,30 L48,34 L48,32 L24,28 L0,32 Z" />
-    <!-- Dart/ship (cyan, pointing right) -->
+        android:pathData="M33,31 L38.5,26 L44,31 L44,29 L38.5,24 L33,29 Z" />
+
+    <!-- Thrust flame (orange-yellow behind ship) -->
+    <path android:fillColor="#FF6600"
+        android:pathData="M12,23 L5,24 L12,25 Z" />
+    <path android:fillColor="#FFCC00"
+        android:pathData="M13,23.4 L8,24 L13,24.6 Z" />
+
+    <!-- Ship glow halo (faint teal circle) -->
+    <path android:fillColor="#00FFCC12"
+        android:pathData="M19,24 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 Z" />
+
+    <!-- Ship body — teal dart pointing right -->
     <path android:fillColor="#00FFCC"
-        android:pathData="M36,24 L16,18 L19,24 L16,30 Z" />
-    <!-- Cockpit -->
-    <path android:fillColor="#007755"
-        android:pathData="M26,21.5 A5,2.5 0 1 1 26,26.5 A5,2.5 0 1 1 26,21.5 Z" />
+        android:pathData="M27,24 L13,19 L16,24 L13,29 Z" />
+
+    <!-- Cockpit (dark with teal outline) -->
+    <path android:fillColor="#001A14"
+        android:pathData="M20,22 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
+    <path android:strokeColor="#00FFCC88"
+        android:strokeWidth="0.8"
+        android:fillColor="#00000000"
+        android:pathData="M20,22 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
+
 </vector>
