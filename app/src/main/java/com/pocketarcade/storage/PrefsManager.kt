@@ -41,10 +41,11 @@ object PrefsManager {
     const val HINT_SNAKE_CONTROLS = "snake_controls"
     private const val KEY_LAST_UPSELL_AT = "last_upsell_at_game"
 
-    const val GAME_SNAKE = "snake"
-    const val GAME_PONG = "pong"
-    const val GAME_ASTEROIDS = "asteroids"
+    const val GAME_SNAKE        = "snake"
+    const val GAME_PONG         = "pong"
+    const val GAME_ASTEROIDS    = "asteroids"
     const val GAME_BRICKBREAKER = "brickbreaker"
+    const val GAME_CAVEDRIVER   = "cavedriver"
 
     // ── Stats ─────────────────────────────────────────────────────────────────
     private fun statKey(metric: String, game: String, mode: String? = null) =

@@ -22,10 +22,11 @@ import com.pocketarcade.storage.PrefsManager
  */
 object ScoreSyncManager {
 
-    /** Maps every game to the mode keys it can produce. "_" means no-mode (Snake, Asteroids). */
+    /** Maps every game to the mode keys it can produce. "_" means no-mode (Snake, Asteroids, Cave Diver). */
     private val GAME_MODES = mapOf(
         PrefsManager.GAME_SNAKE        to listOf("_"),
         PrefsManager.GAME_ASTEROIDS    to listOf("_"),
+        PrefsManager.GAME_CAVEDRIVER   to listOf("_"),
         PrefsManager.GAME_PONG         to listOf("easy", "medium", "hard"),
         PrefsManager.GAME_BRICKBREAKER to listOf("easy", "medium", "hard")
     )
