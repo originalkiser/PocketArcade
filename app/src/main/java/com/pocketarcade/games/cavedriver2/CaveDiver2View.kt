@@ -122,8 +122,8 @@ class CaveDiver2View @JvmOverloads constructor(
 
     // ── Pre-allocated Paints ──────────────────────────────────────────────
 
-    // Background gradient (shader set in surfaceChanged)
-    private val bgPaint = Paint()
+    // Background gradient (shader set in surfaceChanged; fallback color used until then)
+    private val bgPaint = Paint().apply { color = BG2 }
 
     // Scanline overlay — rgba(0,0,20,0.18) → argb(46, 0, 0, 20)
     private val scanPaint = Paint().apply { color = Color.argb(46, 0, 0, 20) }
@@ -219,8 +219,9 @@ class CaveDiver2View @JvmOverloads constructor(
     // ── SurfaceHolder.Callback ─────────────────────────────────────────────
 
     init {
-        // Required for setShadowLayer() to render — hardware-accelerated canvas ignores shadows
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
+        // NOTE: setLayerType(LAYER_TYPE_SOFTWARE) must NOT be set on a SurfaceView —
+        // it breaks surface compositing (black screen). SurfaceView.lockCanvas() already
+        // returns a software canvas, so setShadowLayer() works natively without this call.
         holder.addCallback(this)
     }
 
