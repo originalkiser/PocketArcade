@@ -1,4 +1,4 @@
-package com.pocketarcade.games.cavedriver
+package com.pocketarcade.games.cavedriver_discontinued
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -22,14 +22,14 @@ import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
-class CaveDiverActivity : AppCompatActivity() {
+class CaveDiverDiscontinuedActivity : AppCompatActivity() {
 
-    private lateinit var cdView:     CaveDiverView
+    private lateinit var cdView:     CaveDiverDiscontinuedView
     private lateinit var thrustZone: FrameLayout
     private var gameStartTime = 0L
 
     companion object {
-        const val GAME_KEY = "cavedriver"
+        const val GAME_KEY = "cavedriver_discontinued"
     }
 
     @SuppressLint("ClickableViewAccessibility")

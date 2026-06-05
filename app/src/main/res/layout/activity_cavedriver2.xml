@@ -40,7 +40,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="CAVE DIVER 2"
+            android:text="CAVE DIVER"
             android:textColor="#00FFCC"
             android:textSize="13sp"
             android:fontFamily="monospace"
@@ -54,10 +54,25 @@
             android:textSize="10sp"
             android:fontFamily="monospace" />
 
+        <TextView
+            android:id="@+id/btnSettings2"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:text="&#9881;"
+            android:textColor="#00FFCC"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
 
     <!-- Game canvas — 3:2 aspect ratio enforced by onMeasure -->
-    <com.pocketarcade.games.cavedriver2.CaveDiver2View
+    <com.pocketarcade.games.cavedriver2.CaveDiverView
         android:id="@+id/caveDiver2View"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

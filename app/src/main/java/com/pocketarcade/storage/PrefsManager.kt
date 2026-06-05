@@ -316,6 +316,20 @@ object PrefsManager {
         }
     }
 
+    // ── Block Drop per-difficulty best tracking ───────────────────────────────
+    // diff = "easy" | "medium" | "hard"
+
+    fun getBdBestMoves(ctx: Context, diff: String): Int =
+        prefs(ctx).getInt("bd_best_moves_$diff", 0)
+
+    /** Updates only when [moves] is strictly less than the current best (lower = better). */
+    fun setBdBest(ctx: Context, diff: String, moves: Int) {
+        val current = getBdBestMoves(ctx, diff)
+        if (current == 0 || moves < current) {
+            prefs(ctx).edit { putInt("bd_best_moves_$diff", moves) }
+        }
+    }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

@@ -155,11 +155,7 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity" />
 
-        <activity
-            android:name=".games.cavedriver.CaveDiverActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity" />
+        <!-- cavedriver.CaveDiverActivity renamed to CaveDiverDiscontinuedActivity and removed from nav -->
 
         <activity
             android:name=".games.memorymatch.MemoryMatchActivity"
@@ -168,7 +164,13 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
-            android:name=".games.cavedriver2.CaveDiver2Activity"
+            android:name=".games.cavedriver2.CaveDiverActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".games.blockpop.BlockDropActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity" />

@@ -365,14 +365,34 @@
                         android:orientation="vertical"
                         android:layout_marginStart="16dp">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/game_cavedriver"
-                            android:textColor="#00FFCC"
-                            android:textSize="19sp"
-                            android:fontFamily="monospace"
-                            android:textStyle="bold" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/game_cavedriver"
+                                android:textColor="#00FFCC"
+                                android:textSize="19sp"
+                                android:fontFamily="monospace"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="BETA"
+                                android:textColor="#4444aa"
+                                android:textSize="10sp"
+                                android:fontFamily="monospace"
+                                android:background="@drawable/bg_game_tile"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="2dp" />
+
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/tvScoreCaveDiver"
@@ -404,84 +424,6 @@
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
-                </LinearLayout>
-
-                <!-- CAVE DIVER 2 (beta / JSX port) -->
-                <LinearLayout
-                    android:id="@+id/tileCaveDiver2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="14dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="58dp"
-                        android:layout_height="58dp"
-                        android:src="@drawable/ic_cavedriver"
-                        android:contentDescription="Cave Diver 2" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="16dp">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="CAVE DIVER 2"
-                                android:textColor="#00FFCC"
-                                android:textSize="19sp"
-                                android:fontFamily="monospace"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="BETA"
-                                android:textColor="#4444aa"
-                                android:textSize="10sp"
-                                android:fontFamily="monospace"
-                                android:background="@drawable/bg_game_tile"
-                                android:paddingHorizontal="6dp"
-                                android:paddingVertical="2dp" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/tvScoreCaveDiver2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="High Score: 0"
-                            android:textColor="@color/muted"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#x25B6;"
-                        android:textColor="#00FFCC"
-                        android:textSize="18sp"
-                        android:alpha="0.5"
-                        android:layout_marginStart="8dp" />
-
                 </LinearLayout>
 
                 <!-- MEMORY MATCH -->
@@ -546,6 +488,74 @@
                         android:layout_height="wrap_content"
                         android:text="&#x25B6;"
                         android:textColor="#00FF96"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <!-- BLOCK DROP -->
+                <LinearLayout
+                    android:id="@+id/tileBlockPop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_blockpop"
+                        android:contentDescription="Block Drop" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BLOCK DROP"
+                            android:textColor="#FF6B35"
+                            android:textSize="19sp"
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvScoreBlockPop"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Best: --"
+                            android:textColor="@color/muted"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace" />
+
+                        <TextView
+                            android:id="@+id/tvScoreBlockPopDetail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text=""
+                            android:textColor="#FF6B35"
+                            android:textSize="11sp"
+                            android:fontFamily="monospace"
+                            android:alpha="0.7" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="&#x25B6;"
+                        android:textColor="#FF6B35"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />

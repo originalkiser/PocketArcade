@@ -8,6 +8,35 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.storage.PrefsManager
 
 private val CHANGELOG = mapOf(
+    25 to """★ New Game: Block Drop
+  Clear groups of matching colored blocks
+  before the board gets stuck. Three board
+  sizes — Easy (8×10), Medium (10×12),
+  and Hard (12×14). Fewest moves wins.
+
+★ Cave Diver relaunched [BETA]
+  Completely rebuilt with faster physics,
+  smoother controls, and theme support.
+  High scores tracked on global leaderboard.
+
+★ Theme support — Cave Diver & Block Drop
+  Both new games now follow your chosen
+  color theme. Open ⚙ in-game to switch.
+
+★ Leaderboards for every game
+  Memory Match and Block Drop now track
+  fewest moves per difficulty mode.
+  Friend and global leaderboards wired
+  in for all games.
+
+★ Ad banner moved to top of screen
+  Consistent ad placement across all games.
+
+★ Settings moved to bottom of screen
+  Game toggles and theme picker now live
+  in a bottom bar — out of the way
+  while you play.""",
+
     13 to """★ New Game: Memory Match
   Flip cards to find matching pairs.
   Beat the board in as few moves as

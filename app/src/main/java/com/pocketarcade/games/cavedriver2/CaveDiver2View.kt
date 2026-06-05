@@ -8,6 +8,8 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import com.pocketarcade.GameTheme
+import com.pocketarcade.withAlpha
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -22,7 +24,7 @@ private enum class CD2Phase { IDLE, PLAYING, DEAD }
  * Game loop: background thread, Thread.sleep(16) cap — fixed-step physics.
  */
 @Suppress("ClickableViewAccessibility")
-class CaveDiver2View @JvmOverloads constructor(
+class CaveDiverView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : SurfaceView(context, attrs, defStyle), SurfaceHolder.Callback {
 
@@ -36,18 +38,18 @@ class CaveDiver2View @JvmOverloads constructor(
         private const val SHIP_W = 32f
         private const val SHIP_H = 16f
 
-        // ── Physics (exact JSX values) ─────────────────────────────────────
-        private const val GRAVITY         = 0.225f
-        private const val THRUST          = -0.38f
+        // ── Physics (×3 from JSX prototype values) ───────────────────────
+        private const val GRAVITY         = 0.675f
+        private const val THRUST          = -1.14f
         private const val DAMPING         = 0.92f
-        private const val VY_MIN          = -5f
-        private const val VY_MAX          = 6f
+        private const val VY_MIN          = -15f
+        private const val VY_MAX          = 18f
 
         // ── Obstacles ──────────────────────────────────────────────────────
         private const val GAP             = 110f
         private const val PIPE_W          = 44f
-        private const val PIPE_SPEED_INIT = 2.4f
-        private const val PIPE_INTERVAL   = 110
+        private const val PIPE_SPEED_INIT = 7.2f
+        private const val PIPE_INTERVAL   = 37
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
@@ -120,6 +122,25 @@ class CaveDiver2View @JvmOverloads constructor(
     private var offsetX = 0f
     private var offsetY = 0f
 
+    // ── Theme ─────────────────────────────────────────────────────────────
+    private var themeShipCol = SHIP_COL
+    private var themeGlow    = SHIP_GLOW
+    private var themeGlow0   = SHIP_GLOW_0
+    private var themeHudVal  = SHIP_COL
+
+    fun applyTheme(theme: GameTheme) {
+        themeShipCol = theme.player
+        themeGlow    = theme.player.withAlpha(0x44)
+        themeGlow0   = theme.player.withAlpha(0)
+        themeHudVal  = theme.player
+        hudValuePaint.color = themeHudVal
+        titlePaint.apply   { color = themeShipCol; setShadowLayer(24f, 0f, 0f, themeShipCol) }
+        deadScorePaint.apply { color = themeShipCol; setShadowLayer(16f, 0f, 0f, themeShipCol) }
+        bodyPaint.setShadowLayer(10f, 0f, 0f, themeShipCol)
+        idleBodyPaint.setShadowLayer(12f, 0f, 0f, themeShipCol)
+        cockpitStroke.color = themeShipCol.withAlpha(0x88)
+    }
+
     // ── Pre-allocated Paints ──────────────────────────────────────────────
 
     // Background gradient (shader set in surfaceChanged; fallback color used until then)
@@ -137,15 +158,11 @@ class CaveDiver2View @JvmOverloads constructor(
     // Thrust flame — LinearGradient shader set per-draw
     private val flamePaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // Ship body — linear gradient + glow shadow (shadowBlur=10 as in JSX drawShip)
-    private val bodyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        setShadowLayer(10f, 0f, 0f, SHIP_COL)
-    }
+    // Ship body — linear gradient + glow shadow (set via applyTheme)
+    private val bodyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // Idle-screen ship body — shadowBlur=12 as in JSX paintIdle
-    private val idleBodyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        setShadowLayer(12f, 0f, 0f, SHIP_COL)
-    }
+    // Idle-screen ship body — shadow set via applyTheme
+    private val idleBodyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     // Cockpit
     private val cockpitFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -171,7 +188,7 @@ class CaveDiver2View @JvmOverloads constructor(
         textAlign = Paint.Align.LEFT; isFakeBoldText = true
     }
     private val hudValuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = SCORE_COL; typeface = Typeface.MONOSPACE
+        color = SCORE_COL; typeface = Typeface.MONOSPACE  // updated in applyTheme
         textAlign = Paint.Align.LEFT; isFakeBoldText = true
     }
 
@@ -179,7 +196,7 @@ class CaveDiver2View @JvmOverloads constructor(
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = SHIP_COL; typeface = Typeface.MONOSPACE
         textAlign = Paint.Align.CENTER; isFakeBoldText = true
-        setShadowLayer(24f, 0f, 0f, SHIP_COL)  // JSX shadowBlur=24
+        setShadowLayer(24f, 0f, 0f, SHIP_COL)
     }
     private val subPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = HUD_COL; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER
@@ -201,7 +218,7 @@ class CaveDiver2View @JvmOverloads constructor(
         color = HUD_COL; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER
     }
     private val deadScorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = SCORE_COL; typeface = Typeface.MONOSPACE
+        color = SCORE_COL; typeface = Typeface.MONOSPACE  // updated in applyTheme
         textAlign = Paint.Align.CENTER; isFakeBoldText = true
         setShadowLayer(16f, 0f, 0f, SCORE_COL)
     }
@@ -279,7 +296,7 @@ class CaveDiver2View @JvmOverloads constructor(
                 } catch (e: InterruptedException) {
                     Thread.currentThread().interrupt()
                 } catch (e: Exception) {
-                    Log.e("CaveDiver2", "loop error: ${e.message}", e)
+                    Log.e("CaveDiver", "loop error: ${e.message}", e)
                 }
             }
         }.also { it.start() }
@@ -471,9 +488,9 @@ class CaveDiver2View @JvmOverloads constructor(
     private fun drawShip(canvas: Canvas, x: Float, y: Float, thrusting: Boolean) {
         canvas.save()
 
-        // Radial glow
+        // Radial glow (colour follows theme)
         glowPaint.shader = RadialGradient(x, y, 28f,
-            intArrayOf(SHIP_GLOW, SHIP_GLOW, SHIP_GLOW_0),
+            intArrayOf(themeGlow, themeGlow, themeGlow0),
             floatArrayOf(0f, 2f / 28f, 1f), Shader.TileMode.CLAMP)
         canvas.drawCircle(x, y, 28f, glowPaint)
 
@@ -567,7 +584,7 @@ class CaveDiver2View @JvmOverloads constructor(
         // Idle ship (no cockpit, shadowBlur=12)
         canvas.save()
         glowPaint.shader = RadialGradient(cx, H / 2f, 28f,
-            intArrayOf(SHIP_GLOW, SHIP_GLOW, SHIP_GLOW_0),
+            intArrayOf(themeGlow, themeGlow, themeGlow0),
             floatArrayOf(0f, 2f / 28f, 1f), Shader.TileMode.CLAMP)
         canvas.drawCircle(cx, H / 2f, 28f, glowPaint)
 

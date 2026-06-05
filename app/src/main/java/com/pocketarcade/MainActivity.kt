@@ -18,8 +18,9 @@ import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
 import com.pocketarcade.games.asteroids.AsteroidsActivity
 import com.pocketarcade.games.brickbreaker.BrickBreakerActivity
-import com.pocketarcade.games.cavedriver.CaveDiverActivity
-import com.pocketarcade.games.cavedriver2.CaveDiver2Activity
+import com.pocketarcade.games.cavedriver2.CaveDiverActivity
+import com.pocketarcade.games.blockpop.BlockDropActivity
+import com.pocketarcade.games.blockpop.BlockDropDifficulty
 import com.pocketarcade.games.pong.PongActivity
 import com.pocketarcade.games.memorymatch.MemoryMatchActivity
 import com.pocketarcade.games.snake.SnakeActivity
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         bindTile(R.id.tileAsteroids,    AsteroidsActivity::class.java)
         bindTile(R.id.tileBrickBreaker, BrickBreakerActivity::class.java)
         bindTile(R.id.tileCaveDiver,    CaveDiverActivity::class.java)
-        bindTile(R.id.tileCaveDiver2,   CaveDiver2Activity::class.java)
+        bindTile(R.id.tileBlockPop,     BlockDropActivity::class.java)
         // Memory Match: difficulty picker shows inside the activity (in front of the board)
         bindTile(R.id.tileMemoryMatch, MemoryMatchActivity::class.java)
 
@@ -153,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         border(findViewById(R.id.tilePong),         getColor(R.color.accent_red))
         border(findViewById(R.id.tileAsteroids),    getColor(R.color.accent_cyan))
         border(findViewById(R.id.tileCaveDiver),    Color.parseColor("#00FFCC"))
-        border(findViewById(R.id.tileCaveDiver2),   Color.parseColor("#4444aa"))
+        border(findViewById(R.id.tileBlockPop),     Color.parseColor("#FF6B35"))
         border(findViewById(R.id.tileBrickBreaker), getColor(R.color.accent_yellow))
         border(findViewById(R.id.tileMemoryMatch),  Color.parseColor("#00FF96"))
     }
@@ -238,8 +239,23 @@ class MainActivity : AppCompatActivity() {
             "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS))
         findViewById<TextView>(R.id.tvScoreCaveDiver).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, CaveDiverActivity.GAME_KEY))
-        findViewById<TextView>(R.id.tvScoreCaveDiver2).text =
-            "High Score: %,d".format(PrefsManager.getHighScore(this, CaveDiver2Activity.GAME_KEY))
+        fun bdStat(diff: BlockDropDifficulty): String {
+            val moves = PrefsManager.getBdBestMoves(this, diff.key)
+            return if (moves == 0) "--" else "${moves}mv"
+        }
+        val bdE = bdStat(BlockDropDifficulty.EASY)
+        val bdM = bdStat(BlockDropDifficulty.MEDIUM)
+        val bdH = bdStat(BlockDropDifficulty.HARD)
+        val bdBestAny = listOf(
+            BlockDropDifficulty.EASY, BlockDropDifficulty.MEDIUM, BlockDropDifficulty.HARD
+        ).mapNotNull { d ->
+            val m = PrefsManager.getBdBestMoves(this, d.key)
+            if (m > 0) m else null
+        }.minOrNull()
+        findViewById<TextView>(R.id.tvScoreBlockPop).text =
+            if (bdBestAny != null) "Best: ${bdBestAny}mv" else "Best: --"
+        findViewById<TextView>(R.id.tvScoreBlockPopDetail).text =
+            "E: $bdE  M: $bdM  H: $bdH"
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, PrefsManager.GAME_BRICKBREAKER))
 

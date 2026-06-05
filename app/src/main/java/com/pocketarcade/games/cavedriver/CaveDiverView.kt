@@ -1,4 +1,4 @@
-package com.pocketarcade.games.cavedriver
+package com.pocketarcade.games.cavedriver_discontinued
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -21,7 +21,7 @@ private enum class CDState { IDLE, PLAYING, DEAD }
  * Physics and colours match the reference JSX implementation.
  */
 @Suppress("ClickableViewAccessibility")
-class CaveDiverView @JvmOverloads constructor(
+class CaveDiverDiscontinuedView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : SurfaceView(context, attrs, defStyle), SurfaceHolder.Callback {
 

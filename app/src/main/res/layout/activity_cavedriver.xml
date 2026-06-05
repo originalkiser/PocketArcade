@@ -64,7 +64,7 @@
     </LinearLayout>
 
     <!-- Game canvas: square (onMeasure forces height=width) -->
-    <com.pocketarcade.games.cavedriver.CaveDiverView
+    <com.pocketarcade.games.cavedriver_discontinued.CaveDiverDiscontinuedView
         android:id="@+id/caveDiverView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
