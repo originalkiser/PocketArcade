@@ -43,16 +43,43 @@ class BlockDropActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.btnBackBlockPop).setOnClickListener { finish() }
         findViewById<TextView>(R.id.btnSettingsBlockDrop).setOnClickListener { showSettingsDialog() }
+        findViewById<TextView>(R.id.btnRestartBlockDrop).setOnClickListener { gameView.restart() }
 
         gameView.onGameStarted = {
             gameStartTime = System.currentTimeMillis()
         }
 
-        // STUCK — record stats but do NOT submit to fewest-moves leaderboard
+        // STUCK — record stats + submit a losing score (always below minimum win score)
         gameView.onGameOver = { moves ->
-            val duration = System.currentTimeMillis() - gameStartTime
+            val duration    = System.currentTimeMillis() - gameStartTime
+            val leaderScore = gameView.movesToLostScore(moves)
+            val diffKey     = difficulty.key
             PrefsManager.recordGamePlayed(this)
-            PrefsManager.recordGameStat(this, GAME_KEY, moves, duration, difficulty.key)
+            PrefsManager.recordGameStat(this, GAME_KEY, moves, duration, diffKey)
+            PrefsManager.setHighScore(this, scoreKey(difficulty), leaderScore)
+            ScoreSyncManager.recordGameScore(this, scoreKey(difficulty), "_", leaderScore)
+            val username = PrefsManager.getGlobalUsername(this)
+            if (username != null) {
+                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+                    GlobalLeaderboard.submitScore(
+                        uid, username, GAME_KEY, leaderScore,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        diffKey,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                    GlobalLeaderboard.submitPeriodScore(
+                        uid, username, GAME_KEY, leaderScore,
+                        PrefsManager.getGlobalCountry(this),
+                        PrefsManager.getGlobalState(this),
+                        diffKey,
+                        PrefsManager.getAvatarIndex(this),
+                        PrefsManager.getAvatarColor(this)
+                    )
+                })
+            }
+            // No popup on loss — score submitted silently
         }
 
         // WON — fewest-moves leaderboard

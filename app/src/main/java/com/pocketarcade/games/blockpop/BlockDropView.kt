@@ -17,29 +17,23 @@ enum class BlockDropDifficulty(
     val cols: Int,
     val rows: Int,
     val key: String,
-    val wonCap: Int   // score cap for fewest-moves leaderboard (wonCap - moves*5)
+    val wonCap: Int,   // score cap for win  (wonCap  - moves*5)
+    val lostCap: Int,  // score cap for loss (lostCap - moves*5); always < minimum win score
+    val numColors: Int // number of distinct block colors on this difficulty
 ) {
-    EASY  (cols =  8, rows = 10, key = "easy",   wonCap = 500),
-    MEDIUM(cols = 10, rows = 12, key = "medium",  wonCap = 750),
-    HARD  (cols = 12, rows = 14, key = "hard",    wonCap = 1000),
+    EASY  (cols =  8, rows = 10, key = "easy",   wonCap = 500,  lostCap = 250, numColors = 3),
+    MEDIUM(cols = 10, rows = 12, key = "medium",  wonCap = 750,  lostCap = 375, numColors = 4),
+    HARD  (cols = 12, rows = 14, key = "hard",    wonCap = 1000, lostCap = 500, numColors = 5),
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
 private const val MIN_GROUP        = 2
 private const val SCORE_MULTIPLIER = 10
-private const val CLEAR_BONUS      = 1000
 private const val POP_ANIM_MS      = 260L
 
-private val LEVEL_CONFIGS = listOf(
-    BlockDropLevel(level = 1, numColors = 3),
-    BlockDropLevel(level = 2, numColors = 3),
-    BlockDropLevel(level = 3, numColors = 4),
-    BlockDropLevel(level = 4, numColors = 4),
-    BlockDropLevel(level = 5, numColors = 5),
-)
-
-private val BLOCK_COLORS = intArrayOf(
+// Default block colors (replaced per-theme in applyTheme)
+private val DEFAULT_BLOCK_COLORS = intArrayOf(
     Color.parseColor("#E53935"),
     Color.parseColor("#43A047"),
     Color.parseColor("#1E88E5"),
@@ -49,11 +43,7 @@ private val BLOCK_COLORS = intArrayOf(
 
 private const val EMPTY = -1
 
-// ── Data ──────────────────────────────────────────────────────────────────
-
-data class BlockDropLevel(val level: Int, val numColors: Int)
-
-enum class BlockDropState { PLAYING, POPPING, STUCK, CLEARED, WON }
+enum class BlockDropState { PLAYING, POPPING, STUCK, WON }
 
 // ── View ──────────────────────────────────────────────────────────────────
 
@@ -78,13 +68,14 @@ class BlockDropView @JvmOverloads constructor(
 
     // ── Game state ─────────────────────────────────────────────────────────
 
-    private var board       = Array(rows) { IntArray(cols) { EMPTY } }
-    private var levelIndex  = 0
-    private var score       = 0
-    private var totalScore  = 0
-    private var totalMoves  = 0   // taps across the whole game session (for leaderboard)
-    private var bestScore   = 0
-    private var gameState   = BlockDropState.PLAYING
+    private var board      = Array(rows) { IntArray(cols) { EMPTY } }
+    private var score      = 0
+    private var totalMoves = 0   // taps across the game (for leaderboard)
+    private var bestScore  = 0
+    private var gameState  = BlockDropState.PLAYING
+
+    // Block color palette — updated from theme in applyTheme()
+    private var blockColors = DEFAULT_BLOCK_COLORS.copyOf()
 
     private val highlightedCells = mutableSetOf<Int>()
     private val poppingCells     = mutableSetOf<Int>()
@@ -93,12 +84,12 @@ class BlockDropView @JvmOverloads constructor(
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
-    /** Fired when level 0 starts (or on restart after STUCK/WON). */
+    /** Fired when a new board starts. */
     var onGameStarted: (() -> Unit)? = null
-    /** Fired when the board is stuck. Parameter = totalMoves accumulated. */
+    /** Fired when the board is stuck (no moves left). Parameter = moves used. */
     var onGameOver: ((moves: Int) -> Unit)? = null
-    /** Fired when all 5 levels are cleared. Parameter = totalMoves accumulated. */
-    var onGameWon: ((moves: Int) -> Unit)? = null
+    /** Fired when the board is fully cleared. Parameter = moves used. */
+    var onGameWon:  ((moves: Int) -> Unit)? = null
 
     fun loadBestScore(b: Int) { bestScore = b }
 
@@ -118,7 +109,21 @@ class BlockDropView @JvmOverloads constructor(
         themeAccent = theme.player
         hudAccentPaint.color = themeAccent
         plusPaint.color      = themeAccent
+        blockColors = generateBlockColors(theme.player)
         invalidate()
+    }
+
+    /** Generate 5 evenly hue-spaced colors rooted at the theme's player color. */
+    private fun generateBlockColors(baseColor: Int): IntArray {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(baseColor, hsv)
+        return IntArray(5) { i ->
+            Color.HSVToColor(floatArrayOf(
+                (hsv[0] + i * 72f) % 360f,
+                hsv[1].coerceAtLeast(0.65f),
+                hsv[2].coerceAtLeast(0.72f)
+            ))
+        }
     }
 
     // ── Paints ─────────────────────────────────────────────────────────────
@@ -238,21 +243,16 @@ class BlockDropView @JvmOverloads constructor(
         when (gameState) {
             BlockDropState.STUCK -> {
                 val body = if (bestScore > 0)
-                    "Score: ${totalScore + score}\nBest: $bestScore"
+                    "Score: $score\nBest: $bestScore"
                 else
-                    "No more moves\nScore: ${totalScore + score}"
-                drawOverlay(canvas, w, h, "STUCK!",   Color.parseColor("#FF4444"),
+                    "No more moves!\nScore: $score"
+                drawOverlay(canvas, w, h, "STUCK!", Color.parseColor("#FF4444"),
                     body, "TRY AGAIN", Color.parseColor("#FF4444"))
             }
-            BlockDropState.CLEARED -> drawOverlay(canvas, w, h, "CLEARED!", Color.parseColor("#44FF88"),
-                "+$CLEAR_BONUS bonus!",
-                if (levelIndex < LEVEL_CONFIGS.lastIndex) "NEXT LEVEL" else "FINISH",
-                Color.parseColor("#55AAFF"))
             BlockDropState.WON -> {
-                val finalMoves = totalMoves
-                val body = "Moves: $finalMoves" +
+                val body = "Moves: $totalMoves" +
                     if (bestScore > 0) "\nBest score: $bestScore" else ""
-                drawOverlay(canvas, w, h, "YOU WIN!", Color.parseColor("#FFDD00"),
+                drawOverlay(canvas, w, h, "CLEARED!", Color.parseColor("#FFDD00"),
                     body, "PLAY AGAIN", Color.parseColor("#FFDD00"))
             }
             else -> {}
@@ -268,7 +268,7 @@ class BlockDropView @JvmOverloads constructor(
         val key  = encode(r, c)
         val colorIdx = board[r][c]
         if (colorIdx == EMPTY) { canvas.drawRoundRect(rect, rad, rad, emptyPaint); return }
-        val base        = BLOCK_COLORS[colorIdx]
+        val base        = blockColors[colorIdx]
         val isHighlight = key in highlightedCells
         val isPopping   = key in poppingCells
         blockPaint.color = when {
@@ -292,17 +292,16 @@ class BlockDropView @JvmOverloads constructor(
     }
 
     private fun drawHud(canvas: Canvas, w: Float, h: Float) {
-        val hudCy  = h * 0.065f
-        val third  = w / 3f
-        val cfg    = LEVEL_CONFIGS[levelIndex]
-        canvas.drawText("LEVEL",             third * 0.5f, hudCy - h * 0.025f, hudLabelPaint)
-        canvas.drawText("SCORE",             third * 1.5f, hudCy - h * 0.025f, hudLabelPaint)
-        canvas.drawText("MOVES",             third * 2.5f, hudCy - h * 0.025f, hudLabelPaint)
-        canvas.drawText("${cfg.level}",      third * 0.5f, hudCy + h * 0.020f, hudAccentPaint)
-        canvas.drawText("${totalScore+score}",third * 1.5f, hudCy + h * 0.020f, hudValuePaint)
-        canvas.drawText("$totalMoves",       third * 2.5f, hudCy + h * 0.020f, hudValuePaint)
+        val hudCy = h * 0.065f
+        val third = w / 3f
+        canvas.drawText("DIFF",            third * 0.5f, hudCy - h * 0.025f, hudLabelPaint)
+        canvas.drawText("SCORE",           third * 1.5f, hudCy - h * 0.025f, hudLabelPaint)
+        canvas.drawText("MOVES",           third * 2.5f, hudCy - h * 0.025f, hudLabelPaint)
+        canvas.drawText(difficulty.name,   third * 0.5f, hudCy + h * 0.020f, hudAccentPaint)
+        canvas.drawText("$score",          third * 1.5f, hudCy + h * 0.020f, hudValuePaint)
+        canvas.drawText("$totalMoves",     third * 2.5f, hudCy + h * 0.020f, hudValuePaint)
         hudLabelPaint.textSize = height * 0.018f
-        canvas.drawText(difficulty.name + " · ${cfg.numColors} colors",
+        canvas.drawText("${difficulty.numColors} colors · ${difficulty.cols}×${difficulty.rows}",
             third * 0.5f, hudCy + h * 0.042f, hudLabelPaint)
         hudLabelPaint.textSize = height * 0.022f
     }
@@ -358,16 +357,19 @@ class BlockDropView @JvmOverloads constructor(
 
     // ── Game logic ─────────────────────────────────────────────────────────
 
-    /** Called externally before the game starts or when the difficulty is set. */
+    /** Reset and start a fresh game (called by difficulty setter, restart button, and overlays). */
     fun resetForNewGame() {
-        levelIndex = 0; totalScore = 0; totalMoves = 0; startLevel()
+        totalMoves = 0
+        startLevel()
     }
 
+    /** Restart mid-game — same as resetForNewGame, exposed for the restart button. */
+    fun restart() = resetForNewGame()
+
     private fun startLevel() {
-        if (levelIndex == 0) post { onGameStarted?.invoke() }
-        val cfg  = LEVEL_CONFIGS[levelIndex]
-        board    = Array(rows) { IntArray(cols) { (0 until cfg.numColors).random() } }
-        score    = 0
+        post { onGameStarted?.invoke() }
+        board     = Array(rows) { IntArray(cols) { (0 until difficulty.numColors).random() } }
+        score     = 0
         gameState = BlockDropState.PLAYING
         highlightedCells.clear(); poppingCells.clear(); lastPointsLabel = null
         invalidate()
@@ -392,18 +394,11 @@ class BlockDropView @JvmOverloads constructor(
 
             when {
                 isBoardClear() -> {
-                    score   += CLEAR_BONUS
-                    labelPts = pts + CLEAR_BONUS
-                    gameState = if (levelIndex < LEVEL_CONFIGS.lastIndex)
-                        BlockDropState.CLEARED else BlockDropState.WON
-                    if (gameState == BlockDropState.WON) {
-                        val moves = totalMoves
-                        if (bestScore > 0) {
-                            val newSc = movesToScore(moves)
-                            if (newSc > bestScore) bestScore = newSc
-                        }
-                        post { onGameWon?.invoke(moves) }
-                    }
+                    gameState = BlockDropState.WON
+                    val moves = totalMoves
+                    val newSc = movesToScore(moves)
+                    if (bestScore == 0 || newSc > bestScore) bestScore = newSc
+                    post { onGameWon?.invoke(moves) }
                 }
                 isStuck() -> {
                     gameState = BlockDropState.STUCK
@@ -421,9 +416,13 @@ class BlockDropView @JvmOverloads constructor(
         }, POP_ANIM_MS)
     }
 
-    /** Convert moves to a leaderboard score (higher = fewer moves = better). */
+    /** Win score: higher = fewer moves = better. */
     fun movesToScore(moves: Int): Int =
         (difficulty.wonCap - moves * 5).coerceAtLeast(1)
+
+    /** Lose score: always < minimum possible win score for this difficulty. */
+    fun movesToLostScore(moves: Int): Int =
+        (difficulty.lostCap - moves * 5).coerceAtLeast(1)
 
     private fun findGroup(row: Int, col: Int): List<Pair<Int, Int>> {
         val color = board[row][col]
@@ -483,12 +482,9 @@ class BlockDropView @JvmOverloads constructor(
 
     private fun onOverlayButtonTapped() {
         when (gameState) {
-            BlockDropState.CLEARED -> { totalScore += score; levelIndex++; startLevel() }
-            BlockDropState.STUCK   -> { totalScore = 0; totalMoves = 0; levelIndex = 0; startLevel() }
-            BlockDropState.WON     -> { totalScore = 0; totalMoves = 0; levelIndex = 0; startLevel() }
+            BlockDropState.STUCK, BlockDropState.WON -> resetForNewGame()
             else -> {}
         }
-        invalidate()
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────

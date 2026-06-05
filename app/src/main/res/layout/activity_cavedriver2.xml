@@ -71,7 +71,7 @@
 
     </LinearLayout>
 
-    <!-- Game canvas — 3:2 aspect ratio enforced by onMeasure -->
+    <!-- Game canvas — 1:1 square aspect ratio enforced by onMeasure -->
     <com.pocketarcade.games.cavedriver2.CaveDiverView
         android:id="@+id/caveDiver2View"
         android:layout_width="match_parent"

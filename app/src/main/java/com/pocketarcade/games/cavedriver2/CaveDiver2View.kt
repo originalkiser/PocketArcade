@@ -29,27 +29,27 @@ class CaveDiverView @JvmOverloads constructor(
 ) : SurfaceView(context, attrs, defStyle), SurfaceHolder.Callback {
 
     companion object {
-        // ── Logical canvas (prototype W / H) ──────────────────────────────
+        // ── Logical canvas — square (480 × 480) ───────────────────────────
         private const val W = 480f
-        private const val H = 320f
+        private const val H = 480f
 
         // ── Ship geometry ──────────────────────────────────────────────────
         private const val SHIP_X = 80f
         private const val SHIP_W = 32f
         private const val SHIP_H = 16f
 
-        // ── Physics (×3 from JSX prototype values) ───────────────────────
-        private const val GRAVITY         = 0.675f
-        private const val THRUST          = -1.14f
+        // ── Physics (×6 from JSX prototype; ×2 from previous 3× values) ─
+        private const val GRAVITY         = 1.35f
+        private const val THRUST          = -2.28f
         private const val DAMPING         = 0.92f
-        private const val VY_MIN          = -15f
-        private const val VY_MAX          = 18f
+        private const val VY_MIN          = -30f
+        private const val VY_MAX          = 36f
 
         // ── Obstacles ──────────────────────────────────────────────────────
-        private const val GAP             = 110f
+        private const val GAP             = 120f    // slightly wider gap for taller canvas
         private const val PIPE_W          = 44f
-        private const val PIPE_SPEED_INIT = 7.2f
-        private const val PIPE_INTERVAL   = 37
+        private const val PIPE_SPEED_INIT = 14.4f   // 2× from previous
+        private const val PIPE_INTERVAL   = 18      // halved to maintain pipe density
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
@@ -123,22 +123,28 @@ class CaveDiverView @JvmOverloads constructor(
     private var offsetY = 0f
 
     // ── Theme ─────────────────────────────────────────────────────────────
-    private var themeShipCol = SHIP_COL
-    private var themeGlow    = SHIP_GLOW
-    private var themeGlow0   = SHIP_GLOW_0
-    private var themeHudVal  = SHIP_COL
+    private var themeShipCol  = SHIP_COL
+    private var themeGlow     = SHIP_GLOW
+    private var themeGlow0    = SHIP_GLOW_0
+    private var themeHudVal   = SHIP_COL
+    private var themeCaveEdge = CAVE_EDGE   // glowing stalactite tip / edge
+    private var themeCave     = CAVE        // cave wall body tint
 
     fun applyTheme(theme: GameTheme) {
-        themeShipCol = theme.player
-        themeGlow    = theme.player.withAlpha(0x44)
-        themeGlow0   = theme.player.withAlpha(0)
-        themeHudVal  = theme.player
+        themeShipCol  = theme.player
+        themeGlow     = theme.player.withAlpha(0x44)
+        themeGlow0    = theme.player.withAlpha(0)
+        themeHudVal   = theme.player
+        themeCaveEdge = theme.player.withAlpha(0xCC)
+        themeCave     = theme.muted.withAlpha(0xBB)
         hudValuePaint.color = themeHudVal
-        titlePaint.apply   { color = themeShipCol; setShadowLayer(24f, 0f, 0f, themeShipCol) }
+        titlePaint.apply    { color = themeShipCol; setShadowLayer(24f, 0f, 0f, themeShipCol) }
         deadScorePaint.apply { color = themeShipCol; setShadowLayer(16f, 0f, 0f, themeShipCol) }
         bodyPaint.setShadowLayer(10f, 0f, 0f, themeShipCol)
         idleBodyPaint.setShadowLayer(12f, 0f, 0f, themeShipCol)
         cockpitStroke.color = themeShipCol.withAlpha(0x88)
+        tipPaint.color = themeCaveEdge
+        tipPaint.setShadowLayer(6f, 0f, 0f, theme.player)
     }
 
     // ── Pre-allocated Paints ──────────────────────────────────────────────
@@ -243,9 +249,9 @@ class CaveDiverView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // Preserve 3:2 aspect ratio (480 × 320) so the canvas fills the view exactly
+        // 1:1 square canvas (480 × 480) — fills width, matches height
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val h = (w * H / W).toInt()
+        val h = w
         super.onMeasure(
             MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY)
@@ -539,19 +545,19 @@ class CaveDiverView @JvmOverloads constructor(
     private fun drawCave(canvas: Canvas, p: Pipe) {
         val botY = p.topH + GAP
 
-        // Top wall
+        // Top wall — themed: BG1 → themeCave → themeCaveEdge
         caveTopPaint.shader = LinearGradient(p.x, 0f, p.x, p.topH,
-            intArrayOf(BG1, CAVE, CAVE_EDGE),
+            intArrayOf(BG1, themeCave, themeCaveEdge),
             floatArrayOf(0f, 0.7f, 1f), Shader.TileMode.CLAMP)
         canvas.drawRect(p.x, 0f, p.x + PIPE_W, p.topH, caveTopPaint)
 
-        // Bottom wall
+        // Bottom wall — themed: themeCaveEdge → themeCave → BG1
         caveBotPaint.shader = LinearGradient(p.x, botY, p.x, H,
-            intArrayOf(CAVE_EDGE, CAVE, BG1),
+            intArrayOf(themeCaveEdge, themeCave, BG1),
             floatArrayOf(0f, 0.3f, 1f), Shader.TileMode.CLAMP)
         canvas.drawRect(p.x, botY, p.x + PIPE_W, H, caveBotPaint)
 
-        // Stalactite tip — V pointing down (glow via tipPaint.setShadowLayer)
+        // Stalactite tip — V pointing down (glow via tipPaint shadow; color set in applyTheme)
         tipPath.rewind()
         tipPath.moveTo(p.x,               p.topH)
         tipPath.lineTo(p.x + PIPE_W / 2f, p.topH + TIP)
@@ -578,8 +584,8 @@ class CaveDiverView @JvmOverloads constructor(
         drawScanlines(canvas)
         val cx = W / 2f
 
-        canvas.drawText("CAVE DIVER 2",                   cx, 90f,      titlePaint)
-        canvas.drawText("navigate the crystal caverns",   cx, 118f,     subPaint)
+        canvas.drawText("CAVE DIVER",                     cx, 110f, titlePaint)
+        canvas.drawText("navigate the crystal caverns",   cx, 142f, subPaint)
 
         // Idle ship (no cockpit, shadowBlur=12)
         canvas.save()
@@ -600,8 +606,8 @@ class CaveDiverView @JvmOverloads constructor(
         canvas.drawPath(shipPath, idleBodyPaint)
         canvas.restore()
 
-        canvas.drawText("[ TAP TO LAUNCH ]",                     cx, H - 54f, promptPaint)
-        canvas.drawText("hold to thrust  ·  release to dive", cx, H - 34f, promptSubPaint)
+        canvas.drawText("[ TAP TO LAUNCH ]",              cx, H - 68f, promptPaint)
+        canvas.drawText("hold to thrust  ·  release to dive", cx, H - 46f, promptSubPaint)
     }
 
     /** JSX paintDead() */
@@ -610,13 +616,13 @@ class CaveDiverView @JvmOverloads constructor(
         drawScanlines(canvas)
         val cx = W / 2f
 
-        canvas.drawText("CRASHED",                           cx, 85f,      deadTitlePaint)
-        canvas.drawText("FINAL SCORE",                       cx, 130f,     deadSubPaint)
-        canvas.drawText("%05d".format(score),                cx, 175f,     deadScorePaint)
+        canvas.drawText("CRASHED",                           cx, 140f, deadTitlePaint)
+        canvas.drawText("FINAL SCORE",                       cx, 195f, deadSubPaint)
+        canvas.drawText("%05d".format(score),                cx, 248f, deadScorePaint)
         if (bestScore > 0) {
-            canvas.drawText("BEST  %05d".format(bestScore), cx, 205f,     deadSubPaint)
+            canvas.drawText("BEST  %05d".format(bestScore), cx, 286f, deadSubPaint)
         }
-        canvas.drawText("[ TAP TO RETRY ]",                 cx, H - 44f,  deadPromptPaint)
+        canvas.drawText("[ TAP TO RETRY ]",                 cx, H - 56f, deadPromptPaint)
     }
 
     /** JSX game-playing frame */

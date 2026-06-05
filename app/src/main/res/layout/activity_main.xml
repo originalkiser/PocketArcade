@@ -477,10 +477,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="#00FF96"
+                            android:textColor="@color/muted"
                             android:textSize="11sp"
-                            android:fontFamily="monospace"
-                            android:alpha="0.7" />
+                            android:fontFamily="monospace" />
                     </LinearLayout>
 
                     <TextView

@@ -295,9 +295,11 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { marginEnd = (6 * dp).toInt() }
         }
         val iconSize = (13 * dp).toInt()
+        // Cave Diver uses a dedicated ship-silhouette icon for self rank chips
+        val resolvedIconRes = if (gameKey == "cavedriver") R.drawable.ic_cavedriver_ship else iconRes
         container.addView(ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-            setImageResource(iconRes)
+            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize * 2 / 3)
+            setImageResource(resolvedIconRes)
             setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN)
         })
         container.addView(TextView(this).apply {
