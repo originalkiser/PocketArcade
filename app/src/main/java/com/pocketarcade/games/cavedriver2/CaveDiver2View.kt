@@ -48,8 +48,8 @@ class CaveDiverView @JvmOverloads constructor(
         // ── Obstacles ──────────────────────────────────────────────────────
         private const val GAP             = 120f
         private const val PIPE_W          = 44f
-        private const val PIPE_SPEED_INIT = 6.0f
-        private const val PIPE_INTERVAL   = 25
+        private const val PIPE_SPEED_INIT = 5.0f
+        private const val PIPE_INTERVAL   = 35
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
