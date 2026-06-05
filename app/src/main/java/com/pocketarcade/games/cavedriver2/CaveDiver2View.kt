@@ -49,7 +49,7 @@ class CaveDiverView @JvmOverloads constructor(
         private const val GAP             = 120f
         private const val PIPE_W          = 44f
         private const val PIPE_SPEED_INIT = 5.0f
-        private const val PIPE_INTERVAL   = 35
+        private const val PIPE_INTERVAL   = 50
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
@@ -85,15 +85,22 @@ class CaveDiverView @JvmOverloads constructor(
     private var frame        = 0
     private var pipeSpeed    = PIPE_SPEED_INIT
 
-    private data class Pipe(var x: Float, val topH: Float, var scored: Boolean = false)
+    private class Pipe(x0: Float, val topH: Float) {
+        var x: Float       = x0
+        var scored: Boolean = false
+        // Shaders cached at spawn time; rebuilt on theme change — avoids per-frame allocation
+        lateinit var topShader: Shader
+        lateinit var botShader: Shader
+    }
     private data class Star(var x: Float, var y: Float, val r: Float, val spd: Float, var tw: Float)
 
     private val pipes = mutableListOf<Pipe>()
     private val stars = mutableListOf<Star>()
 
     // ── Thread safety ──────────────────────────────────────────────────────
-    @Volatile private var running      = false
-    @Volatile private var startPending = false
+    @Volatile private var running            = false
+    @Volatile private var startPending       = false
+    @Volatile private var shadersNeedRebuild = false
     private var gameThread: Thread?    = null
 
     // ── Public callbacks ───────────────────────────────────────────────────
@@ -145,6 +152,26 @@ class CaveDiverView @JvmOverloads constructor(
         cockpitStroke.color = themeShipCol.withAlpha(0x88)
         tipPaint.color = themeCaveEdge
         tipPaint.setShadowLayer(6f, 0f, 0f, theme.player)
+        // Signal game thread to rebuild cached pipe shaders with new theme colors
+        shadersNeedRebuild = true
+    }
+
+    /** Build a cached top-wall gradient for a pipe (vertical only — x is irrelevant). */
+    private fun buildTopShader(topH: Float): Shader =
+        LinearGradient(0f, 0f, 0f, topH,
+            intArrayOf(BG1, themeCave, themeCaveEdge),
+            floatArrayOf(0f, 0.7f, 1f), Shader.TileMode.CLAMP)
+
+    /** Build a cached bottom-wall gradient for a pipe. */
+    private fun buildBotShader(topH: Float): Shader =
+        LinearGradient(0f, topH + GAP, 0f, H,
+            intArrayOf(themeCaveEdge, themeCave, BG1),
+            floatArrayOf(0f, 0.3f, 1f), Shader.TileMode.CLAMP)
+
+    /** Attach fresh shaders to a newly-spawned (or theme-updated) pipe. */
+    private fun attachShaders(p: Pipe) {
+        p.topShader = buildTopShader(p.topH)
+        p.botShader = buildBotShader(p.topH)
     }
 
     // ── Pre-allocated Paints ──────────────────────────────────────────────
@@ -299,11 +326,13 @@ class CaveDiverView @JvmOverloads constructor(
                         try { drawFrame(canvas) }
                         finally { holder.unlockCanvasAndPost(canvas) }
                     }
-                    // Adaptive sleep: target 16 ms per frame, subtract actual elapsed time
-                    // so physics + draw overhead doesn't accumulate into visible lag.
-                    val elapsedMs = (System.nanoTime() - frameStart) / 1_000_000L
-                    val sleepMs   = 16L - elapsedMs
-                    if (sleepMs > 1L) Thread.sleep(sleepMs)
+                    // Adaptive sleep: target exactly 1/60s per frame using nanosecond precision.
+                    // Thread.sleep(ms, ns) avoids the ~1ms jitter of integer-ms sleep, which
+                    // would otherwise produce 15/17ms alternating frames at 60fps.
+                    val elapsedNs = System.nanoTime() - frameStart
+                    val sleepNs   = 16_666_666L - elapsedNs
+                    if (sleepNs > 1_000_000L)
+                        Thread.sleep(sleepNs / 1_000_000L, (sleepNs % 1_000_000L).toInt())
                 } catch (e: InterruptedException) {
                     Thread.currentThread().interrupt()
                 } catch (e: Exception) {
@@ -384,9 +413,16 @@ class CaveDiverView @JvmOverloads constructor(
         vy = vy.coerceIn(VY_MIN, VY_MAX)
         shipY += vy
 
+        // Rebuild cached pipe shaders if theme changed (flag set on main thread)
+        if (shadersNeedRebuild) {
+            pipes.forEach { attachShaders(it) }
+            shadersNeedRebuild = false
+        }
+
         // Spawn pipes
         if (frame % PIPE_INTERVAL == 0) {
-            pipes.add(Pipe(x = W + PIPE_W, topH = 40f + Random.nextFloat() * (H - GAP - 80f)))
+            val topH = 40f + Random.nextFloat() * (H - GAP - 80f)
+            pipes.add(Pipe(W + PIPE_W, topH).also { attachShaders(it) })
         }
 
         // Move + cull + score pipes
@@ -550,16 +586,12 @@ class CaveDiverView @JvmOverloads constructor(
     private fun drawCave(canvas: Canvas, p: Pipe) {
         val botY = p.topH + GAP
 
-        // Top wall — themed: BG1 → themeCave → themeCaveEdge
-        caveTopPaint.shader = LinearGradient(p.x, 0f, p.x, p.topH,
-            intArrayOf(BG1, themeCave, themeCaveEdge),
-            floatArrayOf(0f, 0.7f, 1f), Shader.TileMode.CLAMP)
+        // Top wall — use cached shader (built at spawn / theme change, not every frame)
+        caveTopPaint.shader = p.topShader
         canvas.drawRect(p.x, 0f, p.x + PIPE_W, p.topH, caveTopPaint)
 
-        // Bottom wall — themed: themeCaveEdge → themeCave → BG1
-        caveBotPaint.shader = LinearGradient(p.x, botY, p.x, H,
-            intArrayOf(themeCaveEdge, themeCave, BG1),
-            floatArrayOf(0f, 0.3f, 1f), Shader.TileMode.CLAMP)
+        // Bottom wall — cached shader
+        caveBotPaint.shader = p.botShader
         canvas.drawRect(p.x, botY, p.x + PIPE_W, H, caveBotPaint)
 
         // Stalactite tip — V pointing down (glow via tipPaint shadow; color set in applyTheme)
