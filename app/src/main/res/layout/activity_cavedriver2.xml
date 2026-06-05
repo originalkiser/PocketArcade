@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#050510">
+
+    <!-- Banner ad -->
+    <FrameLayout
+        android:id="@+id/adContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_ad_banner" />
+
+    <!-- Header: back + title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:gravity="center_vertical"
+        android:background="#08080F">
+
+        <TextView
+            android:id="@+id/btnBack2"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="&lt; MENU"
+            android:textColor="#00FFCC"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_game_tile"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="CAVE DIVER 2"
+            android:textColor="#00FFCC"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[BETA]"
+            android:textColor="#4444aa"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+
+    </LinearLayout>
+
+    <!-- Game canvas — 3:2 aspect ratio enforced by onMeasure -->
+    <com.pocketarcade.games.cavedriver2.CaveDiver2View
+        android:id="@+id/caveDiver2View"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Thrust zone — fills remaining vertical space below game canvas -->
+    <FrameLayout
+        android:id="@+id/thrustZone2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#050510"
+        android:clickable="true"
+        android:focusable="true">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2a2a5a" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="HOLD TO THRUST"
+            android:textColor="#224444aa"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.2" />
+
+    </FrameLayout>
+
+</LinearLayout>

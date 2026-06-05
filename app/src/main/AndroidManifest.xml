@@ -167,6 +167,12 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".games.cavedriver2.CaveDiver2Activity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
