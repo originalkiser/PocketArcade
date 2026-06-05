@@ -38,9 +38,9 @@ class CaveDiverView @JvmOverloads constructor(
         private const val SHIP_W = 32f
         private const val SHIP_H = 16f
 
-        // ── Physics — gravity and thrust magnitude matched ─────────────────
-        private const val GRAVITY         = 1.8f    // matched with |THRUST|
-        private const val THRUST          = -1.8f   // matched with GRAVITY
+        // ── Physics ────────────────────────────────────────────────────────
+        private const val GRAVITY         = 1.5f    // continuous downward pull each frame
+        private const val THRUST          = -3.0f   // tap impulse; 2× gravity to offset continuous pull
         private const val DAMPING         = 0.92f
         private const val VY_MIN          = -30f
         private const val VY_MAX          = 36f
