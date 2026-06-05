@@ -49,56 +49,22 @@ class BlockDropActivity : AppCompatActivity() {
             gameStartTime = System.currentTimeMillis()
         }
 
-        // STUCK — record stats + submit a losing score (always below minimum win score)
-        gameView.onGameOver = { moves ->
-            val duration    = System.currentTimeMillis() - gameStartTime
-            val leaderScore = gameView.movesToLostScore(moves)
-            val diffKey     = difficulty.key
-            PrefsManager.recordGamePlayed(this)
-            PrefsManager.recordGameStat(this, GAME_KEY, moves, duration, diffKey)
-            PrefsManager.setHighScore(this, scoreKey(difficulty), leaderScore)
-            ScoreSyncManager.recordGameScore(this, scoreKey(difficulty), "_", leaderScore)
-            val username = PrefsManager.getGlobalUsername(this)
-            if (username != null) {
-                GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
-                    GlobalLeaderboard.submitScore(
-                        uid, username, GAME_KEY, leaderScore,
-                        PrefsManager.getGlobalCountry(this),
-                        PrefsManager.getGlobalState(this),
-                        diffKey,
-                        PrefsManager.getAvatarIndex(this),
-                        PrefsManager.getAvatarColor(this)
-                    )
-                    GlobalLeaderboard.submitPeriodScore(
-                        uid, username, GAME_KEY, leaderScore,
-                        PrefsManager.getGlobalCountry(this),
-                        PrefsManager.getGlobalState(this),
-                        diffKey,
-                        PrefsManager.getAvatarIndex(this),
-                        PrefsManager.getAvatarColor(this)
-                    )
-                })
-            }
-            // No popup on loss — score submitted silently
-        }
-
-        // WON — fewest-moves leaderboard
-        gameView.onGameWon = { moves ->
+        // STUCK — game over. Submit the total accumulated score to leaderboards.
+        // Score naturally satisfies "losing < winning" because winning always earns
+        // CLEAR_BONUS on top of whatever the player accumulated.
+        gameView.onGameOver = { totalScore ->
             val duration = System.currentTimeMillis() - gameStartTime
+            val diffKey  = difficulty.key
             PrefsManager.recordGamePlayed(this)
-            PrefsManager.recordGameStat(this, GAME_KEY, moves, duration, difficulty.key)
-            PrefsManager.setBdBest(this, difficulty.key, moves)
-
-            val leaderScore = gameView.movesToScore(moves)
-            val diffKey     = difficulty.key
-            PrefsManager.setHighScore(this, scoreKey(difficulty), leaderScore)
-            ScoreSyncManager.recordGameScore(this, scoreKey(difficulty), "_", leaderScore)
+            PrefsManager.recordGameStat(this, GAME_KEY, totalScore, duration, diffKey)
+            PrefsManager.setHighScore(this, scoreKey(difficulty), totalScore)
+            ScoreSyncManager.recordGameScore(this, scoreKey(difficulty), "_", totalScore)
 
             val username = PrefsManager.getGlobalUsername(this)
             if (username != null) {
                 GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
                     GlobalLeaderboard.submitScore(
-                        uid, username, GAME_KEY, leaderScore,
+                        uid, username, GAME_KEY, totalScore,
                         PrefsManager.getGlobalCountry(this),
                         PrefsManager.getGlobalState(this),
                         diffKey,
@@ -106,7 +72,7 @@ class BlockDropActivity : AppCompatActivity() {
                         PrefsManager.getAvatarColor(this)
                     )
                     GlobalLeaderboard.submitPeriodScore(
-                        uid, username, GAME_KEY, leaderScore,
+                        uid, username, GAME_KEY, totalScore,
                         PrefsManager.getGlobalCountry(this),
                         PrefsManager.getGlobalState(this),
                         diffKey,
@@ -117,7 +83,7 @@ class BlockDropActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
-                checkAndShowLeaderboard(this, scoreKey(difficulty), leaderScore) {
+                checkAndShowLeaderboard(this, scoreKey(difficulty), totalScore) {
                     if (PrefsManager.getGlobalUsername(this) != null) {
                         showGlobalLeaderboardDialog(
                             this, GAME_KEY,

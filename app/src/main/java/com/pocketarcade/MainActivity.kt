@@ -240,8 +240,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvScoreCaveDiver).text =
             "High Score: %,d".format(PrefsManager.getHighScore(this, CaveDiverActivity.GAME_KEY))
         fun bdStat(diff: BlockDropDifficulty): String {
-            val moves = PrefsManager.getBdBestMoves(this, diff.key)
-            return if (moves == 0) "--" else "${moves}mv"
+            val score = PrefsManager.getHighScore(this, BlockDropActivity.scoreKey(diff))
+            return if (score == 0) "--" else "%,d".format(score)
         }
         val bdE = bdStat(BlockDropDifficulty.EASY)
         val bdM = bdStat(BlockDropDifficulty.MEDIUM)
@@ -249,11 +249,11 @@ class MainActivity : AppCompatActivity() {
         val bdBestAny = listOf(
             BlockDropDifficulty.EASY, BlockDropDifficulty.MEDIUM, BlockDropDifficulty.HARD
         ).mapNotNull { d ->
-            val m = PrefsManager.getBdBestMoves(this, d.key)
-            if (m > 0) m else null
-        }.minOrNull()
+            val s = PrefsManager.getHighScore(this, BlockDropActivity.scoreKey(d))
+            if (s > 0) s else null
+        }.maxOrNull()
         findViewById<TextView>(R.id.tvScoreBlockPop).text =
-            if (bdBestAny != null) "Best: ${bdBestAny}mv" else "Best: --"
+            if (bdBestAny != null) "Best: %,d".format(bdBestAny) else "Best: --"
         findViewById<TextView>(R.id.tvScoreBlockPopDetail).text =
             "E: $bdE  M: $bdM  H: $bdH"
         findViewById<TextView>(R.id.tvScoreBrickBreaker).text =

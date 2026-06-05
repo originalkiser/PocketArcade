@@ -38,18 +38,18 @@ class CaveDiverView @JvmOverloads constructor(
         private const val SHIP_W = 32f
         private const val SHIP_H = 16f
 
-        // ── Physics (×6 from JSX prototype; ×2 from previous 3× values) ─
-        private const val GRAVITY         = 1.35f
-        private const val THRUST          = -2.28f
+        // ── Physics — gravity and thrust magnitude matched ─────────────────
+        private const val GRAVITY         = 1.8f    // matched with |THRUST|
+        private const val THRUST          = -1.8f   // matched with GRAVITY
         private const val DAMPING         = 0.92f
         private const val VY_MIN          = -30f
         private const val VY_MAX          = 36f
 
         // ── Obstacles ──────────────────────────────────────────────────────
-        private const val GAP             = 120f    // slightly wider gap for taller canvas
+        private const val GAP             = 120f
         private const val PIPE_W          = 44f
-        private const val PIPE_SPEED_INIT = 14.4f   // 2× from previous
-        private const val PIPE_INTERVAL   = 18      // halved to maintain pipe density
+        private const val PIPE_SPEED_INIT = 13.4f   // −7% from 14.4
+        private const val PIPE_INTERVAL   = 18
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
@@ -291,6 +291,7 @@ class CaveDiverView @JvmOverloads constructor(
         running = true
         gameThread = Thread {
             while (running) {
+                val frameStart = System.nanoTime()
                 try {
                     update()
                     val canvas = holder.lockCanvas()
@@ -298,7 +299,11 @@ class CaveDiverView @JvmOverloads constructor(
                         try { drawFrame(canvas) }
                         finally { holder.unlockCanvasAndPost(canvas) }
                     }
-                    Thread.sleep(16)   // ~60fps fixed-step cap (matches prototype)
+                    // Adaptive sleep: target 16 ms per frame, subtract actual elapsed time
+                    // so physics + draw overhead doesn't accumulate into visible lag.
+                    val elapsedMs = (System.nanoTime() - frameStart) / 1_000_000L
+                    val sleepMs   = 16L - elapsedMs
+                    if (sleepMs > 1L) Thread.sleep(sleepMs)
                 } catch (e: InterruptedException) {
                     Thread.currentThread().interrupt()
                 } catch (e: Exception) {
