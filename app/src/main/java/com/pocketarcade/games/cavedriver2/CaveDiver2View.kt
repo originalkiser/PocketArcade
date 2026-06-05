@@ -39,17 +39,17 @@ class CaveDiverView @JvmOverloads constructor(
         private const val SHIP_H = 16f
 
         // ── Physics ────────────────────────────────────────────────────────
-        private const val GRAVITY         = 1.1f    // continuous downward pull each frame
-        private const val THRUST          = -2.2f   // tap impulse; 2× gravity to offset continuous pull
+        private const val GRAVITY         = 0.8f    // continuous downward pull each frame
+        private const val THRUST          = -1.6f   // tap impulse; 2× gravity to offset continuous pull
         private const val DAMPING         = 0.92f
-        private const val VY_MIN          = -16f
-        private const val VY_MAX          = 16f
+        private const val VY_MIN          = -12f
+        private const val VY_MAX          = 12f
 
         // ── Obstacles ──────────────────────────────────────────────────────
         private const val GAP             = 120f
         private const val PIPE_W          = 44f
-        private const val PIPE_SPEED_INIT = 8.0f
-        private const val PIPE_INTERVAL   = 22
+        private const val PIPE_SPEED_INIT = 6.0f
+        private const val PIPE_INTERVAL   = 25
         private const val TIP             = 8f   // tip protrusion into gap
 
         private const val STAR_COUNT = 40
