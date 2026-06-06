@@ -32,6 +32,7 @@ private val GAMES = listOf(
     GameInfo("asteroids",    R.drawable.ic_asteroids,    "ASTEROIDS"),
     GameInfo("brickbreaker", R.drawable.ic_brickbreaker, "BRICKBREAKER"),
     GameInfo("cavedriver",   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+    GameInfo("blockdrop",    R.drawable.ic_blockpop,     "BLOCK DROP"),
     GameInfo("memorymatch",  R.drawable.ic_memorymatch,  "MEMORY")
 )
 
@@ -438,7 +439,7 @@ fun showGlobalLeaderboardDialog(
     // ── Chip setup ────────────────────────────────────────────────────────────
 
     fun setupModeChips() {
-        if (currentGame != "brickbreaker" && currentGame != "memorymatch") {
+        if (currentGame != "brickbreaker" && currentGame != "memorymatch" && currentGame != "blockdrop") {
             modeChipsScroll.visibility = View.GONE
             return
         }
@@ -463,6 +464,7 @@ fun showGlobalLeaderboardDialog(
         "asteroids"    to Color.parseColor("#00d4ff"),
         "brickbreaker" to Color.parseColor("#f1c40f"),
         "cavedriver"   to Color.parseColor("#00FFCC"),
+        "blockdrop"    to Color.parseColor("#FF6B35"),
         "memorymatch"  to Color.parseColor("#00FF96")
     )
 

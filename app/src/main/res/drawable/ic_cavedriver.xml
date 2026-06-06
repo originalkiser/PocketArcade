@@ -26,19 +26,19 @@
     <path android:fillColor="#AABBCC"
         android:pathData="M16,44 m-0.5,0 a0.5,0.5 0 1,0 1.0,0 a0.5,0.5 0 1,0 -1.0,0 Z" />
 
-    <!-- Cave pipe top wall (x=33..44, y=0..22) — dark cave column -->
+    <!-- Cave pipe top wall (x=33..44, y=0..19) -->
     <path android:fillColor="#1A1A3A"
-        android:pathData="M33,0 H44 V22 H33 Z" />
-    <!-- Stalactite tip glow (V pointing down into gap) -->
+        android:pathData="M33,0 H44 V19 H33 Z" />
+    <!-- Stalactite tip glow — V pointing down, outer tip y=21, inner y=23 (6-unit gap to stalagmite) -->
     <path android:fillColor="#4444AA"
-        android:pathData="M33,20 L38.5,25 L44,20 L44,22 L38.5,27 L33,22 Z" />
+        android:pathData="M33,17 L38.5,21 L44,17 L44,19 L38.5,23 L33,19 Z" />
 
     <!-- Cave pipe bottom wall (x=33..44, y=29..48) -->
     <path android:fillColor="#1A1A3A"
         android:pathData="M33,29 H44 V48 H33 Z" />
-    <!-- Stalagmite tip glow (V pointing up) -->
+    <!-- Stalagmite tip glow — V pointing up, outer tip y=27, inner y=25 -->
     <path android:fillColor="#4444AA"
-        android:pathData="M33,31 L38.5,26 L44,31 L44,29 L38.5,24 L33,29 Z" />
+        android:pathData="M33,31 L38.5,27 L44,31 L44,29 L38.5,25 L33,29 Z" />
 
     <!-- Thrust flame (orange-yellow behind ship) -->
     <path android:fillColor="#FF6600"
@@ -54,12 +54,12 @@
     <path android:fillColor="#00FFCC"
         android:pathData="M27,24 L13,19 L16,24 L13,29 Z" />
 
-    <!-- Cockpit (dark with teal outline) -->
+    <!-- Cockpit (dark with teal outline) — centered on ship body y=24 -->
     <path android:fillColor="#001A14"
-        android:pathData="M20,22 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
+        android:pathData="M20,24 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
     <path android:strokeColor="#00FFCC88"
         android:strokeWidth="0.8"
         android:fillColor="#00000000"
-        android:pathData="M20,22 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
+        android:pathData="M20,24 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
 
 </vector>

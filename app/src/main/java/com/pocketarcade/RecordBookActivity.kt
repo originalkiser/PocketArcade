@@ -27,7 +27,8 @@ class RecordBookActivity : AppCompatActivity() {
 
         val totalGames = listOf(
             PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
-            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
+            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER,
+            PrefsManager.GAME_CAVEDRIVER, "blockdrop", "memorymatch"
         ).sumOf { PrefsManager.getStatPlays(this, it) }
         findViewById<TextView>(R.id.tvTotalMissions).text = "$totalGames TOTAL GAMES"
 
@@ -40,7 +41,7 @@ class RecordBookActivity : AppCompatActivity() {
     private fun buildTabBar() {
         val accentBlue = Color.parseColor("#4f8ef7")
         val mutedColor = Color.parseColor("#666688")
-        val tabs = listOf("ALL", "SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER")
+        val tabs = listOf("ALL", "SNAKE", "PONG", "ASTEROIDS", "BRICK BREAKER", "CAVE DIVER", "BLOCK DROP", "MEMORY")
         val allTabViews = mutableListOf<TextView>()
 
         val tabBar = LinearLayout(this).apply {
@@ -160,22 +161,24 @@ class RecordBookActivity : AppCompatActivity() {
             "PONG"          -> renderPong()
             "ASTEROIDS"     -> renderAsteroids()
             "BRICK BREAKER" -> renderBrickBreaker()
+            "CAVE DIVER"    -> renderCaveDiver()
+            "BLOCK DROP"    -> renderBlockDrop()
+            "MEMORY"        -> renderMemoryMatch()
         }
     }
 
     private fun renderAll() {
-        val totalGames = listOf(
+        val allGames = listOf(
             PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
-            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
-        ).sumOf { PrefsManager.getStatPlays(this, it) }
+            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER,
+            PrefsManager.GAME_CAVEDRIVER, "blockdrop", "memorymatch"
+        )
+        val totalGames = allGames.sumOf { PrefsManager.getStatPlays(this, it) }
 
         addSection(contentContainer, "OVERALL")
         addMostPlayed(contentContainer)
         addRow(contentContainer, "TOTAL GAMES", fmtNum(totalGames))
-        val totalMs = listOf(
-            PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
-            PrefsManager.GAME_ASTEROIDS, PrefsManager.GAME_BRICKBREAKER
-        ).sumOf { PrefsManager.getStatTotalTimeMs(this, it) }
+        val totalMs = allGames.sumOf { PrefsManager.getStatTotalTimeMs(this, it) }
         addRow(contentContainer, "TIME IN FIELD", formatDuration(totalMs))
         addSpacer(contentContainer)
 
@@ -183,6 +186,9 @@ class RecordBookActivity : AppCompatActivity() {
         renderPong()
         renderAsteroids()
         renderBrickBreaker()
+        renderCaveDiver()
+        renderBlockDrop()
+        renderMemoryMatch()
     }
 
     private fun renderSnake() {
@@ -306,6 +312,53 @@ class RecordBookActivity : AppCompatActivity() {
         }
     }
 
+    private fun renderCaveDiver() {
+        buildGameSection(contentContainer,
+            game      = PrefsManager.GAME_CAVEDRIVER,
+            label     = "CAVE DIVER",
+            accentHex = "#00FFCC",
+            modes     = emptyList()
+        )
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, PrefsManager.GAME_CAVEDRIVER, "#00FFCC")
+        addSpacer(contentContainer)
+    }
+
+    private fun renderBlockDrop() {
+        buildGameSection(contentContainer,
+            game      = "blockdrop",
+            label     = "BLOCK DROP",
+            accentHex = "#FF6B35",
+            modes     = listOf("easy", "medium", "hard")
+        )
+        addSpacer(contentContainer)
+        buildLeaderboard(contentContainer, "blockdrop", "#FF6B35")
+        addSpacer(contentContainer)
+    }
+
+    private fun renderMemoryMatch() {
+        addSection(contentContainer, "MEMORY MATCH", "#00FF96")
+        val diffs = listOf("easy" to "EASY", "medium" to "MEDIUM", "hard" to "HARD")
+        diffs.forEach { (diff, label) ->
+            val plays = PrefsManager.getStatPlays(this, "memorymatch", diff)
+            val moves = PrefsManager.getMmBestMoves(this, diff)
+            val secs  = PrefsManager.getMmBestTimeSecs(this, diff)
+            if (plays > 0 || moves > 0) {
+                addSubHeader(contentContainer, label)
+                addRow(contentContainer, "GAMES LOGGED", fmtNum(plays), "#00FF96")
+                if (moves > 0) {
+                    val mm = secs / 60; val ss = secs % 60
+                    addRow(contentContainer, "BEST MOVES", "$moves mv", "#00FF96")
+                    addRow(contentContainer, "BEST TIME",  "%02d:%02d".format(mm, ss), "#00FF96")
+                }
+                addRow(contentContainer, "TOTAL TIME",
+                    formatDuration(PrefsManager.getStatTotalTimeMs(this, "memorymatch", diff)))
+                buildLeaderboard(contentContainer, "memorymatch_$diff", "#00FF96", showHeader = false)
+            }
+        }
+        addSpacer(contentContainer)
+    }
+
     // ── Most played ───────────────────────────────────────────────────────────────
 
     private fun addMostPlayed(container: LinearLayout) {
@@ -315,7 +368,10 @@ class RecordBookActivity : AppCompatActivity() {
             Candidate("SNAKE",         PrefsManager.getStatPlays(this, PrefsManager.GAME_SNAKE),        "#4f8ef7"),
             Candidate("PONG",          PrefsManager.getStatPlays(this, PrefsManager.GAME_PONG),         "#ef5350"),
             Candidate("ASTEROIDS",     PrefsManager.getStatPlays(this, PrefsManager.GAME_ASTEROIDS),    "#00d4ff"),
-            Candidate("BRICK BREAKER", PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER), "#f1c40f")
+            Candidate("BRICK BREAKER", PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER), "#f1c40f"),
+            Candidate("CAVE DIVER",    PrefsManager.getStatPlays(this, PrefsManager.GAME_CAVEDRIVER),   "#00FFCC"),
+            Candidate("BLOCK DROP",    PrefsManager.getStatPlays(this, "blockdrop"),                    "#FF6B35"),
+            Candidate("MEMORY MATCH",  PrefsManager.getStatPlays(this, "memorymatch"),                  "#00FF96")
         )
         val top = candidates.maxByOrNull { it.plays }
         if (top != null && top.plays > 0) {
@@ -331,6 +387,11 @@ class RecordBookActivity : AppCompatActivity() {
         val topBBMode = bbModes.maxByOrNull { PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER, it) }
         val topBBPlays = if (topBBMode != null) PrefsManager.getStatPlays(this, PrefsManager.GAME_BRICKBREAKER, topBBMode) else 0
         if (topBBPlays > 0) addRow(container, "FAV BB MODE", topBBMode!!.uppercase(), "#f1c40f")
+
+        val bdModes = listOf("easy", "medium", "hard")
+        val topBdMode = bdModes.maxByOrNull { PrefsManager.getStatPlays(this, "blockdrop", it) }
+        val topBdPlays = if (topBdMode != null) PrefsManager.getStatPlays(this, "blockdrop", topBdMode) else 0
+        if (topBdPlays > 0) addRow(container, "FAV BD MODE", topBdMode!!.uppercase(), "#FF6B35")
     }
 
     // ── View helpers ──────────────────────────────────────────────────────────────

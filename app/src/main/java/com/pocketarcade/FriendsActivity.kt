@@ -34,7 +34,8 @@ class FriendsActivity : AppCompatActivity() {
         GameInfo(PrefsManager.GAME_PONG,         R.drawable.ic_pong,         "PONG"),
         GameInfo(PrefsManager.GAME_ASTEROIDS,    R.drawable.ic_asteroids,    "ASTEROIDS"),
         GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRKR BREAKER"),
-        GameInfo("cavedriver",                   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+        GameInfo(PrefsManager.GAME_CAVEDRIVER,   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+        GameInfo("blockdrop",                    R.drawable.ic_blockpop,     "BLOCK DROP"),
         GameInfo("memorymatch",                  R.drawable.ic_memorymatch,  "MEMORY")
     )
 
@@ -282,7 +283,8 @@ class FriendsActivity : AppCompatActivity() {
             PrefsManager.GAME_PONG         -> Color.parseColor("#e74c3c")
             PrefsManager.GAME_ASTEROIDS    -> Color.parseColor("#00d4ff")
             PrefsManager.GAME_BRICKBREAKER -> Color.parseColor("#f1c40f")
-            "cavedriver"                   -> Color.parseColor("#00FFCC")
+            PrefsManager.GAME_CAVEDRIVER   -> Color.parseColor("#00FFCC")
+            "blockdrop"                    -> Color.parseColor("#FF6B35")
             "memorymatch"                  -> Color.parseColor("#00FF96")
             else -> getColor(R.color.muted)
         }
@@ -295,8 +297,8 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { marginEnd = (6 * dp).toInt() }
         }
         val iconSize = (13 * dp).toInt()
-        // Cave Diver uses a dedicated ship-silhouette icon for self rank chips
-        val resolvedIconRes = if (gameKey == "cavedriver") R.drawable.ic_cavedriver_ship else iconRes
+        // Cave Diver uses a dedicated ship-silhouette icon for rank chips
+        val resolvedIconRes = if (gameKey == PrefsManager.GAME_CAVEDRIVER) R.drawable.ic_cavedriver_ship else iconRes
         container.addView(ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(iconSize, iconSize * 2 / 3)
             setImageResource(resolvedIconRes)

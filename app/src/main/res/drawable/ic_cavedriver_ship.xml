@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Minimal ship silhouette for rank chips — tinted at runtime via SRC_IN color filter -->
+<!-- Cave Diver rank chip icon — ship with cockpit cutout and mini cave spikes -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="12dp"
     android:viewportWidth="32"
     android:viewportHeight="16">
 
-    <!-- Ship body: right-pointing dart (matches the in-game ship path) -->
+    <!-- Mini stalactite above ship (downward spike, 60% opacity so it reads as cave detail) -->
+    <path
+        android:fillColor="#99FFFFFF"
+        android:pathData="M11,0 L15,4 L19,0 Z" />
+
+    <!-- Ship body with cockpit punched out via evenOdd fill rule -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M32,8 L0,0 L4,8 L0,16 Z" />
+        android:fillType="evenOdd"
+        android:pathData="M30,8 L0,3 L3,8 L0,13 Z M20,8 m-3,0 a3,1.5 0 1,0 6,0 a3,1.5 0 1,0 -6,0 Z" />
 
-    <!-- Cockpit: transparent cutout so the chip shows the body shape cleanly -->
+    <!-- Mini stalagmite below ship (upward spike) -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M26,8 m-5,0 a5,3.5 0 1,0 10,0 a5,3.5 0 1,0 -10,0 Z" />
+        android:fillColor="#99FFFFFF"
+        android:pathData="M11,16 L15,12 L19,16 Z" />
 
 </vector>

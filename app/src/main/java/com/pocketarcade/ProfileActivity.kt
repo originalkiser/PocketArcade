@@ -423,10 +423,13 @@ class ProfileActivity : AppCompatActivity() {
 
         data class GameRow(val key: String, val label: String, val color: Int, val iconRes: Int)
         val gameRows = listOf(
-            GameRow(PrefsManager.GAME_SNAKE,        "SNAKE",       getColor(R.color.accent_blue),   R.drawable.ic_snake),
-            GameRow(PrefsManager.GAME_PONG,         "PONG",        getColor(R.color.accent_red),    R.drawable.ic_pong),
-            GameRow(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS",   getColor(R.color.accent_cyan),   R.drawable.ic_asteroids),
-            GameRow(PrefsManager.GAME_BRICKBREAKER, "BRICK BREAKER", getColor(R.color.accent_yellow), R.drawable.ic_brickbreaker)
+            GameRow(PrefsManager.GAME_SNAKE,        "SNAKE",        getColor(R.color.accent_blue),   R.drawable.ic_snake),
+            GameRow(PrefsManager.GAME_PONG,         "PONG",         getColor(R.color.accent_red),    R.drawable.ic_pong),
+            GameRow(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS",    getColor(R.color.accent_cyan),   R.drawable.ic_asteroids),
+            GameRow(PrefsManager.GAME_BRICKBREAKER, "BRICK BREAKER",getColor(R.color.accent_yellow), R.drawable.ic_brickbreaker),
+            GameRow(PrefsManager.GAME_CAVEDRIVER,   "CAVE DIVER",   Color.parseColor("#00FFCC"),     R.drawable.ic_cavedriver),
+            GameRow("blockdrop",                    "BLOCK DROP",   Color.parseColor("#FF6B35"),     R.drawable.ic_blockpop),
+            GameRow("memorymatch",                  "MEMORY MATCH", Color.parseColor("#00FF96"),     R.drawable.ic_memorymatch)
         )
 
         gameRows.forEach { game ->
@@ -440,6 +443,19 @@ class ProfileActivity : AppCompatActivity() {
                     val bestGame = if (score >= 100) formatGlobalScore(game.key, score) else if (score > 0) "$score–?" else null
                     val best = if (bestGame != null) "  ·  Best $bestGame" else ""
                     "$wins W  ·  W/L $wl$best"
+                }
+                "blockdrop" -> {
+                    val best = listOf("blockdrop_easy", "blockdrop_medium", "blockdrop_hard")
+                        .mapNotNull { key -> PrefsManager.getHighScore(this, key).takeIf { it > 0 } }
+                        .maxOrNull()
+                    if (best != null) "%,d pts".format(best) else "—"
+                }
+                "memorymatch" -> {
+                    val parts = listOf("easy" to "E", "medium" to "M", "hard" to "H").mapNotNull { (diff, lbl) ->
+                        val m = PrefsManager.getMmBestMoves(this, diff)
+                        if (m > 0) "$lbl: ${m}mv" else null
+                    }
+                    if (parts.isNotEmpty()) parts.joinToString("  ") else "—"
                 }
                 else -> if (score > 0) "%,d pts".format(score) else "—"
             }
