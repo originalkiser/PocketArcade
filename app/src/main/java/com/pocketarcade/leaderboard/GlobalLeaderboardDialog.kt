@@ -333,6 +333,9 @@ fun showGlobalLeaderboardDialog(
             PersonalGame("asteroids",          "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
             PersonalGame("brickbreaker",       "BRKR BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f")),
             PersonalGame("cavedriver",         "CAVE DIVER",   R.drawable.ic_cavedriver,   Color.parseColor("#00FFCC")),
+            PersonalGame("blockdrop_easy",     "BLOCK DROP (E)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
+            PersonalGame("blockdrop_medium",   "BLOCK DROP (M)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
+            PersonalGame("blockdrop_hard",     "BLOCK DROP (H)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
             PersonalGame("memorymatch_easy",   "MEMORY (E)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
             PersonalGame("memorymatch_medium", "MEMORY (M)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
             PersonalGame("memorymatch_hard",   "MEMORY (H)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96"))
