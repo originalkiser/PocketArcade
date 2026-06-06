@@ -20,8 +20,8 @@ android {
         applicationId = "com.pocketarcade"
         minSdk = 26
         targetSdk = 34
-        versionCode = 45
-        versionName = "2.0.20"
+        versionCode = 46
+        versionName = "2.0.21"
 
         buildConfigField("String", "ADMOB_APP_ID",        "\"ca-app-pub-3940256099942544~3347511713\"")
         buildConfigField("String", "BANNER_AD_UNIT_ID",   "\"ca-app-pub-3940256099942544/6300978111\"")
