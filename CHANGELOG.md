@@ -2,6 +2,25 @@
 
 ---
 
+## v2.1.0 (versionCode 49)
+
+### Leaderboard Fixes
+- **Cave Diver global & all-time scores corrected** — Score updates used a Firestore transaction with no failure handler; if the write failed silently the old lower score persisted forever. Fixed with a batch write + fallback, plus duplicate-entry cleanup on every submit.
+- **Single best score per player** — World and Local leaderboards now deduplicate by uid client-side so no player ever appears more than once even if stale duplicate documents exist in Firestore.
+- **"ALL" difficulty tab removed** — Brick Breaker, Block Drop, and Memory Match now open directly on the Easy tab. Each difficulty has its own ranked list with no combined view.
+
+### Leaderboard UI
+- **Memory Match shows moves** — Leaderboard entries for Memory Match display "X moves" (e.g. "24 moves") instead of a raw point total. Fewer moves = better rank.
+- **Cave Diver uses ship-silhouette icon** — The game selector chip in the global leaderboard now shows the same horizontal ship icon used in the friends-list rank chips, instead of the full scene icon that rendered as a solid tinted block.
+
+### Game Changes
+- **Asteroids direct-movement controls** — The joystick now moves the ship in the exact direction it's pushed (left = left, right = right, up = up, down = down). The ship rotates to face its movement direction. Replaces the old rotate-then-thrust model.
+
+### Icons
+- **Cave Diver main menu icon** — Removed the solid dark background rectangles and cockpit dark-fill ellipse. Icon is now transparent-background, consistent with all other game icons.
+
+---
+
 ## v1.4.0 (versionCode 5)
 
 ### New Features

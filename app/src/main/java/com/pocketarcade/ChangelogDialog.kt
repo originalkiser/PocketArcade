@@ -8,6 +8,35 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.storage.PrefsManager
 
 private val CHANGELOG = mapOf(
+    49 to """★ Leaderboard overhaul
+  All-time & world boards now always
+  reflect your true best score. Duplicate
+  entries are cleaned automatically.
+
+★ Per-difficulty leaderboards
+  Brick Breaker, Block Drop, and Memory
+  Match each show separate Easy / Medium /
+  Hard boards — no more shared "All" tab.
+
+★ Memory Match shows moves
+  Leaderboard now displays "X moves"
+  instead of a raw point total. Fewer
+  moves = higher rank.
+
+★ Leaderboard game icons updated
+  Cave Diver now shows the ship
+  silhouette in the game selector,
+  matching the friends-list style.
+
+★ Cave Diver icon cleaned up
+  Main menu icon now has a transparent
+  background — black ellipse removed.
+
+★ Asteroids controls reworked
+  Push joystick left → ship moves left,
+  right → right, up → up, down → down.
+  Intuitive direct-movement handling.""",
+
     25 to """★ New Game: Block Drop
   Clear groups of matching colored blocks
   before the board gets stuck. Three board

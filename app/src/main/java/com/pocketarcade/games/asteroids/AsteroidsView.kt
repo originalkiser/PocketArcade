@@ -259,13 +259,15 @@ class AsteroidsView @JvmOverloads constructor(
 
         if (demoMode) demoAI()
 
+        // Direct-movement controls: joystick direction = ship movement direction.
+        // The ship faces the way it is being pushed for intuitive feel.
         val jMag = sqrt(joystickDX * joystickDX + joystickDY * joystickDY)
         if (jMag > 10f) {
-            ship.angle += ROT_SPEED * (PI.toFloat() / 180f) * (joystickDX / jMag)
-        }
-        if (jMag > 36f) {
-            ship.vx += cos(ship.angle) * THRUST
-            ship.vy += sin(ship.angle) * THRUST
+            val nx = joystickDX / jMag
+            val ny = joystickDY / jMag
+            ship.vx += nx * THRUST
+            ship.vy += ny * THRUST
+            ship.angle = atan2(ny, nx)   // face in direction of movement
             thrusting = true
         } else {
             thrusting = false
@@ -391,15 +393,15 @@ class AsteroidsView @JvmOverloads constructor(
         val target = asteroids.minByOrNull { dist(it.x, it.y, ship.x, ship.y) } ?: return
         val angleToTarget = atan2(target.y - ship.y, target.x - ship.x)
         val d = dist(ship.x, ship.y, target.x, target.y)
-        val diff = normalizeAngle(angleToTarget - ship.angle)
-        val aligned = abs(diff) < 0.4f
-        if (d > 120f) {
-            joystickDX = sign(diff) * if (aligned) 10f else 30f
-            joystickDY = if (aligned) -40f else 0f   // jMag ≈ 41 when aligned → thrusts
+        // Direct-movement AI: push the joystick toward the nearest asteroid
+        if (d > 100f) {
+            joystickDX = cos(angleToTarget) * 50f
+            joystickDY = sin(angleToTarget) * 50f
         } else {
             joystickDX = 0f; joystickDY = 0f
         }
-        firePressed = aligned
+        // Fire when close enough; ship.angle will match angleToTarget after update() runs
+        firePressed = d < 280f
     }
 
     private fun normalizeAngle(a: Float): Float {

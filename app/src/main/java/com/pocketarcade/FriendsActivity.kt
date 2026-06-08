@@ -657,7 +657,7 @@ class FriendsActivity : AppCompatActivity() {
 
         // Score column with game icon
         val gameInfo = games.find { it.key == selectedGame }
-        val scoreText = formatGlobalScore(selectedGame, entry.score)
+        val scoreText = formatGlobalScore(selectedGame, entry.score, entry.mode)
         row.addView(TextView(this).apply {
             text = " $scoreText"
             setTextColor(nameColor)

@@ -31,7 +31,7 @@ private val GAMES = listOf(
     GameInfo("pong",         R.drawable.ic_pong,         "PONG"),
     GameInfo("asteroids",    R.drawable.ic_asteroids,    "ASTEROIDS"),
     GameInfo("brickbreaker", R.drawable.ic_brickbreaker, "BRICKBREAKER"),
-    GameInfo("cavedriver",   R.drawable.ic_cavedriver,   "CAVE DIVER"),
+    GameInfo("cavedriver",   R.drawable.ic_cavedriver_ship, "CAVE DIVER"),
     GameInfo("blockdrop",    R.drawable.ic_blockpop,     "BLOCK DROP"),
     GameInfo("memorymatch",  R.drawable.ic_memorymatch,  "MEMORY")
 )
@@ -110,7 +110,8 @@ fun showGlobalLeaderboardDialog(
 
     // Dialog-level mutable state
     var currentGame      = game
-    var currentMode      = mode
+    // Multi-mode games need a concrete default so no "ALL" tab is required
+    var currentMode      = mode ?: if (game in setOf("brickbreaker", "memorymatch", "blockdrop")) "easy" else null
     var currentTab       = "WORLD"
     var friendsTimeRange = TimeRange.ALL_TIME
     var pageLastDoc: DocumentSnapshot? = null
@@ -213,7 +214,7 @@ fun showGlobalLeaderboardDialog(
         }
         // Mode prefix "(H) " etc. only when showing all-modes view
         val prefix     = if (currentMode == null) modeLabel(entry.mode) else ""
-        val scoreText  = prefix + formatGlobalScore(currentGame, entry.score)
+        val scoreText  = prefix + formatGlobalScore(currentGame, entry.score, currentMode ?: entry.mode)
         val scoreColor = pongScoreColor(currentGame, entry.score) ?: accentBlue
         val location   = formatLocationShort(entry.country, entry.state)
 
@@ -448,7 +449,7 @@ fun showGlobalLeaderboardDialog(
         }
         modeChipsScroll.visibility = View.VISIBLE
         modeChipsRow.removeAllViews()
-        listOf(null to "ALL", "easy" to "EASY", "medium" to "MEDIUM", "hard" to "HARD")
+        listOf("easy" to "EASY", "medium" to "MEDIUM", "hard" to "HARD")
             .forEachIndexed { i, (key, label) ->
                 val chip = makeChip(label, currentMode == key)
                 if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
@@ -478,7 +479,7 @@ fun showGlobalLeaderboardDialog(
             if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
             chip.setOnClickListener {
                 currentGame = g.key
-                currentMode = null
+                currentMode = if (g.key in setOf("brickbreaker", "memorymatch", "blockdrop")) "easy" else null
                 tvCurrentGame.text = g.label
                 setupGameChips()
                 setupModeChips()

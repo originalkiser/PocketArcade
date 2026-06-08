@@ -5,12 +5,7 @@
     android:viewportWidth="48"
     android:viewportHeight="48">
 
-    <!-- Dark navy background -->
-    <path android:fillColor="#0D0D2B"
-        android:pathData="M0,0 H48 V48 H0 Z" />
-    <!-- Slightly darker bottom half for depth -->
-    <path android:fillColor="#050510"
-        android:pathData="M0,32 H48 V48 H0 Z" />
+    <!-- Transparent background — no fill -->
 
     <!-- Stars -->
     <path android:fillColor="#AABBCC"
@@ -54,9 +49,7 @@
     <path android:fillColor="#00FFCC"
         android:pathData="M27,24 L13,19 L16,24 L13,29 Z" />
 
-    <!-- Cockpit (dark with teal outline) — centered on ship body y=24 -->
-    <path android:fillColor="#001A14"
-        android:pathData="M20,24 m-4.5,0 a4.5,2 0 1,0 9,0 a4.5,2 0 1,0 -9,0 Z" />
+    <!-- Cockpit outline only (dark fill removed to avoid black ellipse on ship) -->
     <path android:strokeColor="#00FFCC88"
         android:strokeWidth="0.8"
         android:fillColor="#00000000"

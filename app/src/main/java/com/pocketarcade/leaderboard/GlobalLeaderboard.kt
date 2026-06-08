@@ -5,8 +5,27 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-/** Decodes Pong encoded score (playerScore*100 + 99-aiScore) → "ps–ai"; passes through other scores. */
-fun formatGlobalScore(game: String, score: Int): String {
+/**
+ * Formats a leaderboard score for display.
+ *  - Memory Match: stored as (threshold − moves); reversed back to "X moves"
+ *  - Pong:         encoded as playerScore×100+(99−aiScore) → "ps–ai"
+ *  - All others:   formatted as a comma-separated integer
+ *
+ * [mode] is required for Memory Match; for convenience it can be embedded in [game]
+ * as a suffix ("memorymatch_easy", "memorymatch_medium", "memorymatch_hard").
+ */
+fun formatGlobalScore(game: String, score: Int, mode: String? = null): String {
+    if (game == "memorymatch" || game.startsWith("memorymatch_")) {
+        val resolvedMode = mode
+            ?: if (game.contains("_")) game.substringAfterLast("_") else null
+        val threshold = when (resolvedMode?.lowercase()) {
+            "easy"   -> 1000
+            "medium" -> 5000
+            "hard"   -> 10000
+            else     -> return "%,d pts".format(score)
+        }
+        return "${threshold - score} moves"
+    }
     if (game != "pong" && !game.startsWith("pong_")) return "%,d".format(score)
     val ps: Int; val ai: Int
     when {
@@ -213,16 +232,29 @@ object GlobalLeaderboard {
                     db.collection("globalScores").add(data)
                 }
                 else -> {
-                    // Already has an entry — replace only if new score beats it
-                    val existingDoc = docs[0]
-                    val existingScore = (existingDoc.getLong("score") ?: 0L).toInt()
-                    if (score > existingScore) {
-                        db.runTransaction { tx ->
-                            tx.delete(existingDoc.reference)
-                            tx.set(db.collection("globalScores").document(), data)
+                    // Find the best existing score across all docs (handles duplicates from past races)
+                    val bestDoc = docs.maxByOrNull { (it.getLong("score") ?: 0L).toInt() }!!
+                    val existingBest = (bestDoc.getLong("score") ?: 0L).toInt()
+                    when {
+                        score > existingBest -> {
+                            // New score wins — delete ALL existing entries and write fresh
+                            val batch = db.batch()
+                            docs.forEach { batch.delete(it.reference) }
+                            batch.set(db.collection("globalScores").document(), data)
+                            batch.commit().addOnFailureListener {
+                                // Batch failed (network?) — write new score anyway;
+                                // the next successful update will clean up duplicates
+                                db.collection("globalScores").add(data)
+                            }
                         }
+                        docs.size > 1 -> {
+                            // Score not improved, but duplicates exist — keep only the best doc
+                            val batch = db.batch()
+                            docs.filter { it.id != bestDoc.id }.forEach { batch.delete(it.reference) }
+                            batch.commit()
+                        }
+                        // else: single entry, score not improved — nothing to do
                     }
-                    // else: new score doesn't beat existing — skip
                 }
             }
         }.addOnFailureListener {
@@ -414,8 +446,13 @@ object GlobalLeaderboard {
         q.get()
             .addOnSuccessListener { snap ->
                 val docs = snap.documents
-                val entries = docs.mapNotNull { it.toEntry() }
-                onResult(entries, if (entries.size.toLong() >= pageSize) docs.lastOrNull() else null)
+                val allEntries = docs.mapNotNull { it.toEntry() }
+                // Deduplicate: keep only best score per uid (guards against stale duplicates in DB)
+                val entries = allEntries
+                    .groupBy { it.uid }
+                    .map { (_, es) -> es.maxByOrNull { it.score }!! }
+                    .sortedByDescending { it.score }
+                onResult(entries, if (allEntries.size.toLong() >= pageSize) docs.lastOrNull() else null)
             }
             .addOnFailureListener { onResult(emptyList(), null) }
     }
@@ -439,8 +476,13 @@ object GlobalLeaderboard {
         q.get()
             .addOnSuccessListener { snap ->
                 val docs = snap.documents
-                val entries = docs.mapNotNull { it.toEntry() }
-                onResult(entries, if (entries.size.toLong() >= pageSize) docs.lastOrNull() else null)
+                val allEntries = docs.mapNotNull { it.toEntry() }
+                // Deduplicate: keep only best score per uid
+                val entries = allEntries
+                    .groupBy { it.uid }
+                    .map { (_, es) -> es.maxByOrNull { it.score }!! }
+                    .sortedByDescending { it.score }
+                onResult(entries, if (allEntries.size.toLong() >= pageSize) docs.lastOrNull() else null)
             }
             .addOnFailureListener { onResult(emptyList(), null) }
     }
