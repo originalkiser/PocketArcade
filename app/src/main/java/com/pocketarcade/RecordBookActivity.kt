@@ -348,7 +348,7 @@ class RecordBookActivity : AppCompatActivity() {
                 addRow(contentContainer, "GAMES LOGGED", fmtNum(plays), "#00FF96")
                 if (moves > 0) {
                     val mm = secs / 60; val ss = secs % 60
-                    addRow(contentContainer, "BEST MOVES", "$moves mv", "#00FF96")
+                    addRow(contentContainer, "BEST MOVES", "$moves moves", "#00FF96")
                     addRow(contentContainer, "BEST TIME",  "%02d:%02d".format(mm, ss), "#00FF96")
                 }
                 addRow(contentContainer, "TOTAL TIME",

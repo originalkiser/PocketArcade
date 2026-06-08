@@ -388,9 +388,15 @@ object GlobalLeaderboard {
                 val best = mutableMapOf<String, Int>()
                 snap.documents.forEach { doc ->
                     val game  = doc.getString("game") ?: return@forEach
+                    val mode  = doc.getString("mode")
                     val score = (doc.getLong("score") ?: 0L).toInt()
-                    // Normalise: "brickbreaker" (ignore mode suffixes stored as separate field)
                     if (score > (best[game] ?: 0)) best[game] = score
+                    // For Memory Match also store per-mode key so the profile dialog
+                    // can decode the encoded score back to a move count correctly.
+                    if (game == "memorymatch" && mode != null) {
+                        val modeKey = "${game}_${mode}"
+                        if (score > (best[modeKey] ?: 0)) best[modeKey] = score
+                    }
                 }
                 onResult(best)
             }

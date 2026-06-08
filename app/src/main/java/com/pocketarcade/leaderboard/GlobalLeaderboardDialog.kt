@@ -111,7 +111,7 @@ fun showGlobalLeaderboardDialog(
     // Dialog-level mutable state
     var currentGame      = game
     // Multi-mode games need a concrete default so no "ALL" tab is required
-    var currentMode      = mode ?: if (game in setOf("brickbreaker", "memorymatch", "blockdrop")) "easy" else null
+    var currentMode      = mode ?: if (game in setOf("pong", "brickbreaker", "memorymatch", "blockdrop")) "easy" else null
     var currentTab       = "WORLD"
     var friendsTimeRange = TimeRange.ALL_TIME
     var pageLastDoc: DocumentSnapshot? = null
@@ -332,7 +332,7 @@ fun showGlobalLeaderboardDialog(
             PersonalGame("snake",              "SNAKE",        R.drawable.ic_snake,        Color.parseColor("#4f8ef7")),
             PersonalGame("pong",               "PONG",         R.drawable.ic_pong,         Color.parseColor("#e74c3c")),
             PersonalGame("asteroids",          "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
-            PersonalGame("brickbreaker",       "BRKR BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f")),
+            PersonalGame("brickbreaker",       "BRICK BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f")),
             PersonalGame("cavedriver",         "CAVE DIVER",   R.drawable.ic_cavedriver,   Color.parseColor("#00FFCC")),
             PersonalGame("blockdrop_easy",     "BLOCK DROP (E)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
             PersonalGame("blockdrop_medium",   "BLOCK DROP (M)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
@@ -443,7 +443,7 @@ fun showGlobalLeaderboardDialog(
     // ── Chip setup ────────────────────────────────────────────────────────────
 
     fun setupModeChips() {
-        if (currentGame != "brickbreaker" && currentGame != "memorymatch" && currentGame != "blockdrop") {
+        if (currentGame != "pong" && currentGame != "brickbreaker" && currentGame != "memorymatch" && currentGame != "blockdrop") {
             modeChipsScroll.visibility = View.GONE
             return
         }
@@ -479,7 +479,7 @@ fun showGlobalLeaderboardDialog(
             if (i > 0) (chip.layoutParams as LinearLayout.LayoutParams).marginStart = (6 * dp).toInt()
             chip.setOnClickListener {
                 currentGame = g.key
-                currentMode = if (g.key in setOf("brickbreaker", "memorymatch", "blockdrop")) "easy" else null
+                currentMode = if (g.key in setOf("pong", "brickbreaker", "memorymatch", "blockdrop")) "easy" else null
                 tvCurrentGame.text = g.label
                 setupGameChips()
                 setupModeChips()

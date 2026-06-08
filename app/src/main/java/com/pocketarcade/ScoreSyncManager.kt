@@ -31,6 +31,16 @@ object ScoreSyncManager {
         PrefsManager.GAME_BRICKBREAKER to listOf("easy", "medium", "hard")
     )
 
+    /**
+     * Games that store their high scores and period bests with the mode key embedded in the
+     * local key (e.g. "memorymatch_easy") rather than as a separate modeKey entry.
+     * firestoreGame = Firestore "game" field value; localPrefix = PrefsManager key prefix.
+     */
+    private val EMBEDDED_MODE_GAMES = listOf(
+        "memorymatch" to listOf("easy", "medium", "hard"),
+        "blockdrop"   to listOf("easy", "medium", "hard")
+    )
+
     @Volatile private var ranThisSession = false
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -75,6 +85,19 @@ object ScoreSyncManager {
                 country, state, null, avatarIndex, avatarColor
             )
         }
+
+        // Memory Match and Block Drop store high scores per-difficulty under a combined key
+        // (e.g. "memorymatch_easy") rather than per-game. Sync each difficulty separately.
+        for ((firestoreGame, diffs) in EMBEDDED_MODE_GAMES) {
+            for (diff in diffs) {
+                val score = PrefsManager.getHighScore(context, "${firestoreGame}_${diff}")
+                if (score <= 0) continue
+                GlobalLeaderboard.submitScore(
+                    uid, username, firestoreGame, score,
+                    country, state, diff, avatarIndex, avatarColor
+                )
+            }
+        }
     }
 
     // ── Period (week / month) ─────────────────────────────────────────────────
@@ -108,6 +131,29 @@ object ScoreSyncManager {
                     GlobalLeaderboard.submitPeriodScoreForPeriod(
                         uid, username, game, score, country, state,
                         mode, avatarIndex, avatarColor, "month", monthKey
+                    )
+                }
+            }
+        }
+
+        // Memory Match and Block Drop record their period best under a combined local key
+        // (e.g. game="memorymatch_easy", modeKey="_") but submit to Firestore as
+        // game="memorymatch", mode="easy". Handle them separately.
+        for ((firestoreGame, diffs) in EMBEDDED_MODE_GAMES) {
+            for (diff in diffs) {
+                val localGame = "${firestoreGame}_${diff}"
+                val (score, ts) = PrefsManager.getLocalPeriodBest(context, localGame, "_")
+                if (score <= 0 || ts <= 0L) continue
+                if (ts >= weekStart) {
+                    GlobalLeaderboard.submitPeriodScoreForPeriod(
+                        uid, username, firestoreGame, score, country, state,
+                        diff, avatarIndex, avatarColor, "week", weekKey
+                    )
+                }
+                if (ts >= monthStart) {
+                    GlobalLeaderboard.submitPeriodScoreForPeriod(
+                        uid, username, firestoreGame, score, country, state,
+                        diff, avatarIndex, avatarColor, "month", monthKey
                     )
                 }
             }

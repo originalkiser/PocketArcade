@@ -14,10 +14,15 @@ import com.pocketarcade.R
 import com.pocketarcade.storage.PrefsManager
 
 private val GAMES_INFO = listOf(
-    Triple("snake",        R.drawable.ic_snake,        "SNAKE"),
-    Triple("pong",         R.drawable.ic_pong,         "PONG"),
-    Triple("asteroids",    R.drawable.ic_asteroids,    "ASTEROIDS"),
-    Triple("brickbreaker", R.drawable.ic_brickbreaker, "BRKR BREAKER")
+    Triple("snake",              R.drawable.ic_snake,           "SNAKE"),
+    Triple("pong",               R.drawable.ic_pong,            "PONG"),
+    Triple("asteroids",          R.drawable.ic_asteroids,       "ASTEROIDS"),
+    Triple("brickbreaker",       R.drawable.ic_brickbreaker,    "BRICK BREAKER"),
+    Triple("cavedriver",         R.drawable.ic_cavedriver_ship, "CAVE DIVER"),
+    Triple("blockdrop",          R.drawable.ic_blockpop,        "BLOCK DROP"),
+    Triple("memorymatch_easy",   R.drawable.ic_memorymatch,     "MEMORY (E)"),
+    Triple("memorymatch_medium", R.drawable.ic_memorymatch,     "MEMORY (M)"),
+    Triple("memorymatch_hard",   R.drawable.ic_memorymatch,     "MEMORY (H)")
 )
 
 /**

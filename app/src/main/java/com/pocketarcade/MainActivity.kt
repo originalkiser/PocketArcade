@@ -261,10 +261,7 @@ class MainActivity : AppCompatActivity() {
 
         fun mmStat(diff: String): String {
             val moves = PrefsManager.getMmBestMoves(this, diff)
-            if (moves == 0) return "--"
-            val t  = PrefsManager.getMmBestTimeSecs(this, diff)
-            val mm = t / 60; val ss = t % 60
-            return "${moves}mv %02d:%02d".format(mm, ss)
+            return if (moves == 0) "--" else "$moves moves"
         }
         findViewById<TextView>(R.id.tvScoreMemoryMatch).text =
             "E: ${mmStat("easy")}   M: ${mmStat("medium")}"

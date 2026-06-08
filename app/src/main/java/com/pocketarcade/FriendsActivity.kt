@@ -3,9 +3,11 @@ package com.pocketarcade
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -25,19 +27,24 @@ class FriendsActivity : AppCompatActivity() {
     private var groupScores = mapOf<String, Map<String, Int>>()
     private var ranks = mapOf<String, Map<String, Int>>()
     private var selectedGame = PrefsManager.GAME_SNAKE
+    private var selectedMode: String? = null
     private var selectedTimeRange = TimeRange.ALL_TIME
     private var leaderboardLoaded = false
+    // true = show overview tiles, false = show per-game detail list
+    private var leaderboardInOverview = true
 
     private data class GameInfo(val key: String, val iconRes: Int, val label: String)
     private val games = listOf(
         GameInfo(PrefsManager.GAME_SNAKE,        R.drawable.ic_snake,        "SNAKE"),
         GameInfo(PrefsManager.GAME_PONG,         R.drawable.ic_pong,         "PONG"),
         GameInfo(PrefsManager.GAME_ASTEROIDS,    R.drawable.ic_asteroids,    "ASTEROIDS"),
-        GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRKR BREAKER"),
+        GameInfo(PrefsManager.GAME_BRICKBREAKER, R.drawable.ic_brickbreaker, "BRICK BREAKER"),
         GameInfo(PrefsManager.GAME_CAVEDRIVER,   R.drawable.ic_cavedriver,   "CAVE DIVER"),
         GameInfo("blockdrop",                    R.drawable.ic_blockpop,     "BLOCK DROP"),
         GameInfo("memorymatch",                  R.drawable.ic_memorymatch,  "MEMORY")
     )
+
+    private val multiModeGames = setOf("pong", "brickbreaker", "blockdrop", "memorymatch")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,7 +205,6 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { bottomMargin = (6 * dp).toInt() }
         }
 
-        // Tap row → show profile dialog
         row.setOnClickListener {
             GlobalLeaderboard.fetchUserInfo(entry.uid) { country, state ->
                 val globalEntry = GlobalEntry(
@@ -276,7 +282,6 @@ class FriendsActivity : AppCompatActivity() {
         return row
     }
 
-    /** Rank chip: small game icon + "#N" text, colored by game accent */
     private fun makeRankChip(iconRes: Int, gameKey: String, rank: Int, dp: Float): View {
         val color = when (gameKey) {
             PrefsManager.GAME_SNAKE        -> Color.parseColor("#4f8ef7")
@@ -297,7 +302,6 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { marginEnd = (6 * dp).toInt() }
         }
         val iconSize = (13 * dp).toInt()
-        // Cave Diver uses a dedicated ship-silhouette icon for rank chips
         val resolvedIconRes = if (gameKey == PrefsManager.GAME_CAVEDRIVER) R.drawable.ic_cavedriver_ship else iconRes
         container.addView(ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(iconSize, iconSize * 2 / 3)
@@ -432,8 +436,308 @@ class FriendsActivity : AppCompatActivity() {
     private fun loadLeaderboard() {
         setupLeaderboardFilters()
         setupTimeRangeBar()
+        // Wire up back button (overview → detail navigation)
+        findViewById<TextView>(R.id.btnBackToOverview)?.setOnClickListener {
+            switchToOverview()
+        }
+        // Start in overview mode
+        switchToOverview()
+    }
+
+    // ── Overview ──────────────────────────────────────────────────────────────
+
+    private fun switchToOverview() {
+        val overviewPanel = findViewById<ScrollView>(R.id.panelLeaderboardOverview) ?: return
+        val detailPanel   = findViewById<LinearLayout>(R.id.panelLeaderboardDetail) ?: return
+        overviewPanel.visibility = View.VISIBLE
+        detailPanel.visibility   = View.GONE
+        leaderboardInOverview = true
+        fetchAndBuildOverview()
+    }
+
+    private fun switchToDetail(game: String, mode: String?) {
+        val overviewPanel = findViewById<ScrollView>(R.id.panelLeaderboardOverview) ?: return
+        val detailPanel   = findViewById<LinearLayout>(R.id.panelLeaderboardDetail) ?: return
+        selectedGame = game
+        selectedMode = mode
+        overviewPanel.visibility = View.GONE
+        detailPanel.visibility   = View.VISIBLE
+        leaderboardInOverview = false
+        setupLeaderboardFilters()
+        setupLeaderboardModeChips()
         fetchAndShowLeaderboard()
     }
+
+    private fun fetchAndBuildOverview() {
+        val container = findViewById<LinearLayout>(R.id.leaderboardOverviewContainer) ?: return
+        container.removeAllViews()
+
+        val dp = resources.displayMetrics.density
+
+        // Loading indicator
+        container.addView(TextView(this).apply {
+            text = "Loading..."
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            setTextColor(getColor(R.color.muted))
+            gravity = Gravity.CENTER
+            setPadding(0, (32 * dp).toInt(), 0, 0)
+        })
+
+        val uid = myUid ?: return
+        val allUids = (listOf(uid) + following.map { it.uid }).distinct()
+
+        FriendsManager.fetchGroupOverviewScores(allUids, selectedTimeRange) { dataMap ->
+            runOnUiThread {
+                container.removeAllViews()
+                if (dataMap.isEmpty()) {
+                    container.addView(TextView(this).apply {
+                        text = "No friend scores yet.\nAdd friends to see their scores!"
+                        textSize = 13f
+                        typeface = Typeface.MONOSPACE
+                        setTextColor(getColor(R.color.muted))
+                        gravity = Gravity.CENTER
+                        setPadding(0, (32 * dp).toInt(), 0, 0)
+                    })
+                    return@runOnUiThread
+                }
+                buildOverviewTiles(container, dataMap)
+            }
+        }
+    }
+
+    private fun buildOverviewTiles(container: LinearLayout, dataMap: Map<String, List<GlobalEntry>>) {
+        val dp = resources.displayMetrics.density
+
+        data class GameCfg(val key: String, val iconRes: Int, val label: String, val color: Int)
+        val overviewGames = listOf(
+            GameCfg("snake",        R.drawable.ic_snake,           "SNAKE",        Color.parseColor("#4f8ef7")),
+            GameCfg("pong",         R.drawable.ic_pong,            "PONG",         Color.parseColor("#e74c3c")),
+            GameCfg("asteroids",    R.drawable.ic_asteroids,       "ASTEROIDS",    Color.parseColor("#00d4ff")),
+            GameCfg("brickbreaker", R.drawable.ic_brickbreaker,    "BRICK BREAKER",Color.parseColor("#f1c40f")),
+            GameCfg("cavedriver",   R.drawable.ic_cavedriver_ship, "CAVE DIVER",   Color.parseColor("#00FFCC")),
+            GameCfg("blockdrop",    R.drawable.ic_blockpop,        "BLOCK DROP",   Color.parseColor("#FF6B35")),
+            GameCfg("memorymatch",  R.drawable.ic_memorymatch,     "MEMORY MATCH", Color.parseColor("#00FF96"))
+        )
+
+        overviewGames.forEach { cfg ->
+            val isMultiMode = cfg.key in multiModeGames
+            val r = Color.red(cfg.color); val g = Color.green(cfg.color); val b = Color.blue(cfg.color)
+
+            val tile = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 10 * dp
+                    setColor(Color.argb(25, r, g, b))
+                    setStroke((1 * dp).toInt(), Color.argb(70, r, g, b))
+                }
+                setPadding((12 * dp).toInt(), (10 * dp).toInt(), (12 * dp).toInt(), (12 * dp).toInt())
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = (10 * dp).toInt() }
+                isClickable = true
+                isFocusable = true
+            }
+
+            // Header: icon + game name
+            val header = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = (8 * dp).toInt() }
+            }
+            val iconSz = (18 * dp).toInt()
+            header.addView(ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(iconSz, iconSz)
+                setImageResource(cfg.iconRes)
+                setColorFilter(cfg.color, PorterDuff.Mode.SRC_IN)
+            })
+            header.addView(TextView(this).apply {
+                text = cfg.label
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(cfg.color)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginStart = (8 * dp).toInt()
+                }
+            })
+            // Tap header → open detail for default mode
+            val defaultMode = if (isMultiMode) "easy" else null
+            header.isClickable = true
+            header.isFocusable = true
+            header.setOnClickListener { switchToDetail(cfg.key, defaultMode) }
+            tile.addView(header)
+
+            if (!isMultiMode) {
+                // Single-mode tile: show top-3 in one list
+                val entries = dataMap["${cfg.key}|_"] ?: emptyList()
+                if (entries.isEmpty()) {
+                    tile.addView(noScoresHint(dp))
+                } else {
+                    entries.forEachIndexed { idx, entry ->
+                        tile.addView(buildOverviewRow(idx + 1, entry, cfg.key, null, dp))
+                    }
+                }
+                tile.setOnClickListener { switchToDetail(cfg.key, null) }
+            } else {
+                // Multi-mode tile: three columns (Easy | Medium | Hard)
+                val colsRow = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+                listOf("easy" to "EASY", "medium" to "MED", "hard" to "HARD").forEach { (modeKey, modeLabel) ->
+                    val entries = dataMap["${cfg.key}|$modeKey"] ?: emptyList()
+                    val col = buildOverviewModeCol(cfg.key, modeKey, modeLabel, entries, cfg.color, dp)
+                    col.setOnClickListener { switchToDetail(cfg.key, modeKey) }
+                    colsRow.addView(col)
+                }
+                tile.addView(colsRow)
+                tile.setOnClickListener { switchToDetail(cfg.key, "easy") }
+            }
+
+            container.addView(tile)
+        }
+    }
+
+    private fun buildOverviewRow(
+        rank: Int, entry: GlobalEntry, gameKey: String, mode: String?, dp: Float
+    ): View {
+        val rankColor = when (rank) {
+            1 -> Color.parseColor("#FFD700")
+            2 -> Color.parseColor("#C0C0C0")
+            3 -> Color.parseColor("#CD7F32")
+            else -> getColor(R.color.muted)
+        }
+        val isMe = entry.uid == myUid
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (3 * dp).toInt() }
+        }
+        row.addView(TextView(this).apply {
+            text = "#$rank"
+            textSize = 10f
+            typeface = Typeface.MONOSPACE
+            setTextColor(rankColor)
+            layoutParams = LinearLayout.LayoutParams((28 * dp).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT)
+        })
+        row.addView(AvatarUtils.buildView(this, entry.avatarIndex, entry.avatarColor, 18))
+        row.addView(TextView(this).apply {
+            text = if (isMe) "${entry.username} ★" else entry.username
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            setTextColor(if (isMe) getColor(R.color.accent_blue) else Color.WHITE)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginStart = (4 * dp).toInt()
+            }
+        })
+        row.addView(TextView(this).apply {
+            text = formatGlobalScore(gameKey, entry.score, mode ?: entry.mode)
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            setTextColor(getColor(R.color.accent_blue))
+            gravity = Gravity.END
+        })
+        return row
+    }
+
+    private fun buildOverviewModeCol(
+        gameKey: String, modeKey: String, modeLabel: String,
+        entries: List<GlobalEntry>, accentColor: Int, dp: Float
+    ): LinearLayout {
+        val r = Color.red(accentColor); val g = Color.green(accentColor); val b = Color.blue(accentColor)
+        val col = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginEnd = (4 * dp).toInt()
+            }
+            isClickable = true
+            isFocusable = true
+        }
+        // Difficulty label
+        col.addView(TextView(this).apply {
+            text = modeLabel
+            textSize = 9f
+            typeface = Typeface.MONOSPACE
+            setTextColor(Color.argb(180, r, g, b))
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (3 * dp).toInt() }
+        })
+        // Divider
+        col.addView(android.view.View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (1 * dp).toInt()
+            ).apply { bottomMargin = (4 * dp).toInt() }
+            setBackgroundColor(Color.argb(50, r, g, b))
+        })
+        if (entries.isEmpty()) {
+            col.addView(TextView(this).apply {
+                text = "—"
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                setTextColor(getColor(R.color.muted))
+                gravity = Gravity.CENTER
+            })
+        } else {
+            entries.forEachIndexed { idx, entry ->
+                val rankColor = when (idx + 1) {
+                    1 -> Color.parseColor("#FFD700")
+                    2 -> Color.parseColor("#C0C0C0")
+                    3 -> Color.parseColor("#CD7F32")
+                    else -> getColor(R.color.muted)
+                }
+                val isMe = entry.uid == myUid
+                // Username line
+                col.addView(TextView(this).apply {
+                    text = if (isMe) "${entry.username} ★" else entry.username
+                    textSize = 10f
+                    typeface = Typeface.MONOSPACE
+                    setTextColor(rankColor)
+                    maxLines = 1
+                    ellipsize = TextUtils.TruncateAt.END
+                })
+                // Score line
+                col.addView(TextView(this).apply {
+                    text = formatGlobalScore(gameKey, entry.score, modeKey)
+                    textSize = 9f
+                    typeface = Typeface.MONOSPACE
+                    setTextColor(getColor(R.color.accent_blue))
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { bottomMargin = if (idx < entries.size - 1) (4 * dp).toInt() else 0 }
+                })
+            }
+        }
+        return col
+    }
+
+    private fun noScoresHint(dp: Float) = TextView(this).apply {
+        text = "No scores yet"
+        textSize = 11f
+        typeface = Typeface.MONOSPACE
+        setTextColor(getColor(R.color.muted))
+        gravity = Gravity.CENTER
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { topMargin = (4 * dp).toInt() }
+    }
+
+    // ── Detail view ───────────────────────────────────────────────────────────
 
     private fun setupTimeRangeBar() {
         val bar = findViewById<LinearLayout>(R.id.leaderboardTimeBar) ?: return
@@ -456,7 +760,6 @@ class FriendsActivity : AppCompatActivity() {
                     else { setColor(Color.TRANSPARENT); setStroke((1 * dp).toInt(), getColor(R.color.muted)) }
                 }
             }
-            // Days remaining subtitle
             when (selectedTimeRange) {
                 TimeRange.WEEK -> {
                     val days = daysLeftInWeek()
@@ -487,12 +790,49 @@ class FriendsActivity : AppCompatActivity() {
                 setOnClickListener {
                     selectedTimeRange = r.range
                     refreshStyles()
-                    fetchAndShowLeaderboard()
+                    if (leaderboardInOverview) fetchAndBuildOverview() else fetchAndShowLeaderboard()
                 }
             }
             bar.addView(chip)
         }
         refreshStyles()
+    }
+
+    private fun setupLeaderboardModeChips() {
+        val modeScroll = findViewById<HorizontalScrollView>(R.id.leaderboardModeScroll) ?: return
+        val modeRow    = findViewById<LinearLayout>(R.id.leaderboardModeRow) ?: return
+        val isMultiMode = selectedGame in multiModeGames
+        modeScroll.visibility = if (isMultiMode) View.VISIBLE else View.GONE
+        if (!isMultiMode) { if (selectedGame !in multiModeGames) selectedMode = null; return }
+
+        modeRow.removeAllViews()
+        val dp = resources.displayMetrics.density
+        listOf("easy" to "EASY", "medium" to "MED", "hard" to "HARD").forEachIndexed { i, (key, label) ->
+            val isActive = selectedMode == key
+            val chip = TextView(this).apply {
+                text = label
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+                setTextColor(if (isActive) Color.WHITE else getColor(R.color.muted))
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 16 * dp
+                    if (isActive) setColor(getColor(R.color.accent_blue))
+                    else { setColor(Color.TRANSPARENT); setStroke((1 * dp).toInt(), getColor(R.color.muted)) }
+                }
+                setPadding((12 * dp).toInt(), 0, (12 * dp).toInt(), 0)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, (28 * dp).toInt()
+                ).apply { if (i > 0) marginStart = (6 * dp).toInt() }
+                setOnClickListener {
+                    selectedMode = key
+                    setupLeaderboardModeChips()
+                    fetchAndShowLeaderboard()
+                }
+            }
+            modeRow.addView(chip)
+        }
     }
 
     private fun setupLeaderboardFilters() {
@@ -511,7 +851,6 @@ class FriendsActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     (34 * dp).toInt()
                 ).apply { marginEnd = (8 * dp).toInt() }
-                // Game icon as compound drawable
                 val iconSize = (16 * dp).toInt()
                 val d = ContextCompat.getDrawable(this@FriendsActivity, game.iconRes)
                 d?.setBounds(0, 0, iconSize, iconSize)
@@ -542,7 +881,9 @@ class FriendsActivity : AppCompatActivity() {
         for (i in games.indices) {
             (filterRow.getChildAt(i) as? TextView)?.setOnClickListener {
                 selectedGame = games[i].key
+                selectedMode = if (selectedGame in multiModeGames) selectedMode ?: "easy" else null
                 refreshChipStyles()
+                setupLeaderboardModeChips()
                 fetchAndShowLeaderboard()
             }
         }
@@ -561,7 +902,7 @@ class FriendsActivity : AppCompatActivity() {
         val uid = myUid ?: run { tvLoading.text = "Sign in required"; return }
         val allUids = (listOf(uid) + following.map { it.uid }).distinct()
 
-        FriendsManager.fetchFriendsScores(allUids, selectedGame, selectedTimeRange) { entries ->
+        FriendsManager.fetchFriendsScores(allUids, selectedGame, selectedTimeRange, mode = selectedMode) { entries ->
             runOnUiThread {
                 tvLoading.visibility = View.GONE
                 if (entries.isEmpty()) {
@@ -584,7 +925,6 @@ class FriendsActivity : AppCompatActivity() {
         isMutual: Boolean
     ): View {
         val dp = resources.displayMetrics.density
-        // Medals (gold/silver/bronze) only for timed periods, not ALL TIME
         val useMedals = selectedTimeRange != TimeRange.ALL_TIME
         val rankColor = when {
             useMedals && rank == 1 -> Color.parseColor("#FFD700")
@@ -621,7 +961,6 @@ class FriendsActivity : AppCompatActivity() {
             ).apply { bottomMargin = (4 * dp).toInt() }
         }
 
-        // Tap row → show player profile dialog
         row.setOnClickListener {
             showPlayerProfileDialog(
                 activity    = this,
@@ -655,9 +994,8 @@ class FriendsActivity : AppCompatActivity() {
             }
         })
 
-        // Score column with game icon
         val gameInfo = games.find { it.key == selectedGame }
-        val scoreText = formatGlobalScore(selectedGame, entry.score, entry.mode)
+        val scoreText = formatGlobalScore(selectedGame, entry.score, selectedMode ?: entry.mode)
         row.addView(TextView(this).apply {
             text = " $scoreText"
             setTextColor(nameColor)

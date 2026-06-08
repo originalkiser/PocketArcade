@@ -426,72 +426,6 @@
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
 
-                <!-- MEMORY MATCH -->
-                <LinearLayout
-                    android:id="@+id/tileMemoryMatch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="14dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="58dp"
-                        android:layout_height="58dp"
-                        android:src="@drawable/ic_memorymatch"
-                        android:contentDescription="Memory Match" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/game_memorymatch"
-                            android:textColor="#00FF96"
-                            android:textSize="19sp"
-                            android:fontFamily="monospace"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvScoreMemoryMatch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="Best: --"
-                            android:textColor="@color/muted"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace" />
-
-                        <TextView
-                            android:id="@+id/tvScoreMemoryMatchDetail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text=""
-                            android:textColor="@color/muted"
-                            android:textSize="11sp"
-                            android:fontFamily="monospace" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#x25B6;"
-                        android:textColor="#00FF96"
-                        android:textSize="18sp"
-                        android:alpha="0.5"
-                        android:layout_marginStart="8dp" />
-                </LinearLayout>
-
                 <!-- BLOCK DROP -->
                 <LinearLayout
                     android:id="@+id/tileBlockPop"
@@ -555,6 +489,72 @@
                         android:layout_height="wrap_content"
                         android:text="&#x25B6;"
                         android:textColor="#FF6B35"
+                        android:textSize="18sp"
+                        android:alpha="0.5"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <!-- MEMORY MATCH -->
+                <LinearLayout
+                    android:id="@+id/tileMemoryMatch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:src="@drawable/ic_memorymatch"
+                        android:contentDescription="Memory Match" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/game_memorymatch"
+                            android:textColor="#00FF96"
+                            android:textSize="19sp"
+                            android:fontFamily="monospace"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvScoreMemoryMatch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Best: --"
+                            android:textColor="@color/muted"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace" />
+
+                        <TextView
+                            android:id="@+id/tvScoreMemoryMatchDetail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text=""
+                            android:textColor="@color/muted"
+                            android:textSize="11sp"
+                            android:fontFamily="monospace" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="&#x25B6;"
+                        android:textColor="#00FF96"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />

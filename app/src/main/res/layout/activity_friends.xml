@@ -337,23 +337,7 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- Game filter chips -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp">
-
-                <LinearLayout
-                    android:id="@+id/leaderboardFilterRow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-
-            </HorizontalScrollView>
-
-            <!-- Time range bar: WEEK | MONTH | ALL TIME -->
+            <!-- Time range bar: WEEK | MONTH | ALL TIME (shared by overview and detail) -->
             <LinearLayout
                 android:id="@+id/leaderboardTimeBar"
                 android:layout_width="match_parent"
@@ -376,49 +360,135 @@
                 android:background="@color/surface"
                 android:visibility="gone" />
 
+            <!-- OVERVIEW panel — default view, shows top-3 per game tile -->
             <ScrollView
+                android:id="@+id/panelLeaderboardOverview"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:scrollbars="none">
 
                 <LinearLayout
+                    android:id="@+id/leaderboardOverviewContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="12dp" />
+
+            </ScrollView>
+
+            <!-- DETAIL panel — per-game ranked list, initially gone -->
+            <LinearLayout
+                android:id="@+id/panelLeaderboardDetail"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Back button + mode chips row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@color/surface"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
 
                     <TextView
-                        android:id="@+id/tvLeaderboardLoading"
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnBackToOverview"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Loading..."
-                        android:textColor="@color/muted"
-                        android:textSize="13sp"
+                        android:text="← ALL"
+                        android:textColor="@color/accent_blue"
+                        android:textSize="12sp"
                         android:fontFamily="monospace"
-                        android:gravity="center"
-                        android:padding="24dp" />
+                        android:paddingEnd="10dp"
+                        android:clickable="true"
+                        android:focusable="true" />
 
-                    <TextView
-                        android:id="@+id/tvLeaderboardEmpty"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="No scores to show yet.\nAdd friends to compare!"
-                        android:textColor="@color/muted"
-                        android:textSize="13sp"
-                        android:fontFamily="monospace"
-                        android:gravity="center"
-                        android:padding="24dp"
-                        android:visibility="gone" />
+                    <HorizontalScrollView
+                        android:id="@+id/leaderboardModeScroll"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scrollbars="none"
+                        android:visibility="gone">
 
-                    <LinearLayout
-                        android:id="@+id/leaderboardContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                        <LinearLayout
+                            android:id="@+id/leaderboardModeRow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical" />
+
+                    </HorizontalScrollView>
 
                 </LinearLayout>
-            </ScrollView>
+
+                <!-- Game filter chips -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/leaderboardFilterRow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                </HorizontalScrollView>
+
+                <!-- Ranked list -->
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/tvLeaderboardLoading"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Loading..."
+                            android:textColor="@color/muted"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center"
+                            android:padding="24dp" />
+
+                        <TextView
+                            android:id="@+id/tvLeaderboardEmpty"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="No scores to show yet.\nAdd friends to compare!"
+                            android:textColor="@color/muted"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center"
+                            android:padding="24dp"
+                            android:visibility="gone" />
+
+                        <LinearLayout
+                            android:id="@+id/leaderboardContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                    </LinearLayout>
+                </ScrollView>
+
+            </LinearLayout>
 
         </LinearLayout>
 

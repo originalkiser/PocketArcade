@@ -453,7 +453,7 @@ class ProfileActivity : AppCompatActivity() {
                 "memorymatch" -> {
                     val parts = listOf("easy" to "E", "medium" to "M", "hard" to "H").mapNotNull { (diff, lbl) ->
                         val m = PrefsManager.getMmBestMoves(this, diff)
-                        if (m > 0) "$lbl: ${m}mv" else null
+                        if (m > 0) "$lbl: $m moves" else null
                     }
                     if (parts.isNotEmpty()) parts.joinToString("  ") else "—"
                 }

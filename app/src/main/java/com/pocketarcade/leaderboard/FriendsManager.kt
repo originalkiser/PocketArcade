@@ -335,6 +335,83 @@ object FriendsManager {
         }
     }
 
+    /**
+     * Fetches scores for ALL games and modes for the given UIDs, grouped by "game|modeKey".
+     * Returns up to 3 entries per game+mode, sorted descending by score — used to build the
+     * friends leaderboard overview tiles.
+     *
+     * modeKey is "_" for single-mode games, or "easy"/"medium"/"hard" for multi-mode games.
+     */
+    fun fetchGroupOverviewScores(
+        uids: List<String>,
+        timeRange: TimeRange,
+        onResult: (Map<String, List<GlobalEntry>>) -> Unit
+    ) {
+        if (uids.isEmpty()) { onResult(emptyMap()); return }
+
+        fun parseDoc(doc: com.google.firebase.firestore.DocumentSnapshot): Pair<String, GlobalEntry>? {
+            val game = doc.getString("game") ?: return null
+            val uid  = doc.getString("uid")  ?: return null
+            return try {
+                Pair(game, GlobalEntry(
+                    uid         = uid,
+                    username    = doc.getString("username") ?: "???",
+                    score       = (doc.getLong("score") ?: 0L).toInt(),
+                    mode        = doc.getString("mode"),
+                    avatarIndex = (doc.getLong("avatarIndex") ?: 0L).toInt(),
+                    avatarColor = (doc.getLong("avatarColor") ?: 0L).toInt()
+                ))
+            } catch (e: Exception) { null }
+        }
+
+        fun buildMap(raw: List<Pair<String, GlobalEntry>>): Map<String, List<GlobalEntry>> {
+            val map = mutableMapOf<String, MutableList<GlobalEntry>>()
+            raw.forEach { (game, entry) ->
+                val modeKey = entry.mode ?: "_"
+                map.getOrPut("$game|$modeKey") { mutableListOf() }.add(entry)
+            }
+            return map.mapValues { (_, list) ->
+                list.groupBy { it.uid }
+                    .map { (_, es) -> es.maxByOrNull { it.score }!! }
+                    .sortedByDescending { it.score }
+                    .take(3)
+            }
+        }
+
+        if (timeRange == TimeRange.ALL_TIME) {
+            db.collection("globalScores")
+                .whereIn("uid", uids.take(30))
+                .get()
+                .addOnSuccessListener { snap ->
+                    onResult(buildMap(snap.documents.mapNotNull { parseDoc(it) }))
+                }
+                .addOnFailureListener { onResult(emptyMap()) }
+            return
+        }
+
+        val periodType = if (timeRange == TimeRange.WEEK) "week" else "month"
+        val periodKey  = if (timeRange == TimeRange.WEEK) currentWeekKey() else currentMonthKey()
+        val games    = listOf("snake", "pong", "asteroids", "brickbreaker", "cavedriver", "blockdrop", "memorymatch")
+        val modeKeys = listOf("_", "easy", "medium", "hard")
+        val allDocIds = uids.take(30).flatMap { uid ->
+            games.flatMap { game -> modeKeys.map { mk -> "$uid|$game|$mk|$periodType|$periodKey" } }
+        }
+        val batches = allDocIds.chunked(30)
+        val allEntries = mutableListOf<Pair<String, GlobalEntry>>()
+        var pending = batches.size
+
+        batches.forEach { batch ->
+            db.collection("periodScores")
+                .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
+                .get()
+                .addOnSuccessListener { snap ->
+                    snap.documents.forEach { doc -> parseDoc(doc)?.let { allEntries.add(it) } }
+                    if (--pending == 0) onResult(buildMap(allEntries))
+                }
+                .addOnFailureListener { if (--pending == 0) onResult(buildMap(allEntries)) }
+        }
+    }
+
     fun fetchAllGroupScores(
         uids: List<String>,
         onResult: (Map<String, Map<String, Int>>) -> Unit
