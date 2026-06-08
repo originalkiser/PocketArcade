@@ -421,46 +421,100 @@ class ProfileActivity : AppCompatActivity() {
         container.removeAllViews()
         val dp = resources.displayMetrics.density
 
-        data class GameRow(val key: String, val label: String, val color: Int, val iconRes: Int)
-        val gameRows = listOf(
-            GameRow(PrefsManager.GAME_SNAKE,        "SNAKE",        getColor(R.color.accent_blue),   R.drawable.ic_snake),
-            GameRow(PrefsManager.GAME_PONG,         "PONG",         getColor(R.color.accent_red),    R.drawable.ic_pong),
-            GameRow(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS",    getColor(R.color.accent_cyan),   R.drawable.ic_asteroids),
-            GameRow(PrefsManager.GAME_BRICKBREAKER, "BRICK BREAKER",getColor(R.color.accent_yellow), R.drawable.ic_brickbreaker),
-            GameRow(PrefsManager.GAME_CAVEDRIVER,   "CAVE DIVER",   Color.parseColor("#00FFCC"),     R.drawable.ic_cavedriver),
-            GameRow("blockdrop",                    "BLOCK DROP",   Color.parseColor("#FF6B35"),     R.drawable.ic_blockpop),
-            GameRow("memorymatch",                  "MEMORY MATCH", Color.parseColor("#00FF96"),     R.drawable.ic_memorymatch)
+        // Decode a Pong encoded score into "ps–ai" display string
+        fun pongDecodeScore(enc: Int): String {
+            if (enc <= 0) return "—"
+            val ps: Int; val ai: Int
+            when {
+                enc >= 80 -> { ps = enc / 100; ai = 99 - enc % 100 }
+                enc >= 10 -> { ps = enc / 10;  ai = enc % 10 }
+                else      -> { ps = 0;          ai = enc }
+            }
+            return "$ps–$ai"
+        }
+
+        // Each game: null modeScores = single-mode row; non-null = tall 3-row tile
+        data class GameInfo(
+            val key: String, val label: String, val color: Int, val iconRes: Int,
+            val modeScores: List<Pair<String, String>>? = null,
+            val singleScore: String = "—"
         )
 
-        gameRows.forEach { game ->
-            val score = PrefsManager.getHighScore(this, game.key)
-            val scoreStr = when (game.key) {
-                PrefsManager.GAME_PONG -> {
-                    val wins = PrefsManager.getPongWins(this)
-                    val plays = PrefsManager.getStatPlays(this, game.key)
-                    val losses = (plays - wins).coerceAtLeast(0)
-                    val wl = if (losses > 0) "%.1f".format(wins.toFloat() / losses) else if (wins > 0) "∞" else "—"
-                    val bestGame = if (score >= 100) formatGlobalScore(game.key, score) else if (score > 0) "$score–?" else null
-                    val best = if (bestGame != null) "  ·  Best $bestGame" else ""
-                    "$wins W  ·  W/L $wl$best"
-                }
-                "blockdrop" -> {
-                    val best = listOf("blockdrop_easy", "blockdrop_medium", "blockdrop_hard")
-                        .mapNotNull { key -> PrefsManager.getHighScore(this, key).takeIf { it > 0 } }
-                        .maxOrNull()
-                    if (best != null) "%,d pts".format(best) else "—"
-                }
-                "memorymatch" -> {
-                    val parts = listOf("easy" to "E", "medium" to "M", "hard" to "H").mapNotNull { (diff, lbl) ->
-                        val m = PrefsManager.getMmBestMoves(this, diff)
-                        if (m > 0) "$lbl: $m moves" else null
+        val games = listOf(
+            // ── Single-mode ──────────────────────────────────────────────────
+            GameInfo(
+                PrefsManager.GAME_SNAKE, "SNAKE",
+                getColor(R.color.accent_blue), R.drawable.ic_snake,
+                singleScore = PrefsManager.getHighScore(this, PrefsManager.GAME_SNAKE)
+                    .let { if (it > 0) "%,d pts".format(it) else "—" }
+            ),
+            // ── Pong — multi-mode ────────────────────────────────────────────
+            GameInfo(
+                PrefsManager.GAME_PONG, "PONG",
+                getColor(R.color.accent_red), R.drawable.ic_pong,
+                modeScores = listOf("easy", "medium", "hard").map { diff ->
+                    val lbl = diff[0].uppercaseChar().toString()
+                    val entry = LeaderboardManager.getEntries(this, "pong_$diff").firstOrNull()
+                    val disp = if (entry != null && entry.score > 0) {
+                        pongDecodeScore(entry.score)
+                    } else {
+                        val plays = PrefsManager.getStatPlays(this, "pong", diff)
+                        if (plays > 0) "$plays games" else "—"
                     }
-                    if (parts.isNotEmpty()) parts.joinToString("  ") else "—"
+                    Pair(lbl, disp)
                 }
-                else -> if (score > 0) "%,d pts".format(score) else "—"
-            }
+            ),
+            // ── Single-mode ──────────────────────────────────────────────────
+            GameInfo(
+                PrefsManager.GAME_ASTEROIDS, "ASTEROIDS",
+                getColor(R.color.accent_cyan), R.drawable.ic_asteroids,
+                singleScore = PrefsManager.getHighScore(this, PrefsManager.GAME_ASTEROIDS)
+                    .let { if (it > 0) "%,d pts".format(it) else "—" }
+            ),
+            // ── Brick Breaker — multi-mode ───────────────────────────────────
+            GameInfo(
+                PrefsManager.GAME_BRICKBREAKER, "BRICK BREAKER",
+                getColor(R.color.accent_yellow), R.drawable.ic_brickbreaker,
+                modeScores = listOf("easy", "medium", "hard").map { diff ->
+                    val lbl = diff[0].uppercaseChar().toString()
+                    val score = LeaderboardManager.getEntries(this, "brickbreaker_$diff")
+                        .firstOrNull()?.score ?: 0
+                    Pair(lbl, if (score > 0) "%,d pts".format(score) else "—")
+                }
+            ),
+            // ── Single-mode ──────────────────────────────────────────────────
+            GameInfo(
+                PrefsManager.GAME_CAVEDRIVER, "CAVE DIVER",
+                Color.parseColor("#00FFCC"), R.drawable.ic_cavedriver,
+                singleScore = PrefsManager.getHighScore(this, PrefsManager.GAME_CAVEDRIVER)
+                    .let { if (it > 0) "%,d pts".format(it) else "—" }
+            ),
+            // ── Block Drop — multi-mode ──────────────────────────────────────
+            GameInfo(
+                "blockdrop", "BLOCK DROP",
+                Color.parseColor("#FF6B35"), R.drawable.ic_blockpop,
+                modeScores = listOf("easy", "medium", "hard").map { diff ->
+                    val lbl = diff[0].uppercaseChar().toString()
+                    val score = PrefsManager.getHighScore(this, "blockdrop_$diff")
+                    Pair(lbl, if (score > 0) "%,d pts".format(score) else "—")
+                }
+            ),
+            // ── Memory Match — multi-mode ────────────────────────────────────
+            GameInfo(
+                "memorymatch", "MEMORY MATCH",
+                Color.parseColor("#00FF96"), R.drawable.ic_memorymatch,
+                modeScores = listOf("easy", "medium", "hard").map { diff ->
+                    val lbl = diff[0].uppercaseChar().toString()
+                    val moves = PrefsManager.getMmBestMoves(this, diff)
+                    Pair(lbl, if (moves > 0) "$moves moves" else "—")
+                }
+            )
+        )
 
-            val row = LinearLayout(this).apply {
+        val iconSize = (24 * dp).toInt()
+
+        games.forEach { game ->
+            val rowLayout = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 background = getDrawable(R.drawable.bg_game_tile)
@@ -470,30 +524,76 @@ class ProfileActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply { bottomMargin = (6 * dp).toInt() }
             }
-            val iconSize = (24 * dp).toInt()
-            row.addView(ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-                setImageResource(game.iconRes)
-            })
-            val nameTV = TextView(this).apply {
-                text = game.label
-                textSize = 12f
-                typeface = Typeface.MONOSPACE
-                setTextColor(game.color)
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginStart = (10 * dp).toInt()
+
+            if (game.modeScores == null) {
+                // Single-mode: [icon]  [name ──────────]  [score]
+                rowLayout.addView(ImageView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+                    setImageResource(game.iconRes)
+                })
+                rowLayout.addView(TextView(this).apply {
+                    text = game.label
+                    textSize = 12f
+                    typeface = Typeface.MONOSPACE
+                    setTextColor(game.color)
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                        .apply { marginStart = (10 * dp).toInt() }
+                })
+                rowLayout.addView(TextView(this).apply {
+                    text = game.singleScore
+                    textSize = 12f
+                    typeface = Typeface.MONOSPACE
+                    setTextColor(getColor(R.color.muted))
+                    gravity = Gravity.END
+                })
+            } else {
+                // Multi-mode: [icon + name, vertically centered] | [E: val]
+                //                                                  [M: val]
+                //                                                  [H: val]
+                val leftSide = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 }
+                leftSide.addView(ImageView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+                    setImageResource(game.iconRes)
+                })
+                leftSide.addView(TextView(this).apply {
+                    text = game.label
+                    textSize = 12f
+                    typeface = Typeface.MONOSPACE
+                    setTextColor(game.color)
+                    isSingleLine = true
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { marginStart = (10 * dp).toInt() }
+                })
+
+                val rightSide = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+                game.modeScores.forEach { (lbl, value) ->
+                    rightSide.addView(TextView(this).apply {
+                        text = "$lbl: $value"
+                        textSize = 12f
+                        typeface = Typeface.MONOSPACE
+                        setTextColor(getColor(R.color.muted))
+                        gravity = Gravity.END
+                    })
+                }
+
+                rowLayout.addView(leftSide)
+                rowLayout.addView(rightSide)
             }
-            row.addView(nameTV)
-            val scoreTV = TextView(this).apply {
-                text = scoreStr
-                textSize = 12f
-                typeface = Typeface.MONOSPACE
-                setTextColor(getColor(R.color.muted))
-                gravity = Gravity.END
-            }
-            row.addView(scoreTV)
-            container.addView(row)
+
+            container.addView(rowLayout)
         }
     }
 

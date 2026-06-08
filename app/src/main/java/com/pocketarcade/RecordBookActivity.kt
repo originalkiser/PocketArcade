@@ -259,14 +259,15 @@ class RecordBookActivity : AppCompatActivity() {
     private fun buildGameSection(
         container: LinearLayout, game: String, label: String,
         accentHex: String, modes: List<String>,
-        scoreFormatter: ((Int) -> Pair<String, Int>)? = null
+        scoreFormatter: ((Int) -> Pair<String, Int>)? = null,
+        topScoreOverride: Int? = null
     ) {
         addSection(container, label, accentHex)
 
         val plays   = PrefsManager.getStatPlays(this, game)
         val total   = PrefsManager.getStatTotalScore(this, game)
         val timeMs  = PrefsManager.getStatTotalTimeMs(this, game)
-        val hi      = PrefsManager.getHighScore(this, game)
+        val hi      = topScoreOverride ?: PrefsManager.getHighScore(this, game)
         val avg     = if (plays > 0) total / plays else 0L
         val avgTime = if (plays > 0) timeMs / plays else 0L
 
@@ -325,11 +326,15 @@ class RecordBookActivity : AppCompatActivity() {
     }
 
     private fun renderBlockDrop() {
+        val bestBlockDrop = listOf("blockdrop_easy", "blockdrop_medium", "blockdrop_hard")
+            .mapNotNull { k -> PrefsManager.getHighScore(this, k).takeIf { it > 0 } }
+            .maxOrNull() ?: 0
         buildGameSection(contentContainer,
-            game      = "blockdrop",
-            label     = "BLOCK DROP",
-            accentHex = "#FF6B35",
-            modes     = listOf("easy", "medium", "hard")
+            game             = "blockdrop",
+            label            = "BLOCK DROP",
+            accentHex        = "#FF6B35",
+            modes            = listOf("easy", "medium", "hard"),
+            topScoreOverride = bestBlockDrop
         )
         addSpacer(contentContainer)
         buildLeaderboard(contentContainer, "blockdrop", "#FF6B35")

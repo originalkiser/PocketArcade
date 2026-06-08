@@ -21,7 +21,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 51
-        versionName = "2.1.3"
+        versionName = "2.1.4"
 
         buildConfigField("String", "ADMOB_APP_ID",        "\"ca-app-pub-3940256099942544~3347511713\"")
         buildConfigField("String", "BANNER_AD_UNIT_ID",   "\"ca-app-pub-3940256099942544/6300978111\"")

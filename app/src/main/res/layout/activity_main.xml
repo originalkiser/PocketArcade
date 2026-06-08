@@ -546,7 +546,7 @@
                             android:layout_marginTop="2dp"
                             android:text=""
                             android:textColor="@color/muted"
-                            android:textSize="11sp"
+                            android:textSize="13sp"
                             android:fontFamily="monospace" />
                     </LinearLayout>
 
