@@ -59,6 +59,8 @@ class FriendsActivity : AppCompatActivity() {
         val panelLeaderboard = findViewById<LinearLayout>(R.id.panelLeaderboard)
 
         btnBack.setOnClickListener { finish() }
+        // "FRIENDS" title also navigates back (expanded tap target)
+        findViewById<android.widget.TextView>(R.id.tvFriendsTitle).setOnClickListener { finish() }
 
         fun setTab(friendsActive: Boolean) {
             panelMyFriends.visibility  = if (friendsActive) View.VISIBLE else View.GONE

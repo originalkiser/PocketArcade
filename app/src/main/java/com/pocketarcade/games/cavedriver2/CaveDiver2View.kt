@@ -10,6 +10,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.pocketarcade.GameTheme
 import com.pocketarcade.SoundManager
+import com.pocketarcade.darken
 import com.pocketarcade.withAlpha
 import kotlin.math.*
 import kotlin.random.Random
@@ -143,6 +144,14 @@ class CaveDiverView @JvmOverloads constructor(
     // Background gradient top/bottom — updated by applyTheme so light mode uses a lighter sky
     private var themeBg1 = BG1
     private var themeBg2 = BG2
+    // Ship body — in dark mode use the original pastel teal; in light mode use
+    // the theme's player (which is a dark accent) so the ship is visible.
+    private var themeBodyTop = BODY_TOP
+    private var themeBodyBot = BODY_BOT
+    // Star color — white in dark mode, dark/near-black in light mode.
+    private var themeStarR = 255
+    private var themeStarG = 255
+    private var themeStarB = 255
 
     fun applyTheme(theme: GameTheme) {
         themeShipCol  = theme.player
@@ -157,6 +166,24 @@ class CaveDiverView @JvmOverloads constructor(
         themeBg2 = theme.bg
         // Rebuild the background shader immediately (surfaceChanged may have already run)
         bgPaint.shader = LinearGradient(0f, 0f, 0f, H, themeBg1, themeBg2, Shader.TileMode.CLAMP)
+        // Ship body: in dark mode the light pastel works; in light mode use the player colour
+        // (a dark accent) so the ship silhouette contrasts against the light background.
+        val isLight = android.graphics.Color.luminance(theme.bg) > 0.3f
+        if (isLight) {
+            themeBodyTop = theme.player
+            themeBodyBot = theme.player.darken(0.65f)
+        } else {
+            themeBodyTop = BODY_TOP
+            themeBodyBot = BODY_BOT
+        }
+        // Stars: white in dark mode, near-black in light mode so they show against a pale sky.
+        if (isLight) {
+            themeStarR = android.graphics.Color.red(theme.text)
+            themeStarG = android.graphics.Color.green(theme.text)
+            themeStarB = android.graphics.Color.blue(theme.text)
+        } else {
+            themeStarR = 255; themeStarG = 255; themeStarB = 255
+        }
         hudValuePaint.color = themeHudVal
         titlePaint.apply    { color = themeShipCol; setShadowLayer(24f, 0f, 0f, themeShipCol) }
         deadScorePaint.apply { color = themeShipCol; setShadowLayer(16f, 0f, 0f, themeShipCol) }
@@ -531,7 +558,8 @@ class CaveDiverView @JvmOverloads constructor(
         canvas.drawRect(0f, 0f, W, H, bgPaint)
         for (s in stars) {
             val alpha = (0.4f + 0.4f * sin(s.tw)).coerceIn(0f, 1f)
-            starPaint.color = Color.argb((255 * alpha).toInt(), 255, 255, 255)
+            // In light mode stars are dark dots; in dark mode they are white twinkles.
+            starPaint.color = Color.argb((255 * alpha).toInt(), themeStarR, themeStarG, themeStarB)
             canvas.drawCircle(s.x, s.y, s.r, starPaint)
         }
     }
@@ -583,7 +611,7 @@ class CaveDiverView @JvmOverloads constructor(
         bodyPaint.shader = LinearGradient(
             x - SHIP_W / 2f, y - SHIP_H / 2f,
             x + SHIP_W / 2f, y + SHIP_H / 2f,
-            BODY_TOP, BODY_BOT, Shader.TileMode.CLAMP)
+            themeBodyTop, themeBodyBot, Shader.TileMode.CLAMP)
         shipPath.rewind()
         shipPath.moveTo(x + SHIP_W / 2f,      y)
         shipPath.lineTo(x - SHIP_W / 2f,      y - SHIP_H / 2f)
@@ -655,7 +683,7 @@ class CaveDiverView @JvmOverloads constructor(
 
         idleBodyPaint.shader = LinearGradient(
             cx - 16f, H / 2f - 8f, cx + 16f, H / 2f + 8f,
-            BODY_TOP, BODY_BOT, Shader.TileMode.CLAMP)
+            themeBodyTop, themeBodyBot, Shader.TileMode.CLAMP)
         shipPath.rewind()
         shipPath.moveTo(cx + 16f, H / 2f)
         shipPath.lineTo(cx - 16f, H / 2f - 8f)

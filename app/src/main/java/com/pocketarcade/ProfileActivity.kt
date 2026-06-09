@@ -79,6 +79,8 @@ class ProfileActivity : AppCompatActivity() {
         origAvatarColor = selAvatarColor
         hasPhotoOverride = PrefsManager.getProfilePhotoPath(this) != null
 
+        // Both the "<" arrow and the "PROFILE" label navigate back
+        findViewById<TextView>(R.id.tvProfileTitle).setOnClickListener { finish() }
         val btnBack         = findViewById<TextView>(R.id.btnProfileBack)
         val btnEdit         = findViewById<TextView>(R.id.btnEditProfile)
         val avatarContainer = findViewById<FrameLayout>(R.id.profileAvatarContainer)

@@ -108,10 +108,17 @@ class BlockDropView @JvmOverloads constructor(
     private var themeAccent = Color.parseColor("#FF6B35")
 
     fun applyTheme(theme: GameTheme) {
-        themeAccent = theme.player
+        themeAccent          = theme.player
         hudAccentPaint.color = themeAccent
         plusPaint.color      = themeAccent
-        blockColors = generateBlockColors(theme.player)
+        blockColors          = generateBlockColors(theme.player)
+        // Full canvas theming so light mode renders correctly
+        bgPaint.color        = theme.bg
+        boardBgPaint.color   = theme.surface
+        emptyPaint.color     = theme.surface
+        hudValuePaint.color  = theme.text
+        hudLabelPaint.color  = theme.muted
+        overlayBodyPaint.color = theme.muted
         invalidate()
     }
 

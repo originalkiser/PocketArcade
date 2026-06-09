@@ -31,7 +31,9 @@ class RecordBookActivity : AppCompatActivity() {
         setContentView(R.layout.activity_record_book)
         ThemeManager.applyWindowBackground(this)
 
+        // Both the "<" arrow and the "RECORD BOOK" label navigate back
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.tvRecordBookTitle).setOnClickListener { finish() }
 
         val totalGames = listOf(
             PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,

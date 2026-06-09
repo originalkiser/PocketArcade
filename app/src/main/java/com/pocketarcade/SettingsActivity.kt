@@ -31,6 +31,14 @@ class SettingsActivity : AppCompatActivity() {
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
+        // ── Back navigation — arrow and full header row both navigate back ────
+        val backBtn     = findViewById<TextView>(R.id.btnSettingsBack)
+        val headerTitle = findViewById<TextView>(R.id.tvSettingsTitle)
+        val header      = findViewById<LinearLayout>(R.id.settingsHeader)
+        backBtn.setOnClickListener     { finish() }
+        headerTitle.setOnClickListener { finish() }
+        header.setOnClickListener      { finish() }
+
         // ── Game Board Theme picker ───────────────────────────────────────────
         val tvThemeName = findViewById<TextView>(R.id.tvThemeName)
         val swatchIds = listOf(R.id.swatch0, R.id.swatch1, R.id.swatch2, R.id.swatch3, R.id.swatch4, R.id.swatch5, R.id.swatch6)

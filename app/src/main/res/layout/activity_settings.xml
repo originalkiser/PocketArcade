@@ -13,6 +13,50 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
+    <!-- Header bar with back navigation (matches Profile / Friends style) -->
+    <LinearLayout
+        android:id="@+id/settingsHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/surface"
+        android:paddingHorizontal="16dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/btnSettingsBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&lt;"
+            android:textColor="@color/accent_blue"
+            android:textSize="22sp"
+            android:fontFamily="monospace"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvSettingsTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SETTINGS"
+            android:textColor="@color/accent_blue"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Thin divider below header -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/accent_blue"
+        android:alpha="0.2" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -23,15 +67,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:text="SETTINGS"
-                android:textColor="@color/accent_blue"
-                android:textSize="11sp"
-                android:fontFamily="monospace" />
 
             <!-- Game Board Theme -->
             <LinearLayout
@@ -689,7 +724,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="&#128279;  SHARE POCKET ARCADE  &#128279;"
+                android:text="&#128279;  SHARE PIXEL PARLOR  &#128279;"
                 android:textColor="@color/accent_green"
                 android:textSize="17sp"
                 android:fontFamily="monospace"

@@ -90,31 +90,38 @@ class CaveDiverActivity : AppCompatActivity() {
             }
         }
 
-        // Thrust zone below game canvas mirrors in-canvas touch
-        thrustZone.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.setBackgroundColor(Color.parseColor("#0a0a20"))
-                    gameView.setThrusting(true)
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    v.setBackgroundColor(Color.parseColor("#050510"))
-                    gameView.setThrusting(false)
-                }
-            }
-            true
-        }
+        // Thrust zone below game canvas mirrors in-canvas touch.
+        // Colors are theme-aware: dark mode keeps the original near-black feedback;
+        // light mode uses card-grey (pressed) / bg-white (released) instead.
+        wireThrustZone()
     }
 
     override fun onResume() {
         super.onResume()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         applyTheme()
+        wireThrustZone()
     }
 
     override fun onPause() {
         super.onPause()
         gameView.setThrusting(false)
+    }
+
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    private fun wireThrustZone() {
+        val isLight = ThemeManager.isLightMode(this)
+        val bgNormal  = if (isLight) getColor(R.color.bg)   else Color.parseColor("#050510")
+        val bgPressed = if (isLight) getColor(R.color.card) else Color.parseColor("#0a0a20")
+        // Reset to normal in case mode just changed
+        thrustZone.setBackgroundColor(bgNormal)
+        thrustZone.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> { v.setBackgroundColor(bgPressed); gameView.setThrusting(true) }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { v.setBackgroundColor(bgNormal); gameView.setThrusting(false) }
+            }
+            true
+        }
     }
 
     private fun applyTheme() {
