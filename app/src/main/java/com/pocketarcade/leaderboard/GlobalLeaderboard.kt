@@ -291,10 +291,10 @@ object GlobalLeaderboard {
         if (mode != null) data["mode"] = mode
         db.collection("periodScores").document(docId).set(data)
             .addOnSuccessListener {
-                android.util.Log.d("PocketArcade", "syncPeriod OK  $docId score=$score")
+                android.util.Log.d("PixelParlor", "syncPeriod OK  $docId score=$score")
             }
             .addOnFailureListener { e ->
-                android.util.Log.e("PocketArcade", "syncPeriod FAIL $docId", e)
+                android.util.Log.e("PixelParlor", "syncPeriod FAIL $docId", e)
             }
     }
 
@@ -346,13 +346,13 @@ object GlobalLeaderboard {
                     if (score > existing) {
                         ref.set(data)
                             .addOnSuccessListener {
-                                android.util.Log.d("PocketArcade", "periodScore OK  $docId score=$score")
+                                android.util.Log.d("PixelParlor", "periodScore OK  $docId score=$score")
                             }
                             .addOnFailureListener { e ->
-                                android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                                android.util.Log.e("PixelParlor", "periodScore FAIL $docId", e)
                             }
                     } else {
-                        android.util.Log.d("PocketArcade",
+                        android.util.Log.d("PixelParlor",
                             "periodScore SKIP $docId score=$score <= existing=$existing")
                     }
                 }
@@ -360,10 +360,10 @@ object GlobalLeaderboard {
                     // Read failed — write anyway so we don't silently lose scores
                     ref.set(data)
                         .addOnSuccessListener {
-                            android.util.Log.d("PocketArcade", "periodScore OK(fallback) $docId score=$score")
+                            android.util.Log.d("PixelParlor", "periodScore OK(fallback) $docId score=$score")
                         }
                         .addOnFailureListener { e ->
-                            android.util.Log.e("PocketArcade", "periodScore FAIL $docId", e)
+                            android.util.Log.e("PixelParlor", "periodScore FAIL $docId", e)
                         }
                 }
         }

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0F"
+    android:background="@color/bg"
     android:orientation="vertical">
 
     <!-- Banner ad at top -->
@@ -19,14 +19,14 @@
         android:orientation="horizontal"
         android:paddingHorizontal="10dp"
         android:gravity="center_vertical"
-        android:background="#AA0A0A0F">
+        android:background="@color/color_hud_bg_alpha">
 
         <TextView
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:text="&lt; MENU"
-            android:textColor="#00FF96"
+            android:textColor="@color/color_hud_match"
             android:textSize="11sp"
             android:fontFamily="monospace"
             android:gravity="center"
@@ -58,7 +58,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="&#9881;"
-            android:textColor="#00FF96"
+            android:textColor="@color/color_hud_match"
             android:textSize="17sp"
             android:fontFamily="monospace"
             android:clickable="true"

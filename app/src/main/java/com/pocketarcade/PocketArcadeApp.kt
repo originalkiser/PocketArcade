@@ -21,17 +21,21 @@ class PocketArcadeApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Force-enable Crashlytics — the modern SDK silently disables collection
+        // 1. Apply the stored display mode (Dark/Light/System) before any Activity
+        //    is created so the DayNight configuration is correct on first render.
+        ThemeManager.applyDisplayMode(this)
+
+        // 2. Force-enable Crashlytics — the modern SDK silently disables collection
         //    in debug builds unless explicitly opted in.
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
 
-        // 3. Attach app-wide Crashlytics keys (version, uid, current screen).
+        // 4. Attach app-wide Crashlytics keys (version, uid, current screen).
         CrashReporter.init(this)
 
-        // 4. Push any locally stored errors from previous sessions.
+        // 5. Push any locally stored errors from previous sessions.
         CrashReporter.syncLocalLogs(this)
 
-        // 5. Install global uncaught-exception handler.
+        // 6. Install global uncaught-exception handler.
         val upstream = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             // Log locally first — synchronous so it completes before the process dies.

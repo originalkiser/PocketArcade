@@ -76,6 +76,7 @@
                     <View android:id="@+id/swatch3" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
                     <View android:id="@+id/swatch4" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
                     <View android:id="@+id/swatch5" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
+                    <View android:id="@+id/swatch6" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginHorizontal="8dp" android:clickable="true" android:focusable="true" />
                 </LinearLayout>
 
                 <TextView
@@ -141,6 +142,86 @@
                     android:textSize="17sp"
                     android:fontFamily="monospace"
                     android:gravity="center" />
+            </LinearLayout>
+
+            <!-- Display Mode picker -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DISPLAY MODE"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="19sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Light, dark, or follow device setting"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btnModeDark"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="DARK"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_game_tile"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/btnModeLight"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="4dp"
+                        android:text="LIGHT"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_game_tile"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/btnModeSystem"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="SYSTEM"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_game_tile"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Demo Mode row -->

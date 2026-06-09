@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="&#9829;&#9829;&#9829;"
-                android:textColor="#e74c3c"
+                android:textColor="@color/accent_red"
                 android:textSize="13sp" />
 
             <TextView

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- LIGHT MODE theme (default). Dark overrides in values-night/themes.xml. -->
-<resources xmlns:tools="http://schemas.android.com/tools">
+<!-- DARK MODE theme overrides. -->
+<resources>
     <style name="Theme.PixelParlor" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent_blue</item>
         <item name="colorPrimaryVariant">@color/surface</item>
@@ -11,8 +11,7 @@
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:statusBarColor">@color/bg</item>
         <item name="android:navigationBarColor">@color/bg</item>
-        <!-- Light mode: dark icons on the light status bar -->
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <!-- Dark mode: light icons on the dark status bar -->
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

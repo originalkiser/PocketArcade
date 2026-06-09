@@ -4,14 +4,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="#0D1F14">
+    android:background="@color/bg">
 
     <TextView
         android:id="@+id/btnDiffBack"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:text="&lt; MENU"
-        android:textColor="#00FF96"
+        android:textColor="@color/color_hud_match"
         android:textSize="12sp"
         android:fontFamily="monospace"
         android:gravity="center"
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="MEMORY MATCH"
-        android:textColor="#00FF96"
+        android:textColor="@color/color_hud_match"
         android:textSize="16sp"
         android:fontFamily="monospace"
         android:gravity="center"
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SELECT DIFFICULTY"
-        android:textColor="#4A8A5A"
+        android:textColor="@color/muted"
         android:textSize="11sp"
         android:fontFamily="monospace"
         android:gravity="center"
@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="EASY"
-            android:textColor="#00FF96"
+            android:textColor="@color/color_hud_match"
             android:textSize="18sp"
             android:fontFamily="monospace"
             android:textStyle="bold" />
@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="4×4 grid  •  8 pairs"
-            android:textColor="#4A8A5A"
+            android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />
 
@@ -89,7 +89,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="MEDIUM"
-            android:textColor="#FFD700"
+            android:textColor="@color/accent_yellow"
             android:textSize="18sp"
             android:fontFamily="monospace"
             android:textStyle="bold" />
@@ -98,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="6×6 grid  •  18 pairs"
-            android:textColor="#4A8A5A"
+            android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />
 
@@ -119,7 +119,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="HARD"
-            android:textColor="#FF4444"
+            android:textColor="@color/accent_red"
             android:textSize="18sp"
             android:fontFamily="monospace"
             android:textStyle="bold" />
@@ -128,7 +128,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="8×8 grid  •  32 pairs"
-            android:textColor="#4A8A5A"
+            android:textColor="@color/muted"
             android:textSize="11sp"
             android:fontFamily="monospace" />
 

@@ -1,6 +1,8 @@
 package com.pocketarcade
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -13,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.WorkManager
 import com.google.android.gms.ads.MobileAds
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.billing.BillingManager
@@ -129,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         refreshTickerButtons()
 
         updateScores()
-        IconRotationWorker.schedule(this)
+        disableIconRotation()
         UpdateChecker.check(this)
 
         // Show splash curtain — changelog then registration prompt after curtain lifts
@@ -397,6 +400,50 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // ── Icon rotation removal ─────────────────────────────────────────────────
+
+    /**
+     * One-time migration: cancels the legacy icon-rotation WorkManager job and
+     * restores the cabinet icon as the sole active launcher alias.
+     *
+     * Existing installs may have a non-Arcade alias enabled via PackageManager
+     * (the runtime state overrides the manifest default), so we must reset it
+     * explicitly. Guarded by a flag so the PackageManager calls only happen once.
+     */
+    private fun disableIconRotation() {
+        val prefs = getSharedPreferences("icon_rotation", MODE_PRIVATE)
+        if (prefs.getBoolean("rotation_disabled", false)) return
+
+        // Cancel any pending/recurring WorkManager jobs.
+        WorkManager.getInstance(this).cancelUniqueWork("icon_rotation")
+
+        val pkg = packageName
+        val pm  = packageManager
+
+        // Disable every non-cabinet alias first.
+        listOf(".icon.Snake", ".icon.Pong", ".icon.Asteroids", ".icon.BrickBreaker")
+            .forEach { alias ->
+                try {
+                    pm.setComponentEnabledSetting(
+                        ComponentName(pkg, "$pkg$alias"),
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP
+                    )
+                } catch (_: Exception) {}
+            }
+
+        // Then ensure the cabinet icon is active.
+        try {
+            pm.setComponentEnabledSetting(
+                ComponentName(pkg, "$pkg.icon.Arcade"),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+            )
+        } catch (_: Exception) {}
+
+        prefs.edit().putBoolean("rotation_disabled", true).apply()
     }
 
     // ── Upsell dialog ──────────────────────────────────────────────────────────

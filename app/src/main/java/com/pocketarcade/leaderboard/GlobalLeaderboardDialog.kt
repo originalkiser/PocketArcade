@@ -1,7 +1,10 @@
 package com.pocketarcade.leaderboard
 
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.app.Dialog
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -74,7 +77,9 @@ fun showGlobalLeaderboardDialog(
     mode: String? = null,
     pendingScore: PendingGlobalScore? = null,
     initialTab: String = "WORLD",
-    initialTimeRange: TimeRange = TimeRange.ALL_TIME
+    initialTimeRange: TimeRange = TimeRange.ALL_TIME,
+    pulseUid: String? = null,
+    onDismissed: (() -> Unit)? = null
 ) {
     val view = LayoutInflater.from(activity).inflate(R.layout.dialog_global_leaderboard, null)
     val dialog = Dialog(activity)
@@ -118,6 +123,8 @@ fun showGlobalLeaderboardDialog(
     var myUid: String?   = GlobalLeaderboard.currentUid
     var myFollowingUids  = emptySet<String>()
     var myMutualUids     = emptySet<String>()
+    // Row view to pulse/scroll-to once the first page loads (set from appendEntries)
+    var pulseTargetRow: View? = null
 
     val country = PrefsManager.getGlobalCountry(activity)
     val state   = PrefsManager.getGlobalState(activity)
@@ -309,12 +316,36 @@ fun showGlobalLeaderboardDialog(
                 return@runOnUiThread
             }
             tvEmpty.visibility = View.GONE
+            val isFirstPage = loadedCount == 0
             entries.forEach { entry ->
                 loadedCount++
-                container.addView(buildGlobalRow(loadedCount, entry))
+                val row = buildGlobalRow(loadedCount, entry)
+                container.addView(row)
+                if (pulseUid != null && entry.uid == pulseUid && pulseTargetRow == null) {
+                    pulseTargetRow = row
+                }
             }
             pageLastDoc = newLastDoc
             btnLoadMore.visibility = if (newLastDoc != null) View.VISIBLE else View.GONE
+            // Scroll-to and pulse the highlighted row on first page load.
+            if (isFirstPage) pulseTargetRow?.let { row ->
+                row.post {
+                    (container.parent as? ScrollView)?.smoothScrollTo(0, row.top)
+                    val overlay = ColorDrawable(Color.TRANSPARENT)
+                    row.foreground = overlay
+                    ValueAnimator.ofArgb(Color.TRANSPARENT, Color.argb(70, 255, 215, 0)).apply {
+                        duration = 600
+                        repeatCount = 5
+                        repeatMode = ValueAnimator.REVERSE
+                        addUpdateListener { overlay.color = it.animatedValue as Int }
+                        addListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: android.animation.Animator) {
+                                row.foreground = null
+                            }
+                        })
+                    }.start()
+                }
+            }
         }
     }
 
@@ -325,6 +356,7 @@ fun showGlobalLeaderboardDialog(
         btnLoadMore.visibility = View.GONE
         loadedCount = 0
         pageLastDoc = null
+        pulseTargetRow = null   // reset so the new page can capture a fresh reference
         when (currentTab) {
             "WORLD" -> GlobalLeaderboard.fetchGlobalPage(currentGame, currentMode) { entries, last ->
                 appendEntries(entries, last)
@@ -498,6 +530,7 @@ fun showGlobalLeaderboardDialog(
     btnLoadMore.setOnClickListener { loadNextPage() }
     view.findViewById<TextView>(R.id.btnGlobalClose).setOnClickListener { dialog.dismiss() }
 
+    if (onDismissed != null) dialog.setOnDismissListener { onDismissed() }
     setActive(initialTab)
     loadFirstPage()
     dialog.show()

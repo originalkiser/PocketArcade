@@ -110,6 +110,11 @@ fun showLeaderboardDialog(
         val pending = if (shareScore >= 0) PendingGlobalScore(game, shareScore, mode, avatarIndex, avatarColor) else null
         showGlobalLeaderboardDialog(activity, game, mode, pending)
     }
+    view.findViewById<TextView>(R.id.btnFriends).setOnClickListener {
+        val (gGame, gMode) = toGlobalKey(game, mode)
+        showGlobalLeaderboardDialog(activity, gGame, gMode,
+            initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
+    }
     view.findViewById<TextView>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
     dialog.show()
 }
@@ -242,4 +247,117 @@ fun checkAndShowLeaderboard(
         if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, "   ")
         showLeaderboardDialog(activity, game, shareScore = score, mode = mode, onDismiss = onDone)
     }
+}
+
+/**
+ * Normalises a local leaderboard game key to the (globalGame, globalMode) pair used
+ * for Firestore queries. Handles "blockdrop_easy" → ("blockdrop", "easy") etc.
+ */
+private fun toGlobalKey(game: String, mode: String?): Pair<String, String?> {
+    if (mode != null) return game to mode
+    val known = setOf("snake", "pong", "asteroids", "brickbreaker", "cavedriver", "blockdrop", "memorymatch")
+    val parts  = game.split("_", limit = 2)
+    return if (parts.size == 2 && parts[0] in known) parts[0] to parts[1] else game to null
+}
+
+/**
+ * Called from each game activity after the local leaderboard is dismissed.
+ *
+ * Checks whether the score qualifies for auto-navigation to:
+ *  1. **Global leaderboard** — score lands in top-100 worldwide for game+mode.
+ *  2. **Friends leaderboard** — score equals the user's stored period-best for WEEK, MONTH,
+ *     or ALL_TIME (meaning it was accepted as their new best for that period).
+ *
+ * Sequence: global first (with pulse/scroll), then friends on dismiss (with pulse/scroll).
+ * Only one dialog chain is ever started; if neither qualifies, nothing is shown.
+ *
+ * @param globalGame  Base Firestore game key (e.g. "blockdrop", not "blockdrop_easy")
+ * @param globalMode  Mode string or null
+ * @param score       Raw score just submitted
+ */
+fun handlePostGameLeaderboards(
+    activity: AppCompatActivity,
+    globalGame: String,
+    globalMode: String?,
+    score: Int
+) {
+    PrefsManager.getGlobalUsername(activity) ?: return   // not registered → no auto-nav
+
+    GlobalLeaderboard.ensureSignedIn(onReady = { uid ->
+        var globalDone    = false
+        var friendsDone   = false
+        var onGlobalBoard = false
+        var bestRange: TimeRange? = null
+
+        fun navigate() {
+            if (!globalDone || !friendsDone) return
+            if (activity.isFinishing || activity.isDestroyed) return
+            when {
+                onGlobalBoard && bestRange != null -> showGlobalLeaderboardDialog(
+                    activity    = activity,
+                    game        = globalGame,
+                    mode        = globalMode,
+                    pulseUid    = uid,
+                    onDismissed = {
+                        if (!activity.isFinishing && !activity.isDestroyed)
+                            showGlobalLeaderboardDialog(
+                                activity         = activity,
+                                game             = globalGame,
+                                mode             = globalMode,
+                                pulseUid         = uid,
+                                initialTab       = "FRIENDS",
+                                initialTimeRange = bestRange!!
+                            )
+                    }
+                )
+                onGlobalBoard -> showGlobalLeaderboardDialog(
+                    activity = activity,
+                    game     = globalGame,
+                    mode     = globalMode,
+                    pulseUid = uid
+                )
+                bestRange != null -> showGlobalLeaderboardDialog(
+                    activity         = activity,
+                    game             = globalGame,
+                    mode             = globalMode,
+                    pulseUid         = uid,
+                    initialTab       = "FRIENDS",
+                    initialTimeRange = bestRange!!
+                )
+                // else: neither qualifies — return to game, no auto-navigation
+            }
+        }
+
+        // ── 1. Check global rank (top 100) ──────────────────────────────────────
+        GlobalLeaderboard.fetchGlobal(globalGame, globalMode, limit = 100L) { entries ->
+            onGlobalBoard = entries.isNotEmpty() &&
+                (entries.size < 100 || score >= (entries.lastOrNull()?.score ?: 0))
+            globalDone = true
+            navigate()
+        }
+
+        // ── 2. Check friends rank for WEEK, MONTH, ALL_TIME ─────────────────────
+        FriendsManager.getFollowing(uid) { following ->
+            val allUids = (listOf(uid) + following.map { it.uid }).distinct()
+            var pending = 3
+            val qualifying = mutableSetOf<TimeRange>()
+
+            fun finishFriends() {
+                bestRange = listOf(TimeRange.WEEK, TimeRange.MONTH, TimeRange.ALL_TIME)
+                    .firstOrNull { it in qualifying }
+                friendsDone = true
+                navigate()
+            }
+
+            listOf(TimeRange.WEEK, TimeRange.MONTH, TimeRange.ALL_TIME).forEach { range ->
+                FriendsManager.fetchFriendsScores(allUids, globalGame, range, globalMode) { entries ->
+                    // Qualifies when the stored period-best equals the just-submitted score,
+                    // meaning the server accepted it as a new personal best for this period.
+                    val myScore = entries.find { it.uid == uid }?.score
+                    if (myScore != null && myScore == score) qualifying.add(range)
+                    if (--pending == 0) finishFriends()
+                }
+            }
+        }
+    })
 }

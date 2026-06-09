@@ -27,7 +27,7 @@ object UpdateChecker {
     private const val FALLBACK_DOWNLOAD_URL =
         "https://github.com/originalkiser/PocketArcade/releases/latest/download/PocketArcade.apk"
     private const val INTERVAL_MS  = 24 * 60 * 60 * 1000L
-    private const val APK_FILENAME = "PocketArcade_update.apk"
+    private const val APK_FILENAME = "PixelParlor_update.apk"
 
     /** Holds the APK URL while waiting for the user to grant install-unknown-apps permission. */
     private var pendingApkUrl: String? = null
@@ -124,7 +124,7 @@ object UpdateChecker {
         showStyledDialog(
             activity,
             title    = "UPDATE AVAILABLE",
-            message  = "Version $tagName of Pocket Arcade is ready.\nDownload and install now?",
+            message  = "Version $tagName of Pixel Parlor is ready.\nDownload and install now?",
             positive = "DOWNLOAD UPDATE",
             negative = "LATER",
             onDismiss = { updateDialogShown = false }
@@ -135,7 +135,7 @@ object UpdateChecker {
         showStyledDialog(
             activity,
             title    = "PERMISSION REQUIRED",
-            message  = "To install updates, enable 'Install unknown apps' for Pocket Arcade in Settings.",
+            message  = "To install updates, enable 'Install unknown apps' for Pixel Parlor in Settings.",
             positive = "OPEN SETTINGS",
             negative = "CANCEL"
         ) {
@@ -204,7 +204,7 @@ object UpdateChecker {
         val dm = appContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val dlId = dm.enqueue(
             DownloadManager.Request(Uri.parse(apkUrl))
-                .setTitle("Pocket Arcade Update")
+                .setTitle("Pixel Parlor Update")
                 .setDescription("Downloading…")
                 .setDestinationInExternalFilesDir(appContext, null, APK_FILENAME)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)

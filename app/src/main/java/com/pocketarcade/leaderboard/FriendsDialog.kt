@@ -178,7 +178,7 @@ fun showFriendsDialog(
     }
 
     btnShare.setOnClickListener {
-        val text = "Add me as a friend on Pocket Arcade! My username is \"$myUsername\" 🎮"
+        val text = "Add me as a friend on Pixel Parlor! My username is \"$myUsername\" 🎮"
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)

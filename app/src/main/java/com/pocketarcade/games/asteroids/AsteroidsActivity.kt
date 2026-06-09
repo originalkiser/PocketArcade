@@ -16,9 +16,8 @@ import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
-import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
-import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
+import com.pocketarcade.leaderboard.handlePostGameLeaderboards
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
@@ -107,10 +106,7 @@ class AsteroidsActivity : AppCompatActivity() {
                 runOnUiThread {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_ASTEROIDS, score) {
                         astView.readyForRestart = true
-                        if (PrefsManager.getGlobalUsername(this) != null) {
-                            showGlobalLeaderboardDialog(this, PrefsManager.GAME_ASTEROIDS,
-                                initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
-                        }
+                        handlePostGameLeaderboards(this, PrefsManager.GAME_ASTEROIDS, null, score)
                     }
                 }
             }, 1500L)

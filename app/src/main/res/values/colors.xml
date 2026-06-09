@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- LIGHT MODE palette (default).
+     Dark mode overrides live in res/values-night/colors.xml. -->
 <resources>
-    <!-- Retro arcade palette -->
-    <color name="bg">#0f1117</color>
-    <color name="surface">#1a1d2e</color>
-    <color name="card">#252844</color>
-    <color name="border">#3a4a6e</color>
-    <color name="text">#e8ecf0</color>
-    <color name="muted">#6b7a99</color>
+    <!-- ── Shell surfaces ──────────────────────────────────────────────────── -->
+    <color name="bg">#f7f8fc</color>
+    <color name="surface">#ffffff</color>
+    <color name="card">#eef1f8</color>
+    <color name="border">#c8d0e0</color>
+    <color name="text">#0f1117</color>
+    <color name="muted">#64748b</color>
 
-    <color name="accent_blue">#4f8ef7</color>
-    <color name="accent_red">#e74c3c</color>
-    <color name="accent_green">#2ecc71</color>
-    <color name="accent_yellow">#f1c40f</color>
-    <color name="accent_cyan">#00d4ff</color>
-    <color name="accent_purple">#9b59b6</color>
-    <color name="accent_orange">#e67e22</color>
+    <!-- ── Accent palette — darker variants for readability on light bg ─────── -->
+    <color name="accent_blue">#1a56d6</color>
+    <color name="accent_red">#c0392b</color>
+    <color name="accent_green">#15803d</color>
+    <color name="accent_yellow">#c07a00</color>
+    <color name="accent_cyan">#0e7490</color>
+    <color name="accent_purple">#6d28d9</color>
+    <color name="accent_orange">#c2410c</color>
 
-    <!-- Snake game colors -->
-    <color name="snake_head">#4f8ef7</color>
-    <color name="snake_body_even">#2a4a8a</color>
-    <color name="snake_body_odd">#1e3570</color>
-    <color name="snake_food">#e74c3c</color>
-    <color name="snake_grid_dot">#3a4a6e</color>
+    <!-- ── Per-game HUD accent colors ──────────────────────────────────────── -->
+    <!-- Cave Diver score / lives text -->
+    <color name="color_hud_cave">#007A80</color>
+    <!-- Memory Match score / moves text -->
+    <color name="color_hud_match">#00695C</color>
+    <!-- Block Drop score / moves text -->
+    <color name="color_hud_block">#BF360C</color>
+    <!-- Record Book header accent -->
+    <color name="color_record_accent">#6d28d9</color>
 
-    <!-- Theme -->
-    <color name="colorPrimary">#4f8ef7</color>
-    <color name="colorPrimaryDark">#0f1117</color>
-    <color name="colorAccent">#e74c3c</color>
+    <!-- ── Text on colored accent backgrounds (buttons, badges — stays white) -->
+    <color name="color_on_accent">#ffffff</color>
+
+    <!-- ── HUD / overlay backgrounds ───────────────────────────────────────── -->
+    <color name="color_hud_bg">#f7f8fc</color>
+    <color name="color_hud_bg_alpha">#CCf7f8fc</color>
+
+    <!-- ── Legacy game-specific colors (kept for compatibility) ────────────── -->
+    <color name="snake_head">#1a56d6</color>
+    <color name="snake_body_even">#8ab0f5</color>
+    <color name="snake_body_odd">#6090e8</color>
+    <color name="snake_food">#c0392b</color>
+    <color name="snake_grid_dot">#c8d0e0</color>
+
+    <!-- ── Theme / Material ─────────────────────────────────────────────────── -->
+    <color name="colorPrimary">#1a56d6</color>
+    <color name="colorPrimaryDark">#f7f8fc</color>
+    <color name="colorAccent">#c0392b</color>
 </resources>

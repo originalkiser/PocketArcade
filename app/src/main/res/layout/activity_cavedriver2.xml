@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#050510">
+    android:background="@color/bg">
 
     <!-- Banner ad -->
     <FrameLayout
@@ -19,14 +19,14 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:gravity="center_vertical"
-        android:background="#08080F">
+        android:background="@color/surface">
 
         <TextView
             android:id="@+id/btnBack2"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:text="&lt; MENU"
-            android:textColor="#00FFCC"
+            android:textColor="@color/color_hud_cave"
             android:textSize="11sp"
             android:fontFamily="monospace"
             android:gravity="center"
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="CAVE DIVER"
-            android:textColor="#00FFCC"
+            android:textColor="@color/color_hud_cave"
             android:textSize="13sp"
             android:fontFamily="monospace"
             android:letterSpacing="0.15" />
@@ -52,7 +52,7 @@
             android:layout_height="32dp"
             android:layout_marginStart="8dp"
             android:text="&#9881;"
-            android:textColor="#00FFCC"
+            android:textColor="@color/color_hud_cave"
             android:textSize="14sp"
             android:fontFamily="monospace"
             android:gravity="center"
@@ -75,21 +75,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#050510"
+        android:background="@color/bg"
         android:clickable="true"
         android:focusable="true">
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#2a2a5a" />
+            android:background="@color/border" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="HOLD TO THRUST"
-            android:textColor="#224444aa"
+            android:textColor="@color/muted"
+            android:alpha="0.5"
             android:textSize="13sp"
             android:fontFamily="monospace"
             android:letterSpacing="0.2" />

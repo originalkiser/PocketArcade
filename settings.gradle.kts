@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PocketArcade"
+rootProject.name = "PixelParlor"
 include(":app")

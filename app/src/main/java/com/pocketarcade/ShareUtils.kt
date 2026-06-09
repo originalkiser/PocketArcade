@@ -10,11 +10,11 @@ object ShareUtils {
         "https://github.com/originalkiser/PocketArcade/releases/latest"
 
     fun shareApp(activity: Activity) {
-        val text = "🕹️ POCKET ARCADE\n\nSnake · Pong · Asteroids · Brick Breaker\n\nAll the classics, free!\n\n$DOWNLOAD_URL"
+        val text = "🕹️ PIXEL PARLOR\n\nSnake · Pong · Asteroids · Brick Breaker\n\nAll the classics, free!\n\n$DOWNLOAD_URL"
         activity.startActivity(
             Intent.createChooser(
                 Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) },
-                "Share Pocket Arcade"
+                "Share Pixel Parlor"
             )
         )
     }
@@ -55,7 +55,7 @@ object ShareUtils {
         val dateSuffix = if (date.isNotEmpty()) "  ·  $date" else ""
 
         return buildString {
-            appendLine("🕹️ POCKET ARCADE")
+            appendLine("🕹️ PIXEL PARLOR")
             appendLine()
             appendLine("$emoji $label$modeLabel")
             appendLine("$scoreText$dateSuffix")

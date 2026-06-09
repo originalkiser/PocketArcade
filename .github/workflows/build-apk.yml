@@ -19,7 +19,7 @@ jobs:
           git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" .
           git checkout master
           git config user.email "ci@pocketarcade.app"
-          git config user.name "PocketArcade CI"
+          git config user.name "PixelParlor CI"
 
       - name: Select Java 17
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Write release notes
         run: |
           cat > notes.md << EOF
-          ## Pocket Arcade - $RELEASE_TAG
+          ## Pixel Parlor - $RELEASE_TAG
 
           ### Install on Android (API 26+)
           1. Download PocketArcade.apk below
@@ -89,7 +89,7 @@ jobs:
           gh release delete "$RELEASE_TAG" --yes 2>/dev/null || true
           git push origin ":refs/tags/$RELEASE_TAG" 2>/dev/null || true
           gh release create "$RELEASE_TAG" PocketArcade.apk \
-            --title "Pocket Arcade $RELEASE_TAG" \
+            --title "Pixel Parlor $RELEASE_TAG" \
             --notes-file notes.md \
             --latest
         env:

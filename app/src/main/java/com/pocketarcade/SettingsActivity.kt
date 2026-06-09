@@ -32,25 +32,38 @@ class SettingsActivity : AppCompatActivity() {
 
         // ── Game Board Theme picker ───────────────────────────────────────────
         val tvThemeName = findViewById<TextView>(R.id.tvThemeName)
-        val swatchIds = listOf(R.id.swatch0, R.id.swatch1, R.id.swatch2, R.id.swatch3, R.id.swatch4, R.id.swatch5)
+        val swatchIds = listOf(R.id.swatch0, R.id.swatch1, R.id.swatch2, R.id.swatch3, R.id.swatch4, R.id.swatch5, R.id.swatch6)
         var currentIndex = ThemeManager.themeIndex(this)
 
         fun refreshSwatches() {
-            tvThemeName.text = Themes.ALL[currentIndex].first.name
             val d = resources.displayMetrics.density
             val strokePx = (3 * d).toInt()
+            tvThemeName.text = if (currentIndex == Themes.SYSTEM_COLORS_INDEX) "System Colors"
+                               else Themes.ALL[currentIndex].first.name
             swatchIds.forEachIndexed { i, id ->
-                val theme = Themes.ALL[i].first
                 val selected = i == currentIndex
-                findViewById<View>(id).background = splitOvalDrawable(
-                    theme.swatch, theme.rival,
-                    if (selected) Color.WHITE else 0, if (selected) strokePx else 0
-                )
+                val stroke   = if (selected) Color.WHITE else 0
+                val bg = if (i == Themes.SYSTEM_COLORS_INDEX) {
+                    // Rainbow gradient swatch for System Colors
+                    rainbowOvalDrawable(strokePx.takeIf { selected } ?: 0)
+                } else {
+                    val theme = Themes.ALL[i].first
+                    splitOvalDrawable(theme.swatch, theme.rival, stroke, if (selected) strokePx else 0)
+                }
+                findViewById<View>(id).background = bg
             }
         }
 
         swatchIds.forEachIndexed { i, id ->
             findViewById<View>(id).setOnClickListener {
+                if (i == Themes.SYSTEM_COLORS_INDEX && !SystemColorTheme.isAvailable) {
+                    android.widget.Toast.makeText(
+                        this,
+                        "System Colors requires Android 12 or later.",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    return@setOnClickListener
+                }
                 currentIndex = i
                 ThemeManager.setThemeIndex(this, i)
                 // Blast all games to the new theme, clearing any per-game overrides.
@@ -155,6 +168,25 @@ class SettingsActivity : AppCompatActivity() {
         val btnRestore      = findViewById<TextView>(R.id.btnRestore)
         val rowJokeBanner   = findViewById<LinearLayout>(R.id.rowJokeBanner)
         val switchJokeAds   = findViewById<Switch>(R.id.switchJokeAds)
+        // ── Display Mode picker ────────────────────────────────────────────────
+        val btnModeDark   = findViewById<TextView>(R.id.btnModeDark)
+        val btnModeLight  = findViewById<TextView>(R.id.btnModeLight)
+        val btnModeSystem = findViewById<TextView>(R.id.btnModeSystem)
+
+        fun refreshModeButtons() {
+            val active   = getColor(R.color.accent_yellow)
+            val inactive = getColor(R.color.muted)
+            val current  = ThemeManager.getDisplayMode(this)
+            btnModeDark  .setTextColor(if (current == PrefsManager.DisplayMode.DARK)   active else inactive)
+            btnModeLight .setTextColor(if (current == PrefsManager.DisplayMode.LIGHT)  active else inactive)
+            btnModeSystem.setTextColor(if (current == PrefsManager.DisplayMode.SYSTEM) active else inactive)
+        }
+        refreshModeButtons()
+
+        btnModeDark  .setOnClickListener { ThemeManager.setDisplayMode(this, PrefsManager.DisplayMode.DARK);   refreshModeButtons() }
+        btnModeLight .setOnClickListener { ThemeManager.setDisplayMode(this, PrefsManager.DisplayMode.LIGHT);  refreshModeButtons() }
+        btnModeSystem.setOnClickListener { ThemeManager.setDisplayMode(this, PrefsManager.DisplayMode.SYSTEM); refreshModeButtons() }
+
         val btnCheckUpdate  = findViewById<TextView>(R.id.btnCheckUpdate)
         val btnShareApp     = findViewById<TextView>(R.id.btnShareApp)
         val btnWhatsNew     = findViewById<TextView>(R.id.btnWhatsNew)

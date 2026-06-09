@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Pocket Arcade</string>
+    <string name="app_name">Pixel Parlor</string>
     <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 
     <!-- Game names -->

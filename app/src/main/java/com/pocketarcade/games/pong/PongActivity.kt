@@ -17,10 +17,9 @@ import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
-import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.formatGlobalScore
-import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
+import com.pocketarcade.leaderboard.handlePostGameLeaderboards
 import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
@@ -122,11 +121,7 @@ class PongActivity : AppCompatActivity() {
                     checkAndShowLeaderboard(this, PrefsManager.GAME_PONG, encodedScore, mode = mode) {
                         pongView.readyForRestart = true
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
-                        if (PrefsManager.getGlobalUsername(this) != null) {
-                            showGlobalLeaderboardDialog(this, PrefsManager.GAME_PONG,
-                                mode = mode,
-                                initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
-                        }
+                        handlePostGameLeaderboards(this, PrefsManager.GAME_PONG, mode, encodedScore)
                     }
                 }
             }, 1500L)

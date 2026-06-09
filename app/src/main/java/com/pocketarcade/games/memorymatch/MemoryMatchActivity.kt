@@ -12,9 +12,8 @@ import com.pocketarcade.ThemeManager
 import com.pocketarcade.Themes
 import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
-import com.pocketarcade.leaderboard.TimeRange
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
-import com.pocketarcade.leaderboard.showGlobalLeaderboardDialog
+import com.pocketarcade.leaderboard.handlePostGameLeaderboards
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
@@ -84,14 +83,7 @@ class MemoryMatchActivity : AppCompatActivity() {
 
             runOnUiThread {
                 checkAndShowLeaderboard(this, GAME_KEY, score, mode = diffKey) {
-                    if (PrefsManager.getGlobalUsername(this) != null) {
-                        showGlobalLeaderboardDialog(
-                            this, GAME_KEY,
-                            mode = diffKey,
-                            initialTab = "FRIENDS",
-                            initialTimeRange = TimeRange.WEEK
-                        )
-                    }
+                    handlePostGameLeaderboards(this, GAME_KEY, diffKey, score)
                 }
             }
         }

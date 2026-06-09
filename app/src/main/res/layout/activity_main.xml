@@ -3,7 +3,7 @@
     android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050510">
+    android:background="@color/bg">
 
     <!-- Main column -->
     <LinearLayout
@@ -26,7 +26,7 @@
             android:gravity="center_horizontal"
             android:paddingTop="10dp"
             android:paddingBottom="5dp"
-            android:background="#07071A">
+            android:background="@color/surface">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -375,7 +375,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/game_cavedriver"
-                                android:textColor="#00FFCC"
+                                android:textColor="@color/color_hud_cave"
                                 android:textSize="19sp"
                                 android:fontFamily="monospace"
                                 android:textStyle="bold" />
@@ -398,7 +398,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="#00FFCC"
+                            android:textColor="@color/color_hud_cave"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
@@ -408,7 +408,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="&#x25B6;"
-                        android:textColor="#00FFCC"
+                        android:textColor="@color/color_hud_cave"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
@@ -444,7 +444,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="BLOCK DROP"
-                            android:textColor="#FF6B35"
+                            android:textColor="@color/color_hud_block"
                             android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
@@ -465,7 +465,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text=""
-                            android:textColor="#FF6B35"
+                            android:textColor="@color/color_hud_block"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:alpha="0.7" />
@@ -476,7 +476,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="&#x25B6;"
-                        android:textColor="#FF6B35"
+                        android:textColor="@color/color_hud_block"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
@@ -512,7 +512,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/game_memorymatch"
-                            android:textColor="#00FF96"
+                            android:textColor="@color/color_hud_match"
                             android:textSize="19sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
@@ -542,7 +542,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="&#x25B6;"
-                        android:textColor="#00FF96"
+                        android:textColor="@color/color_hud_match"
                         android:textSize="18sp"
                         android:alpha="0.5"
                         android:layout_marginStart="8dp" />
@@ -564,7 +564,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#07071A"
+            android:background="@color/surface"
             android:paddingVertical="10dp"
             android:paddingHorizontal="20dp"
             android:gravity="center">
@@ -715,7 +715,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="#03030E"
+            android:background="@color/bg"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:paddingTop="3dp"
@@ -779,7 +779,7 @@
             android:fontFamily="monospace"
             android:gravity="center_vertical"
             android:paddingHorizontal="8dp"
-            android:background="#03030E"
+            android:background="@color/bg"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"

@@ -152,6 +152,13 @@ object Themes {
 
     /** All pairs in order. Index is persisted in prefs. */
     val ALL = listOf(CLASSIC, SUNSET, FOREST, CHERRY, ICE, NEON)
+
+    /**
+     * Sentinel index for the "System Colors" (Material You) theme.
+     * This is intentionally outside [ALL]'s bounds; [ThemeManager.currentTheme]
+     * handles it as a special case via [SystemColorTheme].
+     */
+    const val SYSTEM_COLORS_INDEX = 6
 }
 
 // ── App background themes ──────────────────────────────────────────────────────

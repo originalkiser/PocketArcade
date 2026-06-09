@@ -1,4 +1,4 @@
-# Pocket Arcade — Changelog
+# Pixel Parlor — Changelog
 
 ---
 

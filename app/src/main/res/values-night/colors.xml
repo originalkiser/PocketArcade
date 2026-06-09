@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DARK MODE palette.
+     Light mode defaults live in res/values/colors.xml. -->
+<resources>
+    <!-- ── Shell surfaces ──────────────────────────────────────────────────── -->
+    <color name="bg">#0f1117</color>
+    <color name="surface">#1a1d2e</color>
+    <color name="card">#252844</color>
+    <color name="border">#3a4a6e</color>
+    <color name="text">#e8ecf0</color>
+    <color name="muted">#6b7a99</color>
+
+    <!-- ── Accent palette ───────────────────────────────────────────────────── -->
+    <color name="accent_blue">#4f8ef7</color>
+    <color name="accent_red">#e74c3c</color>
+    <color name="accent_green">#2ecc71</color>
+    <color name="accent_yellow">#f1c40f</color>
+    <color name="accent_cyan">#00d4ff</color>
+    <color name="accent_purple">#9b59b6</color>
+    <color name="accent_orange">#e67e22</color>
+
+    <!-- ── Per-game HUD accent colors ──────────────────────────────────────── -->
+    <color name="color_hud_cave">#00FFCC</color>
+    <color name="color_hud_match">#00FF96</color>
+    <color name="color_hud_block">#FF6B35</color>
+    <color name="color_record_accent">#AA44FF</color>
+
+    <!-- ── Text on colored accent backgrounds ──────────────────────────────── -->
+    <color name="color_on_accent">#ffffff</color>
+
+    <!-- ── HUD / overlay backgrounds ───────────────────────────────────────── -->
+    <color name="color_hud_bg">#0A0A0F</color>
+    <color name="color_hud_bg_alpha">#CC0A0A0F</color>
+
+    <!-- ── Legacy game-specific colors ────────────────────────────────────── -->
+    <color name="snake_head">#4f8ef7</color>
+    <color name="snake_body_even">#2a4a8a</color>
+    <color name="snake_body_odd">#1e3570</color>
+    <color name="snake_food">#e74c3c</color>
+    <color name="snake_grid_dot">#3a4a6e</color>
+
+    <!-- ── Theme / Material ─────────────────────────────────────────────────── -->
+    <color name="colorPrimary">#4f8ef7</color>
+    <color name="colorPrimaryDark">#0f1117</color>
+    <color name="colorAccent">#e74c3c</color>
+</resources>

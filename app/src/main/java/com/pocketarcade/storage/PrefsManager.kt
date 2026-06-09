@@ -361,6 +361,20 @@ object PrefsManager {
         }
     }
 
+    // ── Display mode (Dark / Light / System Default) ──────────────────────────
+
+    enum class DisplayMode { DARK, LIGHT, SYSTEM }
+
+    fun getDisplayMode(ctx: Context): DisplayMode =
+        when (prefs(ctx).getString("display_mode", "SYSTEM")) {
+            "DARK"  -> DisplayMode.DARK
+            "LIGHT" -> DisplayMode.LIGHT
+            else    -> DisplayMode.SYSTEM
+        }
+
+    fun setDisplayMode(ctx: Context, mode: DisplayMode) =
+        prefs(ctx).edit { putString("display_mode", mode.name) }
+
     // ── Ticker source ─────────────────────────────────────────────────────────
     enum class TickerSource { LOCAL, GLOBAL, FRIENDS }
 

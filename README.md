@@ -1,4 +1,4 @@
-# Pocket Arcade
+# Pixel Parlor
 
 A retro-themed Android game collection with Snake, Pong, Asteroids, and Brick Breaker.
 Built in pure Kotlin with no third-party game engines.

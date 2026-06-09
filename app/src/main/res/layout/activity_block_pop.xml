@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0A0A0F">
+    android:background="@color/bg">
 
     <!-- Banner ad at top -->
     <FrameLayout
@@ -19,14 +19,14 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:gravity="center_vertical"
-        android:background="#08080F">
+        android:background="@color/surface">
 
         <TextView
             android:id="@+id/btnBackBlockPop"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:text="&lt; MENU"
-            android:textColor="#FF6B35"
+            android:textColor="@color/color_hud_block"
             android:textSize="11sp"
             android:fontFamily="monospace"
             android:gravity="center"
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="BLOCK DROP"
-            android:textColor="#FF6B35"
+            android:textColor="@color/color_hud_block"
             android:textSize="13sp"
             android:fontFamily="monospace"
             android:letterSpacing="0.15" />
@@ -70,7 +70,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="↺  RESTART"
-            android:textColor="#FF6B35"
+            android:textColor="@color/color_hud_block"
             android:textSize="12sp"
             android:fontFamily="monospace"
             android:letterSpacing="0.08"
@@ -80,7 +80,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="20dp"
-            android:background="#FF6B35"
+            android:background="@color/color_hud_block"
             android:alpha="0.25" />
 
         <TextView
@@ -90,7 +90,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="&#9881;"
-            android:textColor="#FF6B35"
+            android:textColor="@color/color_hud_block"
             android:textSize="17sp"
             android:fontFamily="monospace"
             android:clickable="true"
