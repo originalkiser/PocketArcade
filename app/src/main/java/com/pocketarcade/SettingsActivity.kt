@@ -256,7 +256,7 @@ class SettingsActivity : AppCompatActivity() {
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
         btnShareApp.setOnClickListener { ShareUtils.shareApp(this) }
         btnWhatsNew.setOnClickListener { showChangelogDialog(this) }
-        btnCredits.setOnClickListener { throw RuntimeException("Crashlytics test crash") }
+        btnCredits.setOnClickListener { showCreditsDialog(this) }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_scores_confirm))
