@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.DocumentSnapshot
 import com.pocketarcade.AvatarUtils
 import com.pocketarcade.R
+import com.pocketarcade.ThemeManager
 import com.pocketarcade.storage.PrefsManager
 
 data class PendingGlobalScore(
@@ -209,14 +210,14 @@ fun showGlobalLeaderboardDialog(
 
         val rankColor = when (rank) {
             1    -> Color.parseColor("#FFD700")
-            2    -> Color.parseColor("#C0C0C0")
+            2    -> if (ThemeManager.isLightMode(activity)) Color.parseColor("#707070") else Color.parseColor("#C0C0C0")
             3    -> Color.parseColor("#CD7F32")
             else -> if (isMe) accentBlue else if (isMutual) accentGreen else mutedColor
         }
         val nameColor = when {
             isMe     -> accentBlue
             isMutual -> accentGreen
-            else     -> Color.WHITE
+            else     -> activity.getColor(R.color.text)
         }
         // Mode prefix "(H) " etc. only when showing all-modes view
         val prefix     = if (currentMode == null) modeLabel(entry.mode) else ""
@@ -269,7 +270,7 @@ fun showGlobalLeaderboardDialog(
 
         // Username — weight=1, wraps to 2 lines for long names
         row.addView(TextView(activity).apply {
-            text = if (isMutual) "${entry.username} ♻" else entry.username
+            text = if (isMutual) "${entry.username} ↔" else entry.username
             setTextColor(nameColor)
             textSize = 13f
             typeface = Typeface.MONOSPACE

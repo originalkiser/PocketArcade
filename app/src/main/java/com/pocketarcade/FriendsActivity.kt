@@ -248,7 +248,7 @@ class FriendsActivity : AppCompatActivity() {
         }
         val nameColor = if (isMutual) Color.parseColor("#00CC66") else getColor(R.color.text)
         nameCol.addView(TextView(this).apply {
-            text = "@${entry.username}" + if (isMutual) "  ♻" else ""
+            text = "@${entry.username}" + if (isMutual) "  ↔" else ""
             setTextColor(nameColor)
             textSize = 13f
             typeface = Typeface.MONOSPACE
@@ -990,7 +990,7 @@ class FriendsActivity : AppCompatActivity() {
         row.addView(AvatarUtils.buildView(this, entry.avatarIndex, entry.avatarColor, 32))
 
         row.addView(TextView(this).apply {
-            text = "@${entry.username}" + if (isMe) " (me)" else if (isMutual) " ♻" else ""
+            text = "@${entry.username}" + if (isMe) " (me)" else if (isMutual) " ↔" else ""
             setTextColor(nameColor)
             textSize = 13f
             typeface = Typeface.MONOSPACE
