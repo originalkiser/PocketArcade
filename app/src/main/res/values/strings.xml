@@ -42,9 +42,10 @@
     <string name="demo_mode_desc">Auto-play after 15s idle</string>
     <string name="sound">Sound Effects</string>
     <string name="sound_desc">Enable in-game sounds</string>
+    <string name="ad_free_price">$2.99</string>
     <string name="ad_free_title">Go Ad-Free</string>
-    <string name="ad_free_desc">Remove all ads — $0.99 one-time</string>
-    <string name="ad_free_purchased">Ad-Free (Purchased!)</string>
+    <string name="ad_free_desc">Remove all ads — $2.99 one-time</string>
+    <string name="ad_free_purchased">Ad-Free ✓</string>
     <string name="restore_purchase">Restore Purchase</string>
     <string name="reset_scores">Reset High Scores</string>
     <string name="reset_scores_confirm">Reset all high scores?</string>
@@ -53,8 +54,8 @@
 
     <!-- Upsell dialog -->
     <string name="upsell_title">ENJOY THE GAMES?</string>
-    <string name="upsell_body">Remove ALL ads for just $0.99.\nOne-time. Forever. No subscriptions.</string>
-    <string name="upsell_buy">BUY AD-FREE ($0.99)</string>
+    <string name="upsell_body">Remove ALL ads for just $2.99.\nOne-time. Forever. No subscriptions.</string>
+    <string name="upsell_buy">BUY AD-FREE — $2.99</string>
     <string name="upsell_dismiss">No thanks (%ds)</string>
 
     <!-- Fake ad messages -->
@@ -63,7 +64,7 @@
         <item>Pong: The only sport where the ball is smarter than the players.</item>
         <item>WARNING: Asteroids may cause sudden bursts of 1983 nostalgia.</item>
         <item>Brick Breaker support group meets Tuesdays. Free snacks.</item>
-        <item>Ad-free for $0.99. That\'s less than a gas station hot dog.</item>
+        <item>Ad-free for $2.99. That\'s less than a fancy coffee.</item>
         <item>Our snake has eaten 47 programmers. You could be next.</item>
         <item>Pong AI went to Harvard. Still loses on Easy mode.</item>
         <item>No internet? No problem. Pixels don\'t need WiFi.</item>

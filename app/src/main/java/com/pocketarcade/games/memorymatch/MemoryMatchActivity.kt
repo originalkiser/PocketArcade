@@ -83,10 +83,11 @@ class MemoryMatchActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
-                checkAndShowLeaderboard(this, GAME_KEY, score) {
+                checkAndShowLeaderboard(this, GAME_KEY, score, mode = diffKey) {
                     if (PrefsManager.getGlobalUsername(this) != null) {
                         showGlobalLeaderboardDialog(
                             this, GAME_KEY,
+                            mode = diffKey,
                             initialTab = "FRIENDS",
                             initialTimeRange = TimeRange.WEEK
                         )

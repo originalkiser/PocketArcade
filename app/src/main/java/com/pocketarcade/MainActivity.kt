@@ -332,7 +332,10 @@ class MainActivity : AppCompatActivity() {
         }.start()
 
         tvDismiss.setOnClickListener { dialog.dismiss() }
-        btnBuy.setOnClickListener { billing.launchPurchaseFlow() }
+        btnBuy.setOnClickListener {
+            dialog.dismiss()
+            startActivity(Intent(this, AdFreeActivity::class.java))
+        }
 
         dialog.show()
     }

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Header bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp"
+        android:background="#0D0A14">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&lt;"
+            android:textColor="@color/accent_yellow"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="GO AD-FREE"
+            android:textColor="@color/accent_yellow"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/accent_yellow"
+        android:alpha="0.4" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Price hero card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="28dp"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="★  AD-FREE  ★"
+                    android:textColor="@color/accent_yellow"
+                    android:textSize="22sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$2.99"
+                    android:textColor="@color/text"
+                    android:textSize="52sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="one-time  ·  forever  ·  no subscriptions"
+                    android:textColor="@color/muted"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- What you get -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="20dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WHAT YOU GET"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="14dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓  No banner ads — ever"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓  No popups or interruptions"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓  Clean, distraction-free gameplay"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓  Supports ongoing development"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- Promo code section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_game_tile"
+                android:padding="20dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PROMO CODE"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/etPromoCode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Enter code"
+                        android:inputType="textCapCharacters|textNoSuggestions"
+                        android:textColor="@color/text"
+                        android:textColorHint="@color/muted"
+                        android:textSize="15sp"
+                        android:fontFamily="monospace"
+                        android:background="@color/surface"
+                        android:padding="10dp"
+                        android:layout_marginEnd="10dp" />
+
+                    <TextView
+                        android:id="@+id/btnApplyPromo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="APPLY"
+                        android:textColor="@color/bg"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="@color/accent_blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPromoStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text=""
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Purchase CTA -->
+            <TextView
+                android:id="@+id/btnPurchase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BUY AD-FREE — $2.99"
+                android:textColor="@color/bg"
+                android:textSize="17sp"
+                android:fontFamily="monospace"
+                android:background="@color/accent_yellow"
+                android:gravity="center"
+                android:padding="18dp"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- Restore purchase -->
+            <TextView
+                android:id="@+id/btnRestorePurchase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Restore Previous Purchase"
+                android:textColor="@color/muted"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:padding="14dp"
+                android:background="@drawable/bg_game_tile"
+                android:layout_marginBottom="24dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

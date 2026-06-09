@@ -5,18 +5,26 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocketarcade.leaderboard.LeaderboardManager
+import com.pocketarcade.leaderboard.formatGlobalScore
 import com.pocketarcade.storage.PrefsManager
 
 class RecordBookActivity : AppCompatActivity() {
 
     private lateinit var contentContainer: LinearLayout
+    private lateinit var scrollView: ScrollView
+    private lateinit var stickyHeader: TextView
     private var activeTab = "ALL"
+
+    private data class SectionHeader(val title: String, val hex: String, val view: TextView)
+    private val sectionViews = mutableListOf<SectionHeader>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +41,12 @@ class RecordBookActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvTotalMissions).text = "$totalGames TOTAL GAMES"
 
         contentContainer = findViewById(R.id.contentContainer)
+        scrollView = findViewById(R.id.scrollView)
+        stickyHeader = findViewById(R.id.stickyHeader)
+
+        scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            updateStickyHeader(scrollY)
+        }
 
         buildTabBar()
         renderTab("ALL")
@@ -151,7 +165,33 @@ class RecordBookActivity : AppCompatActivity() {
         while (contentContainer.childCount > 2) {
             contentContainer.removeViewAt(2)
         }
+        sectionViews.clear()
+        stickyHeader.visibility = View.GONE
+        scrollView.scrollTo(0, 0)
         renderTab(activeTab)
+    }
+
+    private fun updateStickyHeader(scrollY: Int) {
+        val current = sectionViews.lastOrNull { it.view.top <= scrollY }
+        if (current == null) {
+            stickyHeader.visibility = View.GONE
+            return
+        }
+        stickyHeader.text = "===  ${current.title}  ==="
+        stickyHeader.setTextColor(Color.parseColor(current.hex))
+        stickyHeader.visibility = View.VISIBLE
+
+        // Push-up: if the next section header is about to reach the top, slide the
+        // sticky header up so they swap without overlapping.
+        val idx = sectionViews.indexOf(current)
+        val next = sectionViews.getOrNull(idx + 1)
+        val stickyH = stickyHeader.height
+        if (next != null && stickyH > 0) {
+            val gap = next.view.top - scrollY
+            stickyHeader.translationY = if (gap < stickyH) (gap - stickyH).toFloat() else 0f
+        } else {
+            stickyHeader.translationY = 0f
+        }
     }
 
     private fun renderTab(tab: String) {
@@ -358,7 +398,11 @@ class RecordBookActivity : AppCompatActivity() {
                 }
                 addRow(contentContainer, "TOTAL TIME",
                     formatDuration(PrefsManager.getStatTotalTimeMs(this, "memorymatch", diff)))
-                buildLeaderboard(contentContainer, "memorymatch_$diff", "#00FF96", showHeader = false)
+                val mmFmt: (Int) -> Pair<String, Int> = { sc ->
+                    Pair(formatGlobalScore("memorymatch_$diff", sc), Color.parseColor("#00FF96"))
+                }
+                buildLeaderboard(contentContainer, "memorymatch_$diff", "#00FF96", showHeader = false,
+                    scoreFormatter = mmFmt)
             }
         }
         addSpacer(contentContainer)
@@ -411,6 +455,7 @@ class RecordBookActivity : AppCompatActivity() {
         }
         container.addView(tv)
         addDivider(container, accentHex)
+        sectionViews.add(SectionHeader(title, accentHex, tv))
     }
 
     private fun addSubHeader(container: LinearLayout, title: String) {

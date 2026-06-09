@@ -97,7 +97,6 @@ fun showGlobalLeaderboardDialog(
     val tabWorld         = view.findViewById<TextView>(R.id.tabWorld)
     val tabLocal         = view.findViewById<TextView>(R.id.tabLocal)
     val tabFriends       = view.findViewById<TextView>(R.id.tabFriends)
-    val tabPersonal      = view.findViewById<TextView>(R.id.tabPersonal)
     val container        = view.findViewById<LinearLayout>(R.id.globalContainer)
     val progress         = view.findViewById<ProgressBar>(R.id.progressGlobal)
     val tvEmpty          = view.findViewById<TextView>(R.id.tvGlobalEmpty)
@@ -319,77 +318,6 @@ fun showGlobalLeaderboardDialog(
         }
     }
 
-    fun loadPersonalScores() {
-        fun Int.px() = (this * dp).toInt()
-        container.removeAllViews()
-        tvEmpty.visibility = View.GONE
-        progress.visibility = View.GONE
-        btnLoadMore.visibility = View.GONE
-        loadedCount = 0
-
-        data class PersonalGame(val key: String, val label: String, val iconRes: Int, val color: Int)
-        val personalGames = listOf(
-            PersonalGame("snake",              "SNAKE",        R.drawable.ic_snake,        Color.parseColor("#4f8ef7")),
-            PersonalGame("pong",               "PONG",         R.drawable.ic_pong,         Color.parseColor("#e74c3c")),
-            PersonalGame("asteroids",          "ASTEROIDS",    R.drawable.ic_asteroids,    Color.parseColor("#00d4ff")),
-            PersonalGame("brickbreaker",       "BRICK BREAKER", R.drawable.ic_brickbreaker, Color.parseColor("#f1c40f")),
-            PersonalGame("cavedriver",         "CAVE DIVER",   R.drawable.ic_cavedriver,   Color.parseColor("#00FFCC")),
-            PersonalGame("blockdrop_easy",     "BLOCK DROP (E)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
-            PersonalGame("blockdrop_medium",   "BLOCK DROP (M)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
-            PersonalGame("blockdrop_hard",     "BLOCK DROP (H)", R.drawable.ic_blockpop,   Color.parseColor("#FF6B35")),
-            PersonalGame("memorymatch_easy",   "MEMORY (E)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
-            PersonalGame("memorymatch_medium", "MEMORY (M)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96")),
-            PersonalGame("memorymatch_hard",   "MEMORY (H)",   R.drawable.ic_memorymatch,  Color.parseColor("#00FF96"))
-        )
-
-        var hasAny = false
-        personalGames.forEach { game ->
-            val score = PrefsManager.getHighScore(activity, game.key)
-            if (score <= 0) return@forEach
-            hasAny = true
-            val scoreStr = formatGlobalScore(game.key, score)
-
-            val row = LinearLayout(activity).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(4.px(), 10.px(), 4.px(), 10.px())
-            }
-            val iconSize = 20.px()
-            row.addView(ImageView(activity).apply {
-                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-                setImageResource(game.iconRes)
-                setColorFilter(game.color, PorterDuff.Mode.SRC_IN)
-            })
-            row.addView(TextView(activity).apply {
-                text = game.label
-                setTextColor(game.color)
-                textSize = 14f
-                typeface = Typeface.MONOSPACE
-                setTypeface(typeface, Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginStart = 8.px()
-                }
-            })
-            row.addView(TextView(activity).apply {
-                text = scoreStr
-                setTextColor(accentBlue)
-                textSize = 14f
-                typeface = Typeface.MONOSPACE
-                gravity = Gravity.END
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            })
-            container.addView(row)
-        }
-
-        if (!hasAny) {
-            tvEmpty.text = "No local scores yet — play a game!"
-            tvEmpty.visibility = View.VISIBLE
-        }
-    }
-
     fun loadFirstPage() {
         container.removeAllViews()
         tvEmpty.visibility = View.GONE
@@ -405,6 +333,7 @@ fun showGlobalLeaderboardDialog(
                 appendEntries(entries, last)
             }
             "FRIENDS" -> GlobalLeaderboard.ensureSignedIn(
+
                 onReady = { uid ->
                     myUid = uid
                     FriendsManager.getFollowing(uid) { following ->
@@ -483,7 +412,7 @@ fun showGlobalLeaderboardDialog(
                 tvCurrentGame.text = g.label
                 setupGameChips()
                 setupModeChips()
-                if (currentTab != "PERSONAL") loadFirstPage()
+                loadFirstPage()
             }
             gameChipsRow.addView(chip)
         }
@@ -507,9 +436,8 @@ fun showGlobalLeaderboardDialog(
         tabWorld.setTextColor(if (tab == "WORLD") accentBlue else mutedColor)
         tabLocal.setTextColor(if (tab == "LOCAL") accentBlue else mutedColor)
         tabFriends.setTextColor(if (tab == "FRIENDS") accentBlue else mutedColor)
-        tabPersonal.setTextColor(if (tab == "PERSONAL") accentBlue else mutedColor)
         friendsBar.visibility = if (tab == "FRIENDS") View.VISIBLE else View.GONE
-        if (tab == "FRIENDS" || tab == "PERSONAL") btnLoadMore.visibility = View.GONE
+        if (tab == "FRIENDS") btnLoadMore.visibility = View.GONE
     }
 
     // ── Initial state ─────────────────────────────────────────────────────────
@@ -551,7 +479,6 @@ fun showGlobalLeaderboardDialog(
         }
     }
 
-    tabPersonal.setOnClickListener { setActive("PERSONAL"); loadPersonalScores() }
     tabFriendsWeek.setOnClickListener  { setFriendsTimeActive(TimeRange.WEEK);     loadFirstPage() }
     tabFriendsMonth.setOnClickListener { setFriendsTimeActive(TimeRange.MONTH);    loadFirstPage() }
     tabFriendsAll.setOnClickListener   { setFriendsTimeActive(TimeRange.ALL_TIME); loadFirstPage() }

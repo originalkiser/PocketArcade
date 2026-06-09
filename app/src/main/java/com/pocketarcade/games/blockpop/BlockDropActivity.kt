@@ -87,6 +87,7 @@ class BlockDropActivity : AppCompatActivity() {
                     if (PrefsManager.getGlobalUsername(this) != null) {
                         showGlobalLeaderboardDialog(
                             this, GAME_KEY,
+                            mode = diffKey,
                             initialTab = "FRIENDS",
                             initialTimeRange = TimeRange.WEEK
                         )

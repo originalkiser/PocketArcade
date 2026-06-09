@@ -49,19 +49,37 @@
         android:background="#AA44FF"
         android:alpha="0.4" />
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="none"
-        android:padding="12dp">
+        android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/contentContainer"
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/contentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp" />
+
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/stickyHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:gravity="center"
+            android:textSize="28sp"
+            android:background="@color/bg"
+            android:paddingTop="24dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone" />
 
-    </ScrollView>
+    </FrameLayout>
 </LinearLayout>
 

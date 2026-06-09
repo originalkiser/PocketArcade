@@ -47,14 +47,6 @@
             android:letterSpacing="0.15" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="[BETA]"
-            android:textColor="#4444aa"
-            android:textSize="10sp"
-            android:fontFamily="monospace" />
-
-        <TextView
             android:id="@+id/btnSettings2"
             android:layout_width="wrap_content"
             android:layout_height="32dp"

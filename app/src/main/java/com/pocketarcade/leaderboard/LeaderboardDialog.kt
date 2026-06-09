@@ -26,6 +26,24 @@ private fun decodePongScore(enc: Int): String {
     return "$ps-$ai"
 }
 
+private fun isMemoryMatchGame(game: String) = game == "memorymatch" || game.startsWith("memorymatch_")
+
+/** Converts an encoded Memory Match score back to "X moves".
+ *  If the game key includes a mode suffix (e.g. "memorymatch_easy") the threshold
+ *  is exact; for the combined key ("memorymatch") the threshold is inferred from
+ *  the score range (easy < 2000, medium < 7000, hard ≥ 7000). */
+private fun decodeMemoryMatchScore(game: String, score: Int): String {
+    val threshold = when {
+        game.endsWith("_medium") -> 5000
+        game.endsWith("_hard")   -> 10000
+        game.endsWith("_easy")   -> 1000
+        score >= 7001            -> 10000   // hard range
+        score >= 2001            -> 5000    // medium range
+        else                     -> 1000    // easy range
+    }
+    return "${threshold - score} moves"
+}
+
 fun showLeaderboardDialog(
     activity: AppCompatActivity,
     game: String,
@@ -48,8 +66,11 @@ fun showLeaderboardDialog(
             val row = LayoutInflater.from(activity).inflate(R.layout.item_leaderboard, container, false)
             row.findViewById<TextView>(R.id.tvRank).text = "#${index + 1}"
             row.findViewById<TextView>(R.id.tvInitials).text = entry.initials.trim().ifEmpty { "---" }
-            row.findViewById<TextView>(R.id.tvScore).text =
-                if (isPongGame(game)) decodePongScore(entry.score) else entry.score.toString()
+            row.findViewById<TextView>(R.id.tvScore).text = when {
+                isPongGame(game)        -> decodePongScore(entry.score)
+                isMemoryMatchGame(game) -> decodeMemoryMatchScore(game, entry.score)
+                else                    -> entry.score.toString()
+            }
             row.findViewById<TextView>(R.id.tvDate).text = entry.formattedDate
             container.addView(row)
 
@@ -105,8 +126,11 @@ fun showInitialsThenLeaderboard(
     val pickerB = view.findViewById<NumberPicker>(R.id.pickerB)
     val pickerC = view.findViewById<NumberPicker>(R.id.pickerC)
     val preview = view.findViewById<TextView>(R.id.tvInitialsPreview)
-    view.findViewById<TextView>(R.id.tvInitialsScore).text =
-        "SCORE: ${if (isPongGame(game)) decodePongScore(score) else score}"
+    view.findViewById<TextView>(R.id.tvInitialsScore).text = when {
+        isPongGame(game)        -> "SCORE: ${decodePongScore(score)}"
+        isMemoryMatchGame(game) -> decodeMemoryMatchScore(game, score)
+        else                    -> "SCORE: $score"
+    }
 
     val lbSize = PrefsManager.getLeaderboardSize(activity)
     view.findViewById<TextView>(R.id.tvNewTop).text = "🏆 NEW TOP $lbSize!"

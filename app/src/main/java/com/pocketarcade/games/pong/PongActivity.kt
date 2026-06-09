@@ -124,6 +124,7 @@ class PongActivity : AppCompatActivity() {
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                         if (PrefsManager.getGlobalUsername(this) != null) {
                             showGlobalLeaderboardDialog(this, PrefsManager.GAME_PONG,
+                                mode = mode,
                                 initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
                         }
                     }

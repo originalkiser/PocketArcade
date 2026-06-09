@@ -112,20 +112,6 @@
             android:focusable="true"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tabPersonal"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="PERSONAL"
-            android:textSize="12sp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:background="@drawable/bg_game_tile"
-            android:clickable="true"
-            android:focusable="true" />
-
     </LinearLayout>
 
     <!-- Sub-tabs shown only for FRIENDS tab -->

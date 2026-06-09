@@ -20,12 +20,17 @@ object AdManager {
         container.removeAllViews()
 
         if (PrefsManager.isAdFree(ctx)) {
-            container.visibility = View.GONE
+            if (PrefsManager.isJokeAdsEnabled(ctx)) {
+                // Ad-free user opted into the comical joke banner — show fake ads only.
+                container.visibility = View.VISIBLE
+                container.addView(makeFakeAd(ctx))
+            } else {
+                container.visibility = View.GONE
+            }
             return
         }
 
         container.visibility = View.VISIBLE
-
         container.addView(makeFakeAd(ctx))
     }
 

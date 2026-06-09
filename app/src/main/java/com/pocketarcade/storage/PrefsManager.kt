@@ -7,7 +7,8 @@ object PrefsManager {
     private const val PREFS = "pocket_arcade_prefs"
 
     private const val KEY_SCORE_PREFIX = "hi_score_"
-    private const val KEY_AD_FREE = "ad_free"
+    private const val KEY_AD_FREE    = "ad_free"
+    private const val KEY_JOKE_ADS   = "joke_ads"
     private const val KEY_SESSION_COUNT = "session_count"
     private const val KEY_SESSIONS_UNTIL_UPSELL = "sessions_until_upsell"
     private const val KEY_DEMO_MODE = "demo_mode"
@@ -108,6 +109,12 @@ object PrefsManager {
     fun isAdFree(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AD_FREE, false)
 
     fun setAdFree(ctx: Context, value: Boolean) = prefs(ctx).edit { putBoolean(KEY_AD_FREE, value) }
+
+    /** Comical fake-ad banner for ad-free users who opt in. Default: off. */
+    fun isJokeAdsEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_JOKE_ADS, false)
+
+    fun setJokeAdsEnabled(ctx: Context, value: Boolean) =
+        prefs(ctx).edit { putBoolean(KEY_JOKE_ADS, value) }
 
     fun isDemoModeEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_DEMO_MODE, true)
 
@@ -227,19 +234,42 @@ object PrefsManager {
     fun setSnakeControlHintCount(ctx: Context, count: Int) =
         prefs(ctx).edit { putInt("snake_hint_count", count) }
 
-    /** One-time migration: reset any time_ms value that is absurdly large (> 10 days),
-     *  which would be a sign it was inflated by demo-mode sessions before the fix in v5. */
+    /** One-time migrations: reset any time_ms value that is absurdly large (> 10 days),
+     *  which would be a sign it was inflated by demo-mode sessions or other bugs. */
     fun migrateInflatedTime(ctx: Context) {
         val p = prefs(ctx)
-        if (p.getBoolean("time_migration_v1", false)) return
         val tenDaysMs = 10L * 24 * 60 * 60 * 1000
-        val games = listOf(GAME_SNAKE, GAME_PONG, GAME_ASTEROIDS, GAME_BRICKBREAKER)
-        p.edit {
-            for (game in games) {
-                val key = statKey("time_ms", game)
-                if (p.getLong(key, 0L) > tenDaysMs) putLong(key, 0L)
+
+        // v1: original 4 games, top-level keys only
+        if (!p.getBoolean("time_migration_v1", false)) {
+            val v1Games = listOf(GAME_SNAKE, GAME_PONG, GAME_ASTEROIDS, GAME_BRICKBREAKER)
+            p.edit {
+                for (game in v1Games) {
+                    val key = statKey("time_ms", game)
+                    if (p.getLong(key, 0L) > tenDaysMs) putLong(key, 0L)
+                }
+                putBoolean("time_migration_v1", true)
             }
-            putBoolean("time_migration_v1", true)
+        }
+
+        // v2: all games (including cavedriver, blockdrop, memorymatch) + per-mode keys
+        if (!p.getBoolean("time_migration_v2", false)) {
+            val allGames = listOf(
+                GAME_SNAKE, GAME_PONG, GAME_ASTEROIDS, GAME_BRICKBREAKER,
+                GAME_CAVEDRIVER, "blockdrop", "memorymatch"
+            )
+            val modes = listOf("easy", "medium", "hard")
+            p.edit {
+                for (game in allGames) {
+                    val key = statKey("time_ms", game)
+                    if (p.getLong(key, 0L) > tenDaysMs) putLong(key, 0L)
+                    for (mode in modes) {
+                        val modeKey = statKey("time_ms", game, mode)
+                        if (p.getLong(modeKey, 0L) > tenDaysMs) putLong(modeKey, 0L)
+                    }
+                }
+                putBoolean("time_migration_v2", true)
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.pocketarcade
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -15,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.pocketarcade.ads.AdManager
-import com.pocketarcade.billing.BillingManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
 import com.pocketarcade.leaderboard.showUsernameSetupDialog
@@ -23,8 +23,6 @@ import com.pocketarcade.storage.PrefsManager
 import com.pocketarcade.UpdateChecker
 
 class SettingsActivity : AppCompatActivity() {
-
-    private lateinit var billing: BillingManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,16 +148,18 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        val rowAdFree   = findViewById<LinearLayout>(R.id.rowAdFree)
+        val rowAdFree       = findViewById<LinearLayout>(R.id.rowAdFree)
         val tvAdFreeTitle   = findViewById<TextView>(R.id.tvAdFreeTitle)
         val tvAdFreeDesc    = findViewById<TextView>(R.id.tvAdFreeDesc)
         val tvAdFreeChevron = findViewById<TextView>(R.id.tvAdFreeChevron)
-        val btnRestore     = findViewById<TextView>(R.id.btnRestore)
-        val btnCheckUpdate = findViewById<TextView>(R.id.btnCheckUpdate)
-        val btnShareApp    = findViewById<TextView>(R.id.btnShareApp)
-        val btnWhatsNew    = findViewById<TextView>(R.id.btnWhatsNew)
-        val btnCredits     = findViewById<TextView>(R.id.btnCredits)
-        val btnReset       = findViewById<TextView>(R.id.btnResetScores)
+        val btnRestore      = findViewById<TextView>(R.id.btnRestore)
+        val rowJokeBanner   = findViewById<LinearLayout>(R.id.rowJokeBanner)
+        val switchJokeAds   = findViewById<Switch>(R.id.switchJokeAds)
+        val btnCheckUpdate  = findViewById<TextView>(R.id.btnCheckUpdate)
+        val btnShareApp     = findViewById<TextView>(R.id.btnShareApp)
+        val btnWhatsNew     = findViewById<TextView>(R.id.btnWhatsNew)
+        val btnCredits      = findViewById<TextView>(R.id.btnCredits)
+        val btnReset        = findViewById<TextView>(R.id.btnResetScores)
         findViewById<TextView>(R.id.tvVersion).text = "v${BuildConfig.VERSION_NAME}"
 
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
@@ -214,7 +214,8 @@ class SettingsActivity : AppCompatActivity() {
             PrefsManager.setNotifBeaten(this, checked)
         }
 
-        refreshAdFreeUi(tvAdFreeTitle, tvAdFreeDesc, tvAdFreeChevron, rowAdFree)
+        refreshAdFreeUi(tvAdFreeTitle, tvAdFreeDesc, tvAdFreeChevron, rowAdFree,
+            rowJokeBanner, switchJokeAds)
 
         switchDemo.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setDemoModeEnabled(this, checked)
@@ -222,22 +223,17 @@ class SettingsActivity : AppCompatActivity() {
         switchSound.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setSoundEnabled(this, checked)
         }
-
-        billing = BillingManager(
-            activity = this,
-            onPurchased = {
-                refreshAdFreeUi(tvAdFreeTitle, tvAdFreeDesc, tvAdFreeChevron, rowAdFree)
-                AdManager.populateBannerContainer(findViewById(R.id.adContainer))
-                Toast.makeText(this, "Ads removed! Enjoy!", Toast.LENGTH_LONG).show()
-            },
-            onError = { msg -> Toast.makeText(this, msg, Toast.LENGTH_LONG).show() }
-        )
-        billing.connect()
-
-        rowAdFree.setOnClickListener {
-            if (!PrefsManager.isAdFree(this)) billing.launchPurchaseFlow()
+        switchJokeAds.setOnCheckedChangeListener { _, checked ->
+            PrefsManager.setJokeAdsEnabled(this, checked)
+            AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         }
-        btnRestore.setOnClickListener { billing.restorePurchases() }
+
+        // Both the ad-free row and restore button navigate to the landing page.
+        val openAdFreePage = View.OnClickListener {
+            startActivity(Intent(this, AdFreeActivity::class.java))
+        }
+        rowAdFree.setOnClickListener(openAdFreePage)
+        btnRestore.setOnClickListener(openAdFreePage)
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
         btnShareApp.setOnClickListener { ShareUtils.shareApp(this) }
         btnWhatsNew.setOnClickListener { showChangelogDialog(this) }
@@ -255,18 +251,23 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun refreshAdFreeUi(
-        title: TextView, desc: TextView, chevron: TextView, row: LinearLayout
+        title: TextView, desc: TextView, chevron: TextView, row: LinearLayout,
+        jokeRow: LinearLayout? = null, jokeSwitch: Switch? = null
     ) {
         if (PrefsManager.isAdFree(this)) {
             title.text = getString(R.string.ad_free_purchased)
             desc.text = "All ads removed. Thank you! ★"
             chevron.visibility = View.GONE
             row.isClickable = false
+            // Show joke banner toggle — only relevant once ad-free is active.
+            jokeRow?.visibility = View.VISIBLE
+            jokeSwitch?.isChecked = PrefsManager.isJokeAdsEnabled(this)
         } else {
             title.text = getString(R.string.ad_free_title)
             desc.text = getString(R.string.ad_free_desc)
             chevron.visibility = View.VISIBLE
             row.isClickable = true
+            jokeRow?.visibility = View.GONE
         }
     }
 
@@ -310,11 +311,17 @@ class SettingsActivity : AppCompatActivity() {
         ThemeManager.applyWindowBackground(this)
         val bg = ThemeManager.currentBgColor(this)
         findViewById<LinearLayout>(R.id.rootLayout).setBackgroundColor(bg)
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        billing.disconnect()
+        // Refresh ad-free state in case user purchased/restored on the AdFreeActivity screen.
+        val rowAdFree       = findViewById<LinearLayout>(R.id.rowAdFree)     ?: return
+        val tvAdFreeTitle   = findViewById<TextView>(R.id.tvAdFreeTitle)     ?: return
+        val tvAdFreeDesc    = findViewById<TextView>(R.id.tvAdFreeDesc)      ?: return
+        val tvAdFreeChevron = findViewById<TextView>(R.id.tvAdFreeChevron)   ?: return
+        val rowJokeBanner   = findViewById<LinearLayout>(R.id.rowJokeBanner)
+        val switchJokeAds   = findViewById<Switch>(R.id.switchJokeAds)
+        refreshAdFreeUi(tvAdFreeTitle, tvAdFreeDesc, tvAdFreeChevron, rowAdFree,
+            rowJokeBanner, switchJokeAds)
+        AdManager.populateBannerContainer(findViewById(R.id.adContainer))
     }
 
 }

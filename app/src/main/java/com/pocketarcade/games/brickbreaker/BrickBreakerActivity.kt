@@ -129,6 +129,7 @@ class BrickBreakerActivity : AppCompatActivity() {
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                         if (PrefsManager.getGlobalUsername(this) != null) {
                             showGlobalLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER,
+                                mode = mode,
                                 initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
                         }
                     }
@@ -176,6 +177,7 @@ class BrickBreakerActivity : AppCompatActivity() {
                         runOnUiThread { btnStartGame.visibility = View.VISIBLE }
                         if (PrefsManager.getGlobalUsername(this) != null) {
                             showGlobalLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER,
+                                mode = mode,
                                 initialTab = "FRIENDS", initialTimeRange = TimeRange.WEEK)
                         }
                     }
