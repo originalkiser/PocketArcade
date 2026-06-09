@@ -176,7 +176,7 @@ class SnakeActivity : AppCompatActivity() {
         btnDpadMode.setOnClickListener   { setDpadMode(true) }
         btnLightMode.setOnClickListener  { toggleLightMode() }
         btnSound.setOnClickListener      { toggleSound() }
-        btnSettings.setOnClickListener   { showSettingsDialog() }
+        btnSettings.setOnClickListener   { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_SNAKE) }
 
         updateSoundButton()

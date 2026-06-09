@@ -46,7 +46,7 @@ class CaveDiverActivity : AppCompatActivity() {
         applyTheme()
 
         findViewById<TextView>(R.id.btnBack2).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettings2).setOnClickListener { showSettingsDialog() }
+        findViewById<TextView>(R.id.btnSettings2).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
 
         gameView.onGameStarted = {
             gameStartTime = System.currentTimeMillis()

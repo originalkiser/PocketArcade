@@ -114,7 +114,7 @@ class AsteroidsActivity : AppCompatActivity() {
         }
 
         btnAutoFire.setOnClickListener { toggleAutoFire() }
-        btnSettings.setOnClickListener { showSettingsDialog() }
+        btnSettings.setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_ASTEROIDS) }
         btnSound.setOnClickListener { toggleSound() }
         btnLightMode.setOnClickListener { toggleLightMode() }

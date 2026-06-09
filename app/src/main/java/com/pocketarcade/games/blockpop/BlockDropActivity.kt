@@ -41,7 +41,7 @@ class BlockDropActivity : AppCompatActivity() {
         applyTheme()
 
         findViewById<TextView>(R.id.btnBackBlockPop).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettingsBlockDrop).setOnClickListener { showSettingsDialog() }
+        findViewById<TextView>(R.id.btnSettingsBlockDrop).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         findViewById<TextView>(R.id.btnRestartBlockDrop).setOnClickListener { gameView.restart() }
 
         gameView.onGameStarted = {

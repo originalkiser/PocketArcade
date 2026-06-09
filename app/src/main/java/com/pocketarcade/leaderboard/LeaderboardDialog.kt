@@ -56,7 +56,9 @@ fun showLeaderboardDialog(
     val container = view.findViewById<LinearLayout>(R.id.leaderboardContainer)
     val tvEmpty = view.findViewById<TextView>(R.id.tvEmpty)
 
-    val entries = LeaderboardManager.getEntries(activity, game)
+    // Show mode-specific entries when mode is supplied (e.g. "memorymatch_easy" for easy MM scores)
+    val displayGame = if (mode != null) "${game}_$mode" else game
+    val entries = LeaderboardManager.getEntries(activity, displayGame)
 
     if (entries.isEmpty()) {
         tvEmpty.visibility = View.VISIBLE
@@ -180,8 +182,15 @@ fun showInitialsThenLeaderboard(
     view.findViewById<TextView>(R.id.btnSave).setOnClickListener {
         val initials = "${LETTERS[pickerA.value]}${LETTERS[pickerB.value]}${LETTERS[pickerC.value]}"
         PrefsManager.setLastInitials(activity, initials)
-        val rank = LeaderboardManager.addEntry(activity, game, score, initials)
+        val rankCombined = LeaderboardManager.addEntry(activity, game, score, initials)
         if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, initials)
+        // Resolve rank within the mode-specific leaderboard when mode is present
+        val displayGame = if (mode != null) "${game}_$mode" else game
+        val rank = if (mode != null) {
+            val modeEntries = LeaderboardManager.getEntries(activity, displayGame)
+            val idx = modeEntries.indexOfFirst { it.score == score }
+            if (idx >= 0) idx + 1 else rankCombined
+        } else rankCombined
         dialog.dismiss()
         val globalUsername = PrefsManager.getGlobalUsername(activity)
         if (globalUsername != null) {
@@ -240,7 +249,10 @@ fun checkAndShowLeaderboard(
     mode: String? = null,
     onDone: () -> Unit = {}
 ) {
-    if (LeaderboardManager.qualifies(activity, game, score)) {
+    // Qualify against the mode-specific leaderboard when mode is present, so that e.g.
+    // an easy Memory Match score is compared only against other easy scores.
+    val qualifyGame = if (mode != null) "${game}_$mode" else game
+    if (LeaderboardManager.qualifies(activity, qualifyGame, score)) {
         showInitialsThenLeaderboard(activity, game, score, mode, onDone)
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")
@@ -329,9 +341,14 @@ fun handlePostGameLeaderboards(
         }
 
         // ── 1. Check global rank (top 100) ──────────────────────────────────────
+        // Only auto-navigate if the score is a new personal best (not just any
+        // qualifying score — the user may already have a higher entry on the board).
         GlobalLeaderboard.fetchGlobal(globalGame, globalMode, limit = 100L) { entries ->
-            onGlobalBoard = entries.isNotEmpty() &&
-                (entries.size < 100 || score >= (entries.lastOrNull()?.score ?: 0))
+            val cutoff = entries.lastOrNull()?.score ?: 0
+            val inTop100 = entries.isNotEmpty() && (entries.size < 100 || score >= cutoff)
+            val myExisting = entries.find { it.uid == uid }
+            // Qualify only when the score is genuinely new/improved for this player
+            onGlobalBoard = inTop100 && (myExisting == null || score >= myExisting.score)
             globalDone = true
             navigate()
         }

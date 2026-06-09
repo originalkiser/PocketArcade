@@ -31,7 +31,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="POCKET ARCADE"
+                android:text="PIXEL PARLOR"
                 android:textColor="@color/accent_blue"
                 android:textSize="26sp"
                 android:fontFamily="@font/press_start_2p"

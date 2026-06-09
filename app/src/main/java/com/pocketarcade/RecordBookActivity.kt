@@ -549,9 +549,9 @@ class RecordBookActivity : AppCompatActivity() {
         }
         val sc = if (scoreColor == -1) Color.parseColor(accentHex) else scoreColor
         row.addView(col(rank,                     accentHex))
-        row.addView(col(initials.ifEmpty { "-" }, "#FFFFFF"))
+        row.addView(col(initials.ifEmpty { "-" }, if (ThemeManager.isLightMode(this)) "#222244" else "#FFFFFF"))
         row.addView(colInt(score,                 sc))
-        row.addView(col(date,                     "#444466"))
+        row.addView(col(date,                     if (ThemeManager.isLightMode(this)) "#4455AA" else "#666699"))
         container.addView(row)
     }
 

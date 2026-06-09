@@ -637,7 +637,7 @@ class FriendsActivity : AppCompatActivity() {
             text = if (isMe) "${entry.username} ★" else entry.username
             textSize = 11f
             typeface = Typeface.MONOSPACE
-            setTextColor(if (isMe) getColor(R.color.accent_blue) else Color.WHITE)
+            setTextColor(if (isMe) getColor(R.color.accent_blue) else getColor(R.color.text))
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {

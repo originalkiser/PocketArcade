@@ -126,6 +126,10 @@ object PrefsManager {
     fun setSoundEnabled(ctx: Context, value: Boolean) =
         prefs(ctx).edit { putBoolean(KEY_SOUND, value) }
 
+    fun isHapticEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean("haptic_enabled", true)
+    fun setHapticEnabled(ctx: Context, value: Boolean) =
+        prefs(ctx).edit { putBoolean("haptic_enabled", value) }
+
     /** Increment session count and return true if upsell should be shown. */
     fun onSessionStart(ctx: Context): Boolean {
         if (isAdFree(ctx)) return false

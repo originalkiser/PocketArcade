@@ -121,14 +121,10 @@ class CaveDiverView @JvmOverloads constructor(
         } else if (phase == CD2Phase.PLAYING) {
             thrust = pressed
             if (pressed) {
-                SoundManager.startLoop(SoundManager.SFX.CD_THRUSTER, context)
                 post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
-            } else {
-                SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
             }
         } else {
             thrust = false
-            SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
         }
     }
 
@@ -352,7 +348,6 @@ class CaveDiverView @JvmOverloads constructor(
 
     private fun stopThread() {
         running = false
-        SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
         gameThread?.join(500)
         gameThread = null
     }
@@ -395,13 +390,11 @@ class CaveDiverView @JvmOverloads constructor(
                     startPending = true
                 } else {
                     thrust = true
-                    SoundManager.startLoop(SoundManager.SFX.CD_THRUSTER, context)
                     performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 thrust = false
-                SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
             }
         }
         return true
@@ -467,7 +460,6 @@ class CaveDiverView @JvmOverloads constructor(
         if (checkCollision()) {
             phase        = CD2Phase.DEAD
             thrust       = false; thrustFrames = 0
-            SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
             post { performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS) }
             if (score > bestScore) bestScore = score
             initStars()   // JSX: G.stars = makeStars() in paintDead

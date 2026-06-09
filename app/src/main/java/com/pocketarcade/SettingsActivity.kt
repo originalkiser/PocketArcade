@@ -112,8 +112,9 @@ class SettingsActivity : AppCompatActivity() {
         refreshBgSwatches()
 
         // ── Other toggles ──────────────────────────────────────────────────────
-        val switchDemo  = findViewById<Switch>(R.id.switchDemoMode)
-        val switchSound = findViewById<Switch>(R.id.switchSound)
+        val switchDemo   = findViewById<Switch>(R.id.switchDemoMode)
+        val switchSound  = findViewById<Switch>(R.id.switchSound)
+        val switchHaptic = findViewById<Switch>(R.id.switchHaptic)
 
         // Leaderboard size
         val tvLbSize  = findViewById<TextView>(R.id.tvLeaderboardSize)
@@ -213,8 +214,9 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
-        switchSound.isChecked = PrefsManager.isSoundEnabled(this)
+        switchDemo.isChecked   = PrefsManager.isDemoModeEnabled(this)
+        switchSound.isChecked  = PrefsManager.isSoundEnabled(this)
+        switchHaptic.isChecked = PrefsManager.isHapticEnabled(this)
 
         // ── Friend notification switches ───────────────────────────────────────
         val switchNotifNew    = findViewById<Switch>(R.id.switchNotifNewScore)
@@ -273,6 +275,9 @@ class SettingsActivity : AppCompatActivity() {
         }
         switchSound.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setSoundEnabled(this, checked)
+        }
+        switchHaptic.setOnCheckedChangeListener { _, checked ->
+            PrefsManager.setHapticEnabled(this, checked)
         }
         switchJokeAds.setOnCheckedChangeListener { _, checked ->
             PrefsManager.setJokeAdsEnabled(this, checked)

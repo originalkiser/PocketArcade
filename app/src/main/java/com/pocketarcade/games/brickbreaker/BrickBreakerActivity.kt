@@ -181,7 +181,7 @@ class BrickBreakerActivity : AppCompatActivity() {
             true
         }
 
-        btnSettings.setOnClickListener { showSettingsDialog() }
+        btnSettings.setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER) }
         btnSound.setOnClickListener { toggleSound() }
         btnLightMode.setOnClickListener { toggleLightMode() }

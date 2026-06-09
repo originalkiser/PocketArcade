@@ -622,7 +622,7 @@ fun showGlobalLeaderboardPicker(activity: AppCompatActivity) {
         })
         tile.addView(TextView(activity).apply {
             text = g.label
-            setTextColor(Color.WHITE)
+            setTextColor(activity.getColor(R.color.text))
             textSize = 15f
             typeface = Typeface.MONOSPACE
             gravity = Gravity.CENTER_VERTICAL

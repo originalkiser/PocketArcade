@@ -36,7 +36,7 @@ class MemoryMatchActivity : AppCompatActivity() {
 
         gameView = findViewById(R.id.memoryMatchView)
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettings).setOnClickListener { showSettingsDialog() }
+        findViewById<TextView>(R.id.btnSettings).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
 
         applyTheme()
 
