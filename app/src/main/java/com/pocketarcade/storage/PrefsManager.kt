@@ -361,6 +361,19 @@ object PrefsManager {
         }
     }
 
+    // ── Ticker source ─────────────────────────────────────────────────────────
+    enum class TickerSource { LOCAL, GLOBAL, FRIENDS }
+
+    fun getTickerSource(ctx: Context): TickerSource =
+        when (prefs(ctx).getString("ticker_source", "LOCAL")) {
+            "GLOBAL"  -> TickerSource.GLOBAL
+            "FRIENDS" -> TickerSource.FRIENDS
+            else      -> TickerSource.LOCAL
+        }
+
+    fun setTickerSource(ctx: Context, source: TickerSource) =
+        prefs(ctx).edit { putString("ticker_source", source.name) }
+
     private fun nextUpsellInterval() = (3..5).random()
 
     fun recordGamePlayed(ctx: Context) {

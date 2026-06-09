@@ -10,6 +10,7 @@ playServicesAds = "23.0.0"
 billingKtx = "6.2.0"
 workManager = "2.9.0"
 firebaseBom = "34.14.0"
+firebaseCrashlyticsPlugin = "3.0.3"
 googleServices = "4.4.4"
 
 [libraries]
@@ -29,3 +30,4 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

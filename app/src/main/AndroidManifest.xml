@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
+        android:name=".PocketArcadeApp"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -113,6 +114,13 @@
 
         <activity
             android:name=".AdFreeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".SettingsActivity" />
+
+        <!-- Hidden debug screen — accessible only via 7-tap on version number in Settings -->
+        <activity
+            android:name=".DebugLogActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:parentActivityName=".SettingsActivity" />

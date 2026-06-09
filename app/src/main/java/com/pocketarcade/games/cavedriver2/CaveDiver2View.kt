@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.pocketarcade.GameTheme
+import com.pocketarcade.SoundManager
 import com.pocketarcade.withAlpha
 import kotlin.math.*
 import kotlin.random.Random
@@ -119,8 +120,15 @@ class CaveDiverView @JvmOverloads constructor(
             startPending = true           // game thread will call resetGame()
         } else if (phase == CD2Phase.PLAYING) {
             thrust = pressed
+            if (pressed) {
+                SoundManager.startLoop(SoundManager.SFX.CD_THRUSTER, context)
+                post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+            } else {
+                SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
+            }
         } else {
             thrust = false
+            SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
         }
     }
 
@@ -344,6 +352,7 @@ class CaveDiverView @JvmOverloads constructor(
 
     private fun stopThread() {
         running = false
+        SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
         gameThread?.join(500)
         gameThread = null
     }
@@ -381,12 +390,19 @@ class CaveDiverView @JvmOverloads constructor(
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            // JSX onPD: if not playing → launch (no thrust); if playing → thrust=true
             MotionEvent.ACTION_DOWN -> {
-                if (phase != CD2Phase.PLAYING) startPending = true else thrust = true
+                if (phase != CD2Phase.PLAYING) {
+                    startPending = true
+                } else {
+                    thrust = true
+                    SoundManager.startLoop(SoundManager.SFX.CD_THRUSTER, context)
+                    performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                }
             }
-            // JSX onPU: thrust=false
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> thrust = false
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                thrust = false
+                SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
+            }
         }
         return true
     }
@@ -434,7 +450,9 @@ class CaveDiverView @JvmOverloads constructor(
             if (!p.scored && p.x + PIPE_W < SHIP_X) {
                 p.scored  = true
                 score++
-                pipeSpeed = PIPE_SPEED_INIT   // JSX resets speed on score (always 2.4)
+                pipeSpeed = PIPE_SPEED_INIT
+                SoundManager.play(SoundManager.SFX.CD_PASS, context)
+                post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
             }
         }
 
@@ -449,6 +467,8 @@ class CaveDiverView @JvmOverloads constructor(
         if (checkCollision()) {
             phase        = CD2Phase.DEAD
             thrust       = false; thrustFrames = 0
+            SoundManager.stopLoop(SoundManager.SFX.CD_THRUSTER)
+            post { performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS) }
             if (score > bestScore) bestScore = score
             initStars()   // JSX: G.stars = makeStars() in paintDead
             val fs = score

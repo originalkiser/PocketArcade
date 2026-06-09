@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.pocketarcade.GameTheme
+import com.pocketarcade.SoundManager
 import com.pocketarcade.withAlpha
 import kotlin.math.min
 
@@ -393,6 +394,13 @@ class BlockDropView @JvmOverloads constructor(
             applyGravity()
             collapseColumns()
             poppingCells.clear()
+            val sfx = if (group.size >= 5) SoundManager.SFX.BD_CLEAR_COMBO
+                      else                 SoundManager.SFX.BD_CLEAR
+            SoundManager.play(sfx, context)
+            performHapticFeedback(
+                if (group.size >= 5) android.view.HapticFeedbackConstants.LONG_PRESS
+                else                 android.view.HapticFeedbackConstants.CONTEXT_CLICK
+            )
             score      += pts
             totalMoves += 1
             var labelPts = pts

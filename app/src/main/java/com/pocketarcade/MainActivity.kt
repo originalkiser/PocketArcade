@@ -24,13 +24,16 @@ import com.pocketarcade.games.blockpop.BlockDropDifficulty
 import com.pocketarcade.games.pong.PongActivity
 import com.pocketarcade.games.memorymatch.MemoryMatchActivity
 import com.pocketarcade.games.snake.SnakeActivity
+import com.pocketarcade.leaderboard.FriendsManager
+import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.LeaderboardManager
+import com.pocketarcade.leaderboard.TimeRange
+import com.pocketarcade.leaderboard.formatGlobalScore
 import com.pocketarcade.leaderboard.showGlobalLeaderboardPicker
 import com.pocketarcade.DisplacementManager
 import com.pocketarcade.ScoreSyncManager
 import com.pocketarcade.leaderboard.showRegistrationPromptIfNeeded
 import com.pocketarcade.leaderboard.showUsernameSetupDialog
-import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.storage.PrefsManager
 
 class MainActivity : AppCompatActivity() {
@@ -39,9 +42,19 @@ class MainActivity : AppCompatActivity() {
     private var upsellDialog: AlertDialog? = null
     private val blinkHandler = Handler(Looper.getMainLooper())
     private var blinkVisible = true
-    /** Snapshot of games-played count at the START of the last onResume. Used to detect
-     *  whether the user actually finished a game before we offer the upsell dialog. */
+    /** Snapshot of games-played count at the START of the last onResume. */
     private var gamesPlayedAtLastResume = -1
+
+    // ── Ticker external data cache ─────────────────────────────────────────────
+    /** game key → (display name, raw score). Populated by [loadGlobalTickerData] /
+     *  [loadFriendsTickerData] and consumed by [buildMarqueeTicker]. */
+    private val tickerCache = mutableMapOf<String, Pair<String, Int>>()
+
+    private val TICKER_GAME_KEYS = listOf(
+        PrefsManager.GAME_SNAKE, PrefsManager.GAME_PONG,
+        PrefsManager.GAME_ASTEROIDS, CaveDiverActivity.GAME_KEY,
+        PrefsManager.GAME_BRICKBREAKER
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +115,18 @@ class MainActivity : AppCompatActivity() {
         }
         // Marquee requires isSelected = true to scroll
         findViewById<TextView>(R.id.tvMarquee).isSelected = true
+
+        // ── Ticker source buttons ──────────────────────────────────────────────
+        findViewById<TextView>(R.id.tickerBtnLocal).setOnClickListener {
+            selectTickerSource(PrefsManager.TickerSource.LOCAL)
+        }
+        findViewById<TextView>(R.id.tickerBtnGlobal).setOnClickListener {
+            selectTickerSource(PrefsManager.TickerSource.GLOBAL)
+        }
+        findViewById<TextView>(R.id.tickerBtnFriends).setOnClickListener {
+            selectTickerSource(PrefsManager.TickerSource.FRIENDS)
+        }
+        refreshTickerButtons()
 
         updateScores()
         IconRotationWorker.schedule(this)
@@ -176,6 +201,12 @@ class MainActivity : AppCompatActivity() {
         UpdateChecker.checkResumeDownload(this)
         FriendNudgeManager.checkOnOpen(this)
         ScoreSyncManager.syncOnLaunch(this)
+        refreshTickerButtons()
+        when (PrefsManager.getTickerSource(this)) {
+            PrefsManager.TickerSource.GLOBAL  -> loadGlobalTickerData()
+            PrefsManager.TickerSource.FRIENDS -> loadFriendsTickerData()
+            PrefsManager.TickerSource.LOCAL   -> Unit
+        }
         updateScores()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
@@ -282,26 +313,90 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun buildMarqueeTicker(): String {
-        data class G(val key: String, val label: String, val isPong: Boolean)
+        data class G(val key: String, val label: String)
         val games = listOf(
-            G(PrefsManager.GAME_SNAKE,         "SNAKE",     false),
-            G(PrefsManager.GAME_PONG,          "PONG",      true),
-            G(PrefsManager.GAME_ASTEROIDS,     "ASTEROIDS", false),
-            G(CaveDiverActivity.GAME_KEY,      "CAVE",      false),
-            G(PrefsManager.GAME_BRICKBREAKER,  "BRKR",      false)
+            G(PrefsManager.GAME_SNAKE,        "SNAKE"),
+            G(PrefsManager.GAME_PONG,         "PONG"),
+            G(PrefsManager.GAME_ASTEROIDS,    "ASTEROIDS"),
+            G(CaveDiverActivity.GAME_KEY,     "CAVE"),
+            G(PrefsManager.GAME_BRICKBREAKER, "BRKR")
         )
-        val parts = games.map { (key, label, isPong) ->
-            val top = LeaderboardManager.getEntries(this, key).firstOrNull()
-            if (top == null) {
-                "$label · NO SCORES"
-            } else {
-                val initials = top.initials.trim()
-                val score    = if (isPong) "WON!" else "${top.score} PTS"
-                val inits    = if (initials.isNotEmpty()) "$initials · " else ""
-                "$label · $inits$score · ${top.formattedDate}"
+
+        return when (PrefsManager.getTickerSource(this)) {
+            PrefsManager.TickerSource.LOCAL -> {
+                val parts = games.mapNotNull { (key, label) ->
+                    val top = LeaderboardManager.getEntries(this, key).firstOrNull()
+                        ?: return@mapNotNull null
+                    val initials = top.initials.trim()
+                    val score    = if (key == PrefsManager.GAME_PONG) "WON!" else "${top.score} PTS"
+                    val inits    = if (initials.isNotEmpty()) "$initials · " else ""
+                    "$label · $inits$score · ${top.formattedDate}"
+                }
+                if (parts.isEmpty()) "LOCAL BEST  ✦  PLAY TO SET RECORDS  ✦  "
+                else "LOCAL BEST  ✦  ${parts.joinToString("  ✦  ")}  ✦  "
+            }
+            PrefsManager.TickerSource.GLOBAL, PrefsManager.TickerSource.FRIENDS -> {
+                val parts = games.mapNotNull { (key, label) ->
+                    val (username, score) = tickerCache[key] ?: return@mapNotNull null
+                    "$label · @$username · ${formatGlobalScore(key, score)}"
+                }
+                val header = if (PrefsManager.getTickerSource(this) == PrefsManager.TickerSource.GLOBAL)
+                    "WORLD BEST" else "FRIEND BEST"
+                if (parts.isEmpty()) "$header  ✦  FETCHING SCORES…  ✦  "
+                else "$header  ✦  ${parts.joinToString("  ✦  ")}  ✦  "
             }
         }
-        return "TOP SCORES  ✦  ${parts.joinToString("  ✦  ")}  ✦  "
+    }
+
+    // ── Ticker source helpers ──────────────────────────────────────────────────
+
+    private fun selectTickerSource(source: PrefsManager.TickerSource) {
+        PrefsManager.setTickerSource(this, source)
+        refreshTickerButtons()
+        tickerCache.clear()
+        when (source) {
+            PrefsManager.TickerSource.GLOBAL  -> loadGlobalTickerData()
+            PrefsManager.TickerSource.FRIENDS -> loadFriendsTickerData()
+            PrefsManager.TickerSource.LOCAL   -> updateScores()
+        }
+    }
+
+    private fun refreshTickerButtons() {
+        val source  = PrefsManager.getTickerSource(this)
+        val active  = getColor(R.color.accent_yellow)
+        val inactive = getColor(R.color.muted)
+        findViewById<TextView>(R.id.tickerBtnLocal)
+            .setTextColor(if (source == PrefsManager.TickerSource.LOCAL)   active else inactive)
+        findViewById<TextView>(R.id.tickerBtnGlobal)
+            .setTextColor(if (source == PrefsManager.TickerSource.GLOBAL)  active else inactive)
+        findViewById<TextView>(R.id.tickerBtnFriends)
+            .setTextColor(if (source == PrefsManager.TickerSource.FRIENDS) active else inactive)
+    }
+
+    private fun loadGlobalTickerData() {
+        val pending = java.util.concurrent.atomic.AtomicInteger(TICKER_GAME_KEYS.size)
+        TICKER_GAME_KEYS.forEach { game ->
+            GlobalLeaderboard.fetchGlobal(game, mode = null, limit = 1L) { entries ->
+                entries.firstOrNull()?.let { e -> tickerCache[game] = e.username to e.score }
+                if (pending.decrementAndGet() == 0) runOnUiThread { updateScores() }
+            }
+        }
+    }
+
+    private fun loadFriendsTickerData() {
+        val uid = GlobalLeaderboard.currentUid ?: return
+        FriendsManager.getFollowing(uid) { friends ->
+            val uids = friends.map { it.uid }
+            if (uids.isEmpty()) { runOnUiThread { updateScores() }; return@getFollowing }
+            val pending = java.util.concurrent.atomic.AtomicInteger(TICKER_GAME_KEYS.size)
+            TICKER_GAME_KEYS.forEach { game ->
+                FriendsManager.fetchFriendsScores(uids, game, TimeRange.ALL_TIME) { entries ->
+                    entries.maxByOrNull { it.score }
+                        ?.let { e -> tickerCache[game] = e.username to e.score }
+                    if (pending.decrementAndGet() == 0) runOnUiThread { updateScores() }
+                }
+            }
+        }
     }
 
     // ── Upsell dialog ──────────────────────────────────────────────────────────

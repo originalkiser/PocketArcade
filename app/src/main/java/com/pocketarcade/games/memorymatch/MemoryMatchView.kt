@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.pocketarcade.GameTheme
+import com.pocketarcade.SoundManager
 import com.pocketarcade.darken
 import com.pocketarcade.withAlpha
 
@@ -229,6 +230,8 @@ class MemoryMatchView @JvmOverloads constructor(
                 cA.matched = true; cB.matched = true
                 matchCount++
                 selected.clear(); locked = false
+                SoundManager.play(SoundManager.SFX.MM_MATCH, context)
+                performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
 
                 if (matchCount == total / 2) {
                     won = true; running = false
@@ -238,6 +241,8 @@ class MemoryMatchView @JvmOverloads constructor(
                 invalidate()
             } else {
                 mismatched.addAll(selected)
+                SoundManager.play(SoundManager.SFX.MM_NO_MATCH, context)
+                performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
                 invalidate()
                 // After the "red" display pause, animate the cards back face-down
                 handler.postDelayed({ animateFlipBack(cA, cB) }, FLIP_BACK_DELAY)

@@ -160,7 +160,26 @@ class SettingsActivity : AppCompatActivity() {
         val btnWhatsNew     = findViewById<TextView>(R.id.btnWhatsNew)
         val btnCredits      = findViewById<TextView>(R.id.btnCredits)
         val btnReset        = findViewById<TextView>(R.id.btnResetScores)
-        findViewById<TextView>(R.id.tvVersion).text = "v${BuildConfig.VERSION_NAME}"
+        val tvVersion       = findViewById<TextView>(R.id.tvVersion)
+        tvVersion.text      = "v${BuildConfig.VERSION_NAME}"
+
+        // ── Secret debug screen: tap version 7 times within 2 s per tap ──────
+        var versionTaps  = 0
+        var lastVersionTap = 0L
+        tvVersion.setOnClickListener {
+            val now = System.currentTimeMillis()
+            if (now - lastVersionTap > 2_000) versionTaps = 0
+            lastVersionTap = now
+            versionTaps++
+            when {
+                versionTaps == 4 -> Toast.makeText(this,
+                    "3 more taps to enter debug mode.", Toast.LENGTH_SHORT).show()
+                versionTaps >= 7 -> {
+                    versionTaps = 0
+                    startActivity(Intent(this, DebugLogActivity::class.java))
+                }
+            }
+        }
 
         switchDemo.isChecked  = PrefsManager.isDemoModeEnabled(this)
         switchSound.isChecked = PrefsManager.isSoundEnabled(this)
@@ -237,7 +256,7 @@ class SettingsActivity : AppCompatActivity() {
         btnCheckUpdate.setOnClickListener { UpdateChecker.checkNow(this) }
         btnShareApp.setOnClickListener { ShareUtils.shareApp(this) }
         btnWhatsNew.setOnClickListener { showChangelogDialog(this) }
-        btnCredits.setOnClickListener { showCreditsDialog(this) }
+        btnCredits.setOnClickListener { throw RuntimeException("Crashlytics test crash") }
         btnReset.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_scores_confirm))
