@@ -165,15 +165,16 @@ object Themes {
 // Muted/desaturated dark backgrounds for the app shell (menus, settings, etc.).
 // One per game-board theme, loosely matching its visual identity.
 
-data class AppBgTheme(val name: String, val swatch: Int, val bg: Int)
+// bgLight = a very lightly-tinted white used as the shell background in light mode
+data class AppBgTheme(val name: String, val swatch: Int, val bg: Int, val bgLight: Int)
 
 object AppBgThemes {
     val ALL = listOf(
-        AppBgTheme("Void",  p("#2a3a52"), p("#0c1e38")),  // Classic — dark navy blue
-        AppBgTheme("Ember", p("#4a2a10"), p("#221100")),  // Sunset — dark amber
-        AppBgTheme("Grove", p("#183a14"), p("#071e08")),  // Forest — dark green
-        AppBgTheme("Dusk",  p("#3a1038"), p("#1c0628")),  // Cherry — dark purple
-        AppBgTheme("Frost", p("#082a3c"), p("#05182c")),  // Ice — dark blue-teal
-        AppBgTheme("Ink",   p("#1a2a1c"), p("#06180c"))   // Neon — dark lime green
+        AppBgTheme("Void",  p("#2a3a52"), p("#0c1e38"), p("#eef0ff")),  // Classic — light blue tint
+        AppBgTheme("Ember", p("#4a2a10"), p("#221100"), p("#fff4ec")),  // Sunset — light amber tint
+        AppBgTheme("Grove", p("#183a14"), p("#071e08"), p("#edfff0")),  // Forest — light green tint
+        AppBgTheme("Dusk",  p("#3a1038"), p("#1c0628"), p("#faf0ff")),  // Cherry — light purple tint
+        AppBgTheme("Frost", p("#082a3c"), p("#05182c"), p("#edfffe")),  // Ice — light teal tint
+        AppBgTheme("Ink",   p("#1a2a1c"), p("#06180c"), p("#f0fff2"))   // Neon — light lime tint
     )
 }

@@ -26,6 +26,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_settings)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))

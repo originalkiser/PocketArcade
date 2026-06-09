@@ -140,6 +140,9 @@ class CaveDiverView @JvmOverloads constructor(
     private var themeHudVal   = SHIP_COL
     private var themeCaveEdge = CAVE_EDGE   // glowing stalactite tip / edge
     private var themeCave     = CAVE        // cave wall body tint
+    // Background gradient top/bottom — updated by applyTheme so light mode uses a lighter sky
+    private var themeBg1 = BG1
+    private var themeBg2 = BG2
 
     fun applyTheme(theme: GameTheme) {
         themeShipCol  = theme.player
@@ -148,6 +151,12 @@ class CaveDiverView @JvmOverloads constructor(
         themeHudVal   = theme.player
         themeCaveEdge = theme.player.withAlpha(0xCC)
         themeCave     = theme.muted.withAlpha(0xBB)
+        // Background: use the theme's surface as the top of the gradient and bg as the base.
+        // In dark themes both are near-black; in light themes they become pale tinted colours.
+        themeBg1 = theme.surface
+        themeBg2 = theme.bg
+        // Rebuild the background shader immediately (surfaceChanged may have already run)
+        bgPaint.shader = LinearGradient(0f, 0f, 0f, H, themeBg1, themeBg2, Shader.TileMode.CLAMP)
         hudValuePaint.color = themeHudVal
         titlePaint.apply    { color = themeShipCol; setShadowLayer(24f, 0f, 0f, themeShipCol) }
         deadScorePaint.apply { color = themeShipCol; setShadowLayer(16f, 0f, 0f, themeShipCol) }
@@ -296,8 +305,9 @@ class CaveDiverView @JvmOverloads constructor(
         offsetX = (w  - W * scale) / 2f
         offsetY = (h2 - H * scale) / 2f
 
-        // Background gradient: top → bottom, exactly as JSX createLinearGradient(0,0,0,H)
-        bgPaint.shader = LinearGradient(0f, 0f, 0f, H, BG1, BG2, Shader.TileMode.CLAMP)
+        // Background gradient: top → bottom. Use theme-derived colours so light mode
+        // renders a pale sky rather than the hardcoded dark space gradient.
+        bgPaint.shader = LinearGradient(0f, 0f, 0f, H, themeBg1, themeBg2, Shader.TileMode.CLAMP)
 
         // Text sizes in logical canvas pixels — canvas.scale() applies physical scaling
         titlePaint.textSize      = 36f

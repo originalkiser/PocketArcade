@@ -75,14 +75,14 @@ object ThemeManager {
 
     /**
      * Background color for shell activities (menus, settings, record book, etc.).
-     * In dark mode: selected [AppBgTheme] bg.
-     * In light mode: the game-board theme's own light background so it stays coherent.
+     * Dark mode: the selected [AppBgTheme]'s dark bg.
+     * Light mode: the selected [AppBgTheme]'s light tinted bg (bgLight), so the
+     * background-tint setting is honoured in both modes.
      */
-    fun currentBgColor(ctx: Context): Int =
-        if (isEffectivelyLight(ctx))
-            currentTheme(ctx).bg
-        else
-            AppBgThemes.ALL[bgThemeIndex(ctx).coerceIn(0, AppBgThemes.ALL.lastIndex)].bg
+    fun currentBgColor(ctx: Context): Int {
+        val theme = AppBgThemes.ALL[bgThemeIndex(ctx).coerceIn(0, AppBgThemes.ALL.lastIndex)]
+        return if (isEffectivelyLight(ctx)) theme.bgLight else theme.bg
+    }
 
     // ── Game board theme ────────────────────────────────────────────────────
 

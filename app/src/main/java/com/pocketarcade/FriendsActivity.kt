@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.pocketarcade.leaderboard.*
 import com.pocketarcade.storage.PrefsManager
+import com.pocketarcade.SystemColorTheme
 
 class FriendsActivity : AppCompatActivity() {
 
@@ -48,6 +49,7 @@ class FriendsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_friends)
 
         val btnBack       = findViewById<TextView>(R.id.btnFriendsBack)
@@ -612,7 +614,8 @@ class FriendsActivity : AppCompatActivity() {
     ): View {
         val rankColor = when (rank) {
             1 -> Color.parseColor("#FFD700")
-            2 -> Color.parseColor("#C0C0C0")
+            // Silver is #C0C0C0 — invisible on light backgrounds; darken it in light mode
+            2 -> if (ThemeManager.isLightMode(this)) Color.parseColor("#707070") else Color.parseColor("#C0C0C0")
             3 -> Color.parseColor("#CD7F32")
             else -> getColor(R.color.muted)
         }
@@ -697,7 +700,7 @@ class FriendsActivity : AppCompatActivity() {
             entries.forEachIndexed { idx, entry ->
                 val rankColor = when (idx + 1) {
                     1 -> Color.parseColor("#FFD700")
-                    2 -> Color.parseColor("#C0C0C0")
+                    2 -> if (ThemeManager.isLightMode(this)) Color.parseColor("#707070") else Color.parseColor("#C0C0C0")
                     3 -> Color.parseColor("#CD7F32")
                     else -> getColor(R.color.muted)
                 }
@@ -928,7 +931,7 @@ class FriendsActivity : AppCompatActivity() {
         val useMedals = selectedTimeRange != TimeRange.ALL_TIME
         val rankColor = when {
             useMedals && rank == 1 -> Color.parseColor("#FFD700")
-            useMedals && rank == 2 -> Color.parseColor("#C0C0C0")
+            useMedals && rank == 2 -> if (ThemeManager.isLightMode(this)) Color.parseColor("#707070") else Color.parseColor("#C0C0C0")
             useMedals && rank == 3 -> Color.parseColor("#CD7F32")
             isMe     -> getColor(R.color.accent_blue)
             isMutual -> Color.parseColor("#00CC66")

@@ -45,6 +45,7 @@ class AsteroidsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.pocketarcade.SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_asteroids)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))

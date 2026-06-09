@@ -47,6 +47,7 @@ class PongActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.pocketarcade.SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_pong)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))

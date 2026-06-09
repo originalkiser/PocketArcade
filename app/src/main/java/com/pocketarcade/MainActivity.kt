@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_main)
 
         PrefsManager.migrateInflatedTime(this)
@@ -171,9 +172,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyTileBorders() {
         val d = resources.displayMetrics.density
+        val isLight = ThemeManager.isLightMode(this)
+        // Light mode: use card colour (#eef1f8) so tiles lift off the bg.
+        // Dark mode: keep the near-black #060614 that the dark palette expects.
+        val tileBg = if (isLight) getColor(R.color.card) else Color.parseColor("#060614")
         fun border(view: View, color: Int) {
             val gd = GradientDrawable()
-            gd.setColor(Color.parseColor("#060614"))
+            gd.setColor(tileBg)
             gd.cornerRadius = 8f * d
             gd.setStroke((1.5f * d).toInt(), color)
             view.background = gd
@@ -181,10 +186,10 @@ class MainActivity : AppCompatActivity() {
         border(findViewById(R.id.tileSnake),        getColor(R.color.accent_blue))
         border(findViewById(R.id.tilePong),         getColor(R.color.accent_red))
         border(findViewById(R.id.tileAsteroids),    getColor(R.color.accent_cyan))
-        border(findViewById(R.id.tileCaveDiver),    Color.parseColor("#00FFCC"))
-        border(findViewById(R.id.tileBlockPop),     Color.parseColor("#FF6B35"))
+        border(findViewById(R.id.tileCaveDiver),    getColor(R.color.color_hud_cave))
+        border(findViewById(R.id.tileBlockPop),     getColor(R.color.color_hud_block))
         border(findViewById(R.id.tileBrickBreaker), getColor(R.color.accent_yellow))
-        border(findViewById(R.id.tileMemoryMatch),  Color.parseColor("#00FF96"))
+        border(findViewById(R.id.tileMemoryMatch),  getColor(R.color.color_hud_match))
     }
 
     private fun startBlinkPrompt() {
@@ -214,6 +219,7 @@ class MainActivity : AppCompatActivity() {
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         ThemeManager.applyWindowBackground(this)
         findViewById<FrameLayout>(R.id.rootFrame).setBackgroundColor(ThemeManager.currentBgColor(this))
+        applyTileBorders()
 
         refreshProfileCircle()
 

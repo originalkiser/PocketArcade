@@ -66,6 +66,11 @@ class MemoryMatchView @JvmOverloads constructor(
     private var tBorderFlip   = BORDER_FLIP
     private var tBorderMatch  = BORDER_MATCH
     private var tBorderDef    = BORDER_DEF
+    // Additional theme vars for full light/dark canvas support
+    private var tCardDark     = CARD_DARK          // face-down card body
+    private var tCardMiss     = CARD_MISS          // mismatch flash body
+    private var tStatsBg      = 0xFF111111.toInt() // stats bar background
+    private var tWinBoxBg     = 0xFF0D1F14.toInt() // win overlay box background
 
     fun applyTheme(theme: GameTheme) {
         tAccent      = theme.accent
@@ -74,9 +79,19 @@ class MemoryMatchView @JvmOverloads constructor(
         tBorderFlip  = theme.accent.withAlpha(0x99)
         tBorderMatch = theme.accent
         tBorderDef   = theme.accent.withAlpha(0x44)
-        labelPaint.color     = theme.accent
+        // Full canvas theming
+        bgPaint.color    = theme.bg
+        tCardDark        = theme.surface or 0xFF000000.toInt()
+        tCardMiss        = theme.rival.darken(0.30f) or 0xFF000000.toInt()
+        tStatsBg         = theme.surface or 0xFF000000.toInt()
+        tWinBoxBg        = theme.surface or 0xFF000000.toInt()
+        // Text colours
+        valuePaint.color   = theme.text
+        titlePaint.color   = theme.text
+        labelPaint.color   = theme.accent
         diffLabelPaint.color = theme.accent
         winTitlePaint.color  = theme.accent
+        winStatPaint.color   = theme.muted
         invalidate()
     }
 
@@ -397,7 +412,7 @@ class MemoryMatchView @JvmOverloads constructor(
     }
 
     private fun drawStats(canvas: Canvas) {
-        cardPaint.color = 0xFF111111.toInt()
+        cardPaint.color = tStatsBg
         canvas.drawRoundRect(statsRect, 16f, 16f, cardPaint)
 
         val third  = statsRect.width() / 3f
@@ -431,10 +446,10 @@ class MemoryMatchView @JvmOverloads constructor(
             )
 
             cardPaint.color = when {
-                isMiss       -> CARD_MISS
+                isMiss       -> tCardMiss
                 card.matched -> tCardMatch
                 isFlip       -> tCardFlip
-                else         -> CARD_DARK
+                else         -> tCardDark
             }
             canvas.drawRoundRect(scaledRect, cornerRadius, cornerRadius, cardPaint)
 
@@ -448,10 +463,12 @@ class MemoryMatchView @JvmOverloads constructor(
 
             val textY = rect.centerY() + iconPaint.textSize * 0.35f
             if (isFlip) {
+                // Emojis render in full color regardless; this tint only affects plain glyphs
                 iconPaint.color = TEXT_WHITE
                 canvas.drawText(card.icon, rect.centerX(), textY, iconPaint)
             } else {
-                iconPaint.color = TEXT_DIM
+                // "?" placeholder — use border accent so it's always visible against the card body
+                iconPaint.color = tBorderDef or 0xFF000000.toInt()
                 canvas.drawText("?", rect.centerX(), textY, iconPaint)
             }
         }
@@ -466,7 +483,7 @@ class MemoryMatchView @JvmOverloads constructor(
             (w - boxW) / 2f, (h - boxH) / 2f,
             (w + boxW) / 2f, (h + boxH) / 2f
         )
-        cardPaint.color = 0xFF0D1F14.toInt()
+        cardPaint.color = tWinBoxBg
         canvas.drawRoundRect(boxRect, 32f, 32f, cardPaint)
         borderPaint.color = tAccent
         canvas.drawRoundRect(boxRect, 32f, 32f, borderPaint)

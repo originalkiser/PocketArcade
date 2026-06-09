@@ -34,6 +34,7 @@ class CaveDiverActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.pocketarcade.SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_cavedriver2)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))

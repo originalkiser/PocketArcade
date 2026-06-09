@@ -78,6 +78,7 @@ class SnakeActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.pocketarcade.SystemColorTheme.applyIfActive(this, this)
         setContentView(R.layout.activity_snake)
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
