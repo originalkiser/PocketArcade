@@ -42,12 +42,8 @@ class SnakeActivity : AppCompatActivity() {
     private lateinit var btnBack: TextView
     private lateinit var controlZone: FrameLayout
     private lateinit var swipeZoneContainer: FrameLayout
-    private lateinit var dpadContainer: FrameLayout
+    private lateinit var dpadZone: SnakeDpadZoneView
     private lateinit var btnRestart: View
-    private lateinit var btnUp: View
-    private lateinit var btnDown: View
-    private lateinit var btnLeft: View
-    private lateinit var btnRight: View
     private lateinit var btnSwipeMode: TextView
     private lateinit var btnDpadMode: TextView
     private lateinit var btnLightMode: TextView
@@ -61,9 +57,6 @@ class SnakeActivity : AppCompatActivity() {
     private var fruitsThisGame = 0
     private var consecutiveLowScores = 0  // resets when score >= 15; not persisted
 
-    private var dpadButtonSizeDp = 56f
-    private var dpadHSpreadDp = 0f
-    private var dpadVSpacingDp = 4f
     private var swipeSensitivity = 2
 
     private val prefs by lazy { getPreferences(MODE_PRIVATE) }
@@ -94,12 +87,8 @@ class SnakeActivity : AppCompatActivity() {
         btnBack.setOnClickListener { finish() }
         controlZone        = findViewById(R.id.controlZone)
         swipeZoneContainer = findViewById(R.id.swipeZoneContainer)
-        dpadContainer      = findViewById(R.id.dpadContainer)
+        dpadZone           = findViewById(R.id.dpadZone)
         btnRestart         = findViewById(R.id.btnRestart)
-        btnUp              = findViewById(R.id.btnUp)
-        btnDown            = findViewById(R.id.btnDown)
-        btnLeft            = findViewById(R.id.btnLeft)
-        btnRight           = findViewById(R.id.btnRight)
         btnSwipeMode       = findViewById(R.id.btnSwipeMode)
         btnDpadMode        = findViewById(R.id.btnDpadMode)
         btnLightMode       = findViewById(R.id.btnLightMode)
@@ -173,10 +162,11 @@ class SnakeActivity : AppCompatActivity() {
             snakeView.startGame()
         }
 
-        btnUp.setOnTouchListener    { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadUp();    true }
-        btnDown.setOnTouchListener  { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadDown();  true }
-        btnLeft.setOnTouchListener  { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadLeft();  true }
-        btnRight.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_DOWN) snakeView.dpadRight(); true }
+        // Wire the triangular zone view to the Snake view's d-pad inputs
+        dpadZone.onUp    = { snakeView.dpadUp()    }
+        dpadZone.onDown  = { snakeView.dpadDown()  }
+        dpadZone.onLeft  = { snakeView.dpadLeft()  }
+        dpadZone.onRight = { snakeView.dpadRight() }
 
         btnSwipeMode.setOnClickListener  { setDpadMode(false) }
         btnDpadMode.setOnClickListener   { setDpadMode(true) }
@@ -201,7 +191,6 @@ class SnakeActivity : AppCompatActivity() {
         }
 
         applyControlBarState()
-        applyDpadLayout()
         scheduleIdle()
 
         HintManager.showToastIfNeeded(this,
@@ -242,11 +231,13 @@ class SnakeActivity : AppCompatActivity() {
         gd.setStroke((1 * d).toInt(), theme.accent, 6f * d, 3f * d)
         swipeZoneContainer.background = gd
 
+        dpadZone.applyTheme(theme.accent, theme.text)
+
         btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         applyThemeToUi()
     }
 
@@ -275,20 +266,13 @@ class SnakeActivity : AppCompatActivity() {
 
     private fun loadSettings() {
         isDpadMode       = prefs.getBoolean("control_dpad", false)
-        dpadButtonSizeDp = prefs.getFloat("dpad_btn_size", 56f)
-        dpadHSpreadDp    = prefs.getFloat("dpad_h_spread", 0f)
-        dpadVSpacingDp   = prefs.getFloat("dpad_v_spacing", 0f)
         swipeSensitivity = prefs.getInt("swipe_sensitivity", 2)
-
         snakeView.swipeThresholdDp = sensitivityToThresholdDp(swipeSensitivity)
     }
 
     private fun saveSettings() {
         prefs.edit()
             .putBoolean("control_dpad", isDpadMode)
-            .putFloat("dpad_btn_size", dpadButtonSizeDp)
-            .putFloat("dpad_h_spread", dpadHSpreadDp)
-            .putFloat("dpad_v_spacing", dpadVSpacingDp)
             .putInt("swipe_sensitivity", swipeSensitivity)
             .apply()
     }
@@ -307,45 +291,7 @@ class SnakeActivity : AppCompatActivity() {
         btnSwipeMode.setTextColor(if (!isDpadMode) activeColor else inactiveColor)
         btnDpadMode.setTextColor(if (isDpadMode) activeColor else inactiveColor)
         swipeZoneContainer.visibility = if (!isDpadMode) View.VISIBLE else View.GONE
-        dpadContainer.visibility      = if (isDpadMode)  View.VISIBLE else View.GONE
-    }
-
-    // ── D-pad layout ───────────────────────────────────────────────────────────
-
-    private fun applyDpadLayout() {
-        val B = dpadButtonSizeDp
-        val S = dpadHSpreadDp
-        val V = dpadVSpacingDp
-        val d = resources.displayMetrics.density
-
-        val bPx = (B * d).toInt()
-        val sPx = (S * d).toInt()
-        val vPx = (V * d).toInt()
-
-        val contW   = 3 * bPx + sPx
-        val contH   = 3 * bPx + 2 * vPx
-        val centerX = bPx + sPx / 2
-
-        val dcLp = dpadContainer.layoutParams as FrameLayout.LayoutParams
-        dcLp.width   = contW
-        dcLp.height  = contH
-        dcLp.gravity = Gravity.CENTER
-        dpadContainer.layoutParams = dcLp
-
-        setDpadBtn(btnUp,    centerX,        0,               bPx)
-        setDpadBtn(btnLeft,  0,              bPx + vPx,       bPx)
-        setDpadBtn(btnRight, 2 * bPx + sPx, bPx + vPx,       bPx)
-        setDpadBtn(btnDown,  centerX,        2 * (bPx + vPx), bPx)
-    }
-
-    private fun setDpadBtn(v: View, x: Int, y: Int, sz: Int) {
-        val lp = v.layoutParams as FrameLayout.LayoutParams
-        lp.gravity    = Gravity.TOP or Gravity.START
-        lp.leftMargin = x
-        lp.topMargin  = y
-        lp.width      = sz
-        lp.height     = sz
-        v.layoutParams = lp
+        dpadZone.visibility           = if (isDpadMode)  View.VISIBLE else View.GONE
     }
 
     // ── Swipe sensitivity ──────────────────────────────────────────────────────
@@ -360,37 +306,6 @@ class SnakeActivity : AppCompatActivity() {
 
     private fun showSettingsDialog() {
         val view = layoutInflater.inflate(R.layout.dialog_snake_settings, null)
-
-        // ── Seekbars ──
-        val seekBtnSize  = view.findViewById<SeekBar>(R.id.seekBtnSize)
-        val tvBtnSize    = view.findViewById<TextView>(R.id.tvBtnSize)
-        val seekHSpread  = view.findViewById<SeekBar>(R.id.seekHSpread)
-        val tvHSpread    = view.findViewById<TextView>(R.id.tvHSpread)
-        val seekVSpacing = view.findViewById<SeekBar>(R.id.seekVSpacing)
-        val tvVSpacing   = view.findViewById<TextView>(R.id.tvVSpacing)
-
-        seekBtnSize.progress  = dpadButtonSizeDp.toInt()
-        tvBtnSize.text        = "${dpadButtonSizeDp.toInt()}dp"
-        seekHSpread.progress  = dpadHSpreadDp.toInt()
-        tvHSpread.text        = "${dpadHSpreadDp.toInt()}dp"
-        seekVSpacing.progress = dpadVSpacingDp.toInt()
-        tvVSpacing.text       = "${dpadVSpacingDp.toInt()}dp"
-
-        seekBtnSize.onProgress { p ->
-            dpadButtonSizeDp = p.toFloat()
-            tvBtnSize.text = "${p}dp"
-            applyDpadLayout()
-        }
-        seekHSpread.onProgress { p ->
-            dpadHSpreadDp = p.toFloat()
-            tvHSpread.text = "${p}dp"
-            applyDpadLayout()
-        }
-        seekVSpacing.onProgress { p ->
-            dpadVSpacingDp = p.toFloat()
-            tvVSpacing.text = "${p}dp"
-            applyDpadLayout()
-        }
 
         // ── Sensitivity toggle ──
         val btnSensLazy  = view.findViewById<TextView>(R.id.btnSensLazy)
@@ -471,10 +386,8 @@ class SnakeActivity : AppCompatActivity() {
             .setView(view)
             .setPositiveButton("DONE") { _, _ -> saveSettings() }
             .setNegativeButton("RESET") { _, _ ->
-                dpadButtonSizeDp = 56f; dpadHSpreadDp = 0f
-                dpadVSpacingDp = 0f; swipeSensitivity = 2
+                swipeSensitivity = 2
                 snakeView.swipeThresholdDp = sensitivityToThresholdDp(2)
-                applyDpadLayout()
                 saveSettings()
             }
             .create()

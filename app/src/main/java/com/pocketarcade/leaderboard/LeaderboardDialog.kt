@@ -3,6 +3,9 @@ package com.pocketarcade.leaderboard
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -257,8 +260,98 @@ fun checkAndShowLeaderboard(
     } else {
         LeaderboardManager.addEntry(activity, game, score, "   ")
         if (mode != null) LeaderboardManager.addEntry(activity, "${game}_$mode", score, "   ")
+        // No high score — don't auto-show the full leaderboard.
+        // Present a light prompt: primary "Play Again" + secondary "View Leaderboard".
+        showNoHighScorePrompt(activity, game, score, mode, onDone)
+    }
+}
+
+/**
+ * Shown after a game ends when the score doesn't qualify for the top list.
+ * Primary action: return to game (calls [onDone] which makes the restart UI visible).
+ * Secondary action: open the full local leaderboard first, then [onDone].
+ */
+private fun showNoHighScorePrompt(
+    activity: AppCompatActivity,
+    game: String,
+    score: Int,
+    mode: String? = null,
+    onDone: () -> Unit
+) {
+    val dp = activity.resources.displayMetrics.density
+
+    val root = LinearLayout(activity).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding((24 * dp).toInt(), (20 * dp).toInt(), (24 * dp).toInt(), (16 * dp).toInt())
+        background = GradientDrawable().apply {
+            cornerRadius = 16f * dp
+            setColor(activity.getColor(R.color.surface))
+            setStroke((1f * dp).toInt(), activity.getColor(R.color.border))
+        }
+    }
+
+    // Score label (format matches the per-game decoding already used in leaderboard rows)
+    val scoreText = when {
+        isPongGame(game)        -> "SCORE  ${decodePongScore(score)}"
+        isMemoryMatchGame(game) -> "${decodeMemoryMatchScore(game, score)}"
+        else                    -> "SCORE  $score"
+    }
+    root.addView(TextView(activity).apply {
+        text = scoreText
+        setTextColor(activity.getColor(R.color.text))
+        textSize = 20f
+        typeface = Typeface.MONOSPACE
+        gravity = Gravity.CENTER
+        setPadding(0, 0, 0, (18 * dp).toInt())
+    })
+
+    // Primary: PLAY AGAIN
+    val btnPlay = TextView(activity).apply {
+        text = "▶  PLAY AGAIN"
+        setTextColor(activity.getColor(R.color.accent_blue))
+        textSize = 14f
+        typeface = Typeface.MONOSPACE
+        gravity = Gravity.CENTER
+        background = GradientDrawable().apply {
+            cornerRadius = 8f * dp
+            setColor(0x224488FF.toInt())
+            setStroke((1f * dp).toInt(), activity.getColor(R.color.accent_blue))
+        }
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, (48 * dp).toInt()
+        ).also { it.bottomMargin = (10 * dp).toInt() }
+        isClickable = true; isFocusable = true
+    }
+    root.addView(btnPlay)
+
+    // Secondary: VIEW LOCAL LEADERBOARD
+    val btnLb = TextView(activity).apply {
+        text = "🏆 View Local Leaderboard"
+        setTextColor(activity.getColor(R.color.muted))
+        textSize = 12f
+        typeface = Typeface.MONOSPACE
+        gravity = Gravity.CENTER
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, (40 * dp).toInt()
+        )
+        isClickable = true; isFocusable = true
+    }
+    root.addView(btnLb)
+
+    val dialog = Dialog(activity)
+    dialog.setContentView(root)
+    dialog.setCancelable(false)
+    dialog.window?.apply {
+        setBackgroundDrawableResource(android.R.color.transparent)
+        setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    btnPlay.setOnClickListener { dialog.dismiss(); onDone() }
+    btnLb.setOnClickListener  {
+        dialog.dismiss()
         showLeaderboardDialog(activity, game, shareScore = score, mode = mode, onDismiss = onDone)
     }
+    dialog.show()
 }
 
 /**

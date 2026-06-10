@@ -82,7 +82,11 @@ class MemoryMatchActivity : AppCompatActivity() {
         gameView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
         gameView.onDemoStopped = { runOnUiThread { scheduleIdle() } }
 
-        gameView.onGameWon = { moves, elapsedSecs ->
+        gameView.onGameWon = gameWonCallback@{ moves, elapsedSecs ->
+            // Guard: demo sessions must never reach the scoring pipeline.
+            // The view already blocks this call in demo mode; this is a belt-and-suspenders check.
+            if (gameView.isDemoMode()) return@gameWonCallback
+            runOnUiThread { scheduleIdle() }   // reset idle timer from win moment
             val duration = System.currentTimeMillis() - gameStartTime
             val diffKey  = difficulty.name.lowercase()
 
@@ -185,7 +189,7 @@ class MemoryMatchActivity : AppCompatActivity() {
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         updateLightModeButton()
         applyTheme()
     }

@@ -236,7 +236,7 @@ class PongActivity : AppCompatActivity() {
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         updateLightModeButton()
         pongView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_PONG))
     }

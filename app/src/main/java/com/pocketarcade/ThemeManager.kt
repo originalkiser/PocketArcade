@@ -64,6 +64,19 @@ object ThemeManager {
     fun setLightMode(ctx: Context, light: Boolean) =
         setDisplayMode(ctx, if (light) PrefsManager.DisplayMode.LIGHT else PrefsManager.DisplayMode.DARK)
 
+    /**
+     * In-game live toggle: persists the preference WITHOUT calling
+     * [AppCompatDelegate.setDefaultNightMode], so the current Activity is NOT
+     * recreated.  Game canvases read the pref via [currentTheme] on every
+     * [applyTheme] call, so the board redraws correctly.  The system-level
+     * AppCompat night mode will be re-synced the next time [applyDisplayMode]
+     * is called (app launch, or returning to a shell Activity).
+     */
+    fun setLightModeInPlace(ctx: Context, light: Boolean) {
+        PrefsManager.setDisplayMode(ctx, if (light) PrefsManager.DisplayMode.LIGHT else PrefsManager.DisplayMode.DARK)
+        // No AppCompatDelegate call — avoids Activity recreation mid-game
+    }
+
     // ── App background theme ────────────────────────────────────────────────
 
     fun themeIndex(ctx: Context): Int = PrefsManager.getThemeIndex(ctx)

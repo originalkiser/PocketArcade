@@ -148,6 +148,9 @@ class MemoryMatchView @JvmOverloads constructor(
     /** True only when a real user is actively playing (not in demo). */
     fun isUserPlaying() = !demoMode && running
 
+    /** Exposes demo state so activity callbacks can guard score recording. */
+    fun isDemoMode() = demoMode
+
     /** Start an AI demo that flips cards, remembers them, and picks known matches. */
     fun startDemo() {
         demoMode = true
@@ -319,18 +322,21 @@ class MemoryMatchView @JvmOverloads constructor(
                 matchCount++
                 selected.clear(); locked = false
                 SoundManager.play(SoundManager.SFX.MM_MATCH, context)
-                performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                    performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
 
                 if (matchCount == total / 2) {
                     won = true; running = false
                     handler.removeCallbacks(tickRunnable)
-                    onGameWon?.invoke(moves, elapsed)
+                    // Never fire onGameWon during a demo session — demo restarts itself
+                    if (!demoMode) onGameWon?.invoke(moves, elapsed)
                 }
                 invalidate()
             } else {
                 mismatched.addAll(selected)
                 SoundManager.play(SoundManager.SFX.MM_NO_MATCH, context)
-                performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                    performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
                 invalidate()
                 // After the "red" display pause, animate the cards back face-down
                 handler.postDelayed({ animateFlipBack(cA, cB) }, FLIP_BACK_DELAY)

@@ -73,6 +73,7 @@ class CaveDiverActivity : AppCompatActivity() {
         btnHaptics.setOnClickListener     { toggleHaptics() }
         btnSound.setOnClickListener       { toggleSound() }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, GAME_KEY) }
+        findViewById<TextView>(R.id.btnSettingsCave).setOnClickListener { showSettingsDialog() }
 
         updateLightModeButton()
         updateHapticsButton()
@@ -82,6 +83,7 @@ class CaveDiverActivity : AppCompatActivity() {
         gameView.onDemoStopped = { runOnUiThread { scheduleIdle() } }
 
         gameView.onGameOver = { score ->
+            runOnUiThread { scheduleIdle() }   // reset idle timer from game-over moment
             val duration = System.currentTimeMillis() - gameStartTime
             PrefsManager.recordGamePlayed(this)
             PrefsManager.recordGameStat(this, GAME_KEY, score, duration)
@@ -165,7 +167,7 @@ class CaveDiverActivity : AppCompatActivity() {
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         updateLightModeButton()
         applyTheme()
         wireThrustZone()

@@ -21,7 +21,7 @@
             android:gravity="center"
             android:layout_marginBottom="20dp" />
 
-        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â COLOR THEME Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+        <!-- COLOR THEME -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,7 +100,6 @@
             android:gravity="center"
             android:layout_marginBottom="12dp" />
 
-
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
@@ -108,163 +107,7 @@
             android:background="@color/border"
             android:layout_marginBottom="16dp" />
 
-        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â D-PAD BUTTONS Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="D-PAD BUTTONS"
-            android:textColor="@color/muted"
-            android:textSize="13sp"
-            android:fontFamily="monospace"
-            android:letterSpacing="0.1"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Button Size: smol Ã¢â€ ÂÃ¢â€ â€™ chonk -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="Small"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace" />
-
-            <SeekBar
-                android:id="@+id/seekBtnSize"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:min="36"
-                android:max="80"
-                android:progress="56" />
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="Large"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:gravity="end" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvBtnSize"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="56dp"
-            android:textColor="@color/accent_blue"
-            android:textSize="11sp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:layout_marginBottom="14dp" />
-
-        <!-- H-Spread: tight Ã¢â€ ÂÃ¢â€ â€™ wide -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="tight"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace" />
-
-            <SeekBar
-                android:id="@+id/seekHSpread"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:min="0"
-                android:max="40"
-                android:progress="0" />
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="wide"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:gravity="end" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvHSpread"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="0dp"
-            android:textColor="@color/accent_blue"
-            android:textSize="11sp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:layout_marginBottom="14dp" />
-
-        <!-- V-Gap: cozy Ã¢â€ ÂÃ¢â€ â€™ airy -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="Compact"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace" />
-
-            <SeekBar
-                android:id="@+id/seekVSpacing"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:min="0"
-                android:max="20"
-                android:progress="0" />
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="Spacious"
-                android:textColor="@color/muted"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:gravity="end" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvVSpacing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="4dp"
-            android:textColor="@color/accent_blue"
-            android:textSize="11sp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:layout_marginBottom="14dp" />
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/border"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â SWIPE FEEL Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+        <!-- SWIPE FEEL -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -321,4 +164,3 @@
 
     </LinearLayout>
 </ScrollView>
-

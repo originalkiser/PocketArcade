@@ -358,7 +358,8 @@ class BrickBreakerView @JvmOverloads constructor(
                     b.y = paddleY - b.r - 1f
                     if (!demoMode) {
                         SoundManager.play(SoundManager.SFX.BB_PADDLE, context)
-                        post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                        if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                            post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
                     }
                 }
             }
@@ -384,7 +385,8 @@ class BrickBreakerView @JvmOverloads constructor(
                     brick.hp--
                     if (!demoMode) {
                         SoundManager.play(SoundManager.SFX.BB_BRICK, context)
-                        post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                        if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                            post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
                     }
                     if (brick.hp <= 0) {
                         brickIter.remove()

@@ -198,7 +198,8 @@ class SnakeView @JvmOverloads constructor(
             score++; food = randomFood(); onScoreChanged?.invoke(score)
             if (!demoMode) { onFruitEaten?.invoke()
                 SoundManager.play(SoundManager.SFX.SNAKE_EAT, context)
-                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             }
         }
         invalidate()

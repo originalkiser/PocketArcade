@@ -251,8 +251,8 @@ class PongView @JvmOverloads constructor(
         bx += bvx; by += bvy
 
         // Wall bounce (left/right)
-        if (bx - BALL_R < 0) { bx = BALL_R; bvx = abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
-        if (bx + BALL_R > w) { bx = w - BALL_R; bvx = -abs(bvx); if (!demoMode) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
+        if (bx - BALL_R < 0) { bx = BALL_R; bvx = abs(bvx); if (!demoMode && com.pocketarcade.storage.PrefsManager.isHapticEnabled(context)) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
+        if (bx + BALL_R > w) { bx = w - BALL_R; bvx = -abs(bvx); if (!demoMode && com.pocketarcade.storage.PrefsManager.isHapticEnabled(context)) post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) } }
 
         // Player paddle collision (bottom) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â swept: check if ball crossed paddle plane this frame
         if (bvy > 0 &&
@@ -270,7 +270,8 @@ class PongView @JvmOverloads constructor(
             bvy = -abs(newSpd * sin(angle.toDouble()).toFloat())
             if (!demoMode) {
                 SoundManager.play(SoundManager.SFX.PONG_BOUNCE, context)
-                post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                    post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
             }
         }
 

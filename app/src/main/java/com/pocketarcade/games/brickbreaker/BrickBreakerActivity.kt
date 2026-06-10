@@ -323,7 +323,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         updateLightModeButton()
         bbView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_BRICKBREAKER))
     }

@@ -109,6 +109,9 @@ class BlockDropView @JvmOverloads constructor(
     fun isUserPlaying() = !demoMode && totalMoves > 0 &&
             (gameState == BlockDropState.PLAYING || gameState == BlockDropState.POPPING)
 
+    /** Exposes demo state so activity callbacks can guard score recording. */
+    fun isDemoMode() = demoMode
+
     /** Start an AI-driven demo that auto-clears the largest group every ~800 ms. */
     fun startDemo() {
         demoMode = true
@@ -459,10 +462,12 @@ class BlockDropView @JvmOverloads constructor(
             val sfx = if (group.size >= 5) SoundManager.SFX.BD_CLEAR_COMBO
                       else                 SoundManager.SFX.BD_CLEAR
             SoundManager.play(sfx, context)
-            performHapticFeedback(
-                if (group.size >= 5) android.view.HapticFeedbackConstants.LONG_PRESS
-                else                 android.view.HapticFeedbackConstants.CONTEXT_CLICK
-            )
+            if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context)) {
+                performHapticFeedback(
+                    if (group.size >= 5) android.view.HapticFeedbackConstants.LONG_PRESS
+                    else                 android.view.HapticFeedbackConstants.CONTEXT_CLICK
+                )
+            }
             score      += pts
             totalMoves += 1
             var labelPts = pts
@@ -478,7 +483,8 @@ class BlockDropView @JvmOverloads constructor(
                     gameState = BlockDropState.STUCK
                     val finalScore = totalScore + score
                     if (bestScore == 0 || finalScore > bestScore) bestScore = finalScore
-                    post { onGameOver?.invoke(finalScore) }
+                    // Never fire onGameOver during a demo session — demo restarts itself
+                    if (!demoMode) post { onGameOver?.invoke(finalScore) }
                 }
                 else -> gameState = BlockDropState.PLAYING
             }

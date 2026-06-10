@@ -545,7 +545,8 @@ class CaveDiverView @JvmOverloads constructor(
                 score++
                 pipeSpeed = PIPE_SPEED_INIT
                 SoundManager.play(SoundManager.SFX.CD_PASS, context)
-                post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+                if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                    post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
             }
         }
 
@@ -560,7 +561,8 @@ class CaveDiverView @JvmOverloads constructor(
         if (checkCollision()) {
             phase        = CD2Phase.DEAD
             thrust       = false; thrustFrames = 0
-            post { performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS) }
+            if (com.pocketarcade.storage.PrefsManager.isHapticEnabled(context))
+                post { performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS) }
             if (score > bestScore) bestScore = score
             initStars()   // JSX: G.stars = makeStars() in paintDead
             val fs = score

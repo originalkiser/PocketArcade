@@ -89,7 +89,11 @@ class BlockDropActivity : AppCompatActivity() {
         }
 
         // STUCK — game over. Submit the total accumulated score to leaderboards.
-        gameView.onGameOver = { totalScore ->
+        gameView.onGameOver = gameOverCallback@{ totalScore ->
+            // Guard: demo sessions must never reach the scoring pipeline.
+            // The view already blocks this call in demo mode; this is a belt-and-suspenders check.
+            if (gameView.isDemoMode()) return@gameOverCallback
+            runOnUiThread { scheduleIdle() }   // reset idle timer from game-over moment
             val duration = System.currentTimeMillis() - gameStartTime
             val diffKey  = difficulty.key
             PrefsManager.recordGamePlayed(this)
@@ -195,7 +199,7 @@ class BlockDropActivity : AppCompatActivity() {
     }
 
     private fun toggleLightMode() {
-        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        ThemeManager.setLightModeInPlace(this, !ThemeManager.isLightMode(this))
         updateLightModeButton()
         applyTheme()
     }
