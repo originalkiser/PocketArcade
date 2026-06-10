@@ -2,6 +2,8 @@ package com.pocketarcade.games.blockpop
 
 import android.app.Dialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -14,14 +16,26 @@ import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.handlePostGameLeaderboards
+import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
 class BlockDropActivity : AppCompatActivity() {
 
     private lateinit var gameView: BlockDropView
+    private lateinit var btnLightMode: TextView
+    private lateinit var btnHaptics: TextView
+    private lateinit var btnSound: TextView
+    private lateinit var btnLeaderboard: TextView
     private var gameStartTime = 0L
     private var difficulty = BlockDropDifficulty.MEDIUM
+
+    private val idleHandler = Handler(Looper.getMainLooper())
+    private val idleRunnable = Runnable {
+        if (PrefsManager.isDemoModeEnabled(this) && !gameView.isUserPlaying()) {
+            gameView.startDemo()
+        }
+    }
 
     companion object {
         const val GAME_KEY = "blockdrop"
@@ -37,21 +51,33 @@ class BlockDropActivity : AppCompatActivity() {
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
-        gameView = findViewById(R.id.blockPopView)
+        gameView      = findViewById(R.id.blockPopView)
+        btnLightMode  = findViewById(R.id.btnLightModeBlockDrop)
+        btnHaptics    = findViewById(R.id.btnHapticsBlockDrop)
+        btnSound      = findViewById(R.id.btnSoundBlockDrop)
+        btnLeaderboard = findViewById(R.id.btnLeaderboardBlockDrop)
 
         applyTheme()
 
         findViewById<TextView>(R.id.btnBackBlockPop).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettingsBlockDrop).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
+        findViewById<TextView>(R.id.btnSettingsBlockDrop).setOnClickListener {
+            startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java))
+        }
         findViewById<TextView>(R.id.btnRestartBlockDrop).setOnClickListener { gameView.restart() }
+        btnLightMode.setOnClickListener  { toggleLightMode() }
+        btnHaptics.setOnClickListener    { toggleHaptics() }
+        btnSound.setOnClickListener      { toggleSound() }
+        btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, scoreKey(difficulty)) }
+
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
 
         gameView.onGameStarted = {
             gameStartTime = System.currentTimeMillis()
         }
 
         // STUCK — game over. Submit the total accumulated score to leaderboards.
-        // Score naturally satisfies "losing < winning" because winning always earns
-        // CLEAR_BONUS on top of whatever the player accumulated.
         gameView.onGameOver = { totalScore ->
             val duration = System.currentTimeMillis() - gameStartTime
             val diffKey  = difficulty.key
@@ -89,6 +115,8 @@ class BlockDropActivity : AppCompatActivity() {
             }
         }
 
+        gameView.onDemoStopped = { runOnUiThread { scheduleIdle() } }
+
         // Load best score (medium difficulty by default until dialog picks one)
         gameView.loadBestScore(PrefsManager.getHighScore(this, scoreKey(BlockDropDifficulty.MEDIUM)))
 
@@ -124,21 +152,64 @@ class BlockDropActivity : AppCompatActivity() {
         super.onResume()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         applyTheme()
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
         gameView.onResume()
+        scheduleIdle()
     }
 
     override fun onPause() {
         super.onPause()
+        idleHandler.removeCallbacksAndMessages(null)
         gameView.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        idleHandler.removeCallbacksAndMessages(null)
         gameView.onDestroy()
+    }
+
+    private fun scheduleIdle() {
+        idleHandler.removeCallbacks(idleRunnable)
+        idleHandler.postDelayed(idleRunnable, 15_000L)
     }
 
     private fun applyTheme() {
         gameView.applyTheme(ThemeManager.currentTheme(this, GAME_KEY))
+        ThemeManager.applyWindowBackground(this, GAME_KEY)
+    }
+
+    private fun toggleLightMode() {
+        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        updateLightModeButton()
+        applyTheme()
+    }
+
+    private fun updateLightModeButton() {
+        btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
+    }
+
+    private fun toggleHaptics() {
+        PrefsManager.setHapticEnabled(this, !PrefsManager.isHapticEnabled(this))
+        updateHapticsButton()
+    }
+
+    private fun updateHapticsButton() {
+        btnHaptics.setTextColor(
+            if (PrefsManager.isHapticEnabled(this)) getColor(R.color.color_hud_block)
+            else getColor(R.color.muted)
+        )
+    }
+
+    private fun toggleSound() {
+        PrefsManager.setSoundEnabled(this, !PrefsManager.isSoundEnabled(this))
+        updateSoundButton()
+    }
+
+    private fun updateSoundButton() {
+        btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
     }
 
     private fun showSettingsDialog() {

@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="&#127942; LEADERBOARD"
+        android:text="&#127942; LOCAL LEADERBOARD"
         android:textColor="@color/accent_blue"
         android:textSize="18sp"
         android:fontFamily="monospace"

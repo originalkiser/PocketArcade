@@ -92,6 +92,8 @@ class MemoryMatchView @JvmOverloads constructor(
         diffLabelPaint.color = theme.accent
         winTitlePaint.color  = theme.accent
         winStatPaint.color   = theme.muted
+        // "PLAY AGAIN" button: text on accent-colored background — use bg for contrast
+        playAgainBtnPaint.color = theme.bg
         invalidate()
     }
 
@@ -134,6 +136,77 @@ class MemoryMatchView @JvmOverloads constructor(
     var onGameStarted: (() -> Unit)? = null
     /** [moves] = total flips, [elapsedSecs] = seconds on the clock */
     var onGameWon: ((moves: Int, elapsedSecs: Int) -> Unit)? = null
+    /** Fired when user touches during demo — activity should schedule next idle. */
+    var onDemoStopped: (() -> Unit)? = null
+
+    // ── Demo mode ──────────────────────────────────────────────────────────
+
+    private var demoMode = false
+    // Memory of seen card positions: icon → list of card indices seen
+    private val demoMemory = mutableMapOf<String, MutableList<Int>>()
+
+    /** True only when a real user is actively playing (not in demo). */
+    fun isUserPlaying() = !demoMode && running
+
+    /** Start an AI demo that flips cards, remembers them, and picks known matches. */
+    fun startDemo() {
+        demoMode = true
+        demoMemory.clear()
+        newGame()
+        handler.postDelayed(::demoStep, 1000L)
+    }
+
+    private fun demoStep() {
+        if (!demoMode) return
+        if (won) {
+            // Pause on win screen, then restart
+            handler.postDelayed({
+                if (demoMode) { demoMemory.clear(); newGame(); handler.postDelayed(::demoStep, 1000L) }
+            }, 2000L)
+            return
+        }
+        if (locked) { handler.postDelayed(::demoStep, 300L); return }
+
+        val available = cards.indices.filter { !cards[it].flipped && !cards[it].matched }
+        if (available.isEmpty()) { handler.postDelayed(::demoStep, 500L); return }
+
+        val pick = chooseDemoCard(available)
+        if (pick >= 0 && pick < cards.size) {
+            val card = cards[pick]
+            // Record this card in memory
+            demoMemory.getOrPut(card.icon) { mutableListOf() }.let {
+                if (pick !in it) it.add(pick)
+            }
+            onCardTap(pick)
+        }
+        // Next flip: allow for possible flip-back animation (FLIP_BACK_DELAY + buffer)
+        handler.postDelayed(::demoStep, if (selected.size >= 2) 1200L else 900L)
+    }
+
+    private fun chooseDemoCard(available: List<Int>): Int {
+        if (selected.size == 1) {
+            // Second flip: try to find the matching card in memory
+            val firstIcon = cards.first { it.id == selected[0] }.icon
+            val knownMatch = demoMemory[firstIcon]?.firstOrNull { idx ->
+                idx in available && cards[idx].id != selected[0]
+            }
+            if (knownMatch != null) return knownMatch
+            // No known match — flip an unseen card
+            return available.firstOrNull { idx -> demoMemory[cards[idx].icon]?.contains(idx) != true }
+                ?: available.random()
+        } else {
+            // First flip: if we know two positions of the same icon, pick one
+            val knownPairIcon = demoMemory.entries.firstOrNull { (_, idxs) ->
+                idxs.count { it in available } >= 2
+            }?.key
+            if (knownPairIcon != null) {
+                return demoMemory[knownPairIcon]!!.first { it in available }
+            }
+            // Otherwise flip an unseen card
+            return available.firstOrNull { idx -> demoMemory[cards[idx].icon]?.contains(idx) != true }
+                ?: available.random()
+        }
+    }
 
     // ── Timer ─────────────────────────────────────────────────────────────────
 
@@ -148,7 +221,7 @@ class MemoryMatchView @JvmOverloads constructor(
         }
     }
 
-    fun pauseTimer()  { running = false; handler.removeCallbacks(tickRunnable) }
+    fun pauseTimer()  { running = false; handler.removeCallbacks(tickRunnable); if (demoMode) { demoMode = false } }
     fun resumeTimer() { if (!won && moves > 0) { running = true; handler.post(tickRunnable) } }
 
     // ── Paints ────────────────────────────────────────────────────────────────
@@ -515,6 +588,17 @@ class MemoryMatchView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
+
+        // Stop demo on any user touch — reset board for a fresh user game
+        if (demoMode) {
+            demoMode = false
+            handler.removeCallbacksAndMessages(null)
+            demoMemory.clear()
+            newGame()
+            post { onDemoStopped?.invoke() }
+            return true
+        }
+
         val x = event.x; val y = event.y
 
         if (won) {

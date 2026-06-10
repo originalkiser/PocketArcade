@@ -92,8 +92,51 @@ class BlockDropView @JvmOverloads constructor(
     var onGameStarted: (() -> Unit)? = null
     /** Fired when stuck — parameter is total accumulated score (all levels + partial). */
     var onGameOver: ((score: Int) -> Unit)? = null
+    /** Fired when user touches during a demo session. */
+    var onDemoStopped: (() -> Unit)? = null
 
     fun loadBestScore(b: Int) { bestScore = b }
+
+    // ── Demo mode ──────────────────────────────────────────────────────────
+
+    private var demoMode = false
+
+    /** True when a real user is actively playing (not in demo). */
+    fun isUserPlaying() = !demoMode && (gameState == BlockDropState.PLAYING ||
+            gameState == BlockDropState.POPPING)
+
+    /** Start an AI-driven demo that auto-clears the largest group every ~800 ms. */
+    fun startDemo() {
+        demoMode = true
+        resetForNewGame()
+        scheduleDemoTick()
+    }
+
+    private fun scheduleDemoTick() {
+        if (!demoMode) return
+        handler.postDelayed(::demoTick, 600L + (0..600).random().toLong())
+    }
+
+    private fun demoTick() {
+        if (!demoMode) return
+        // Auto-advance overlay screens
+        if (gameState == BlockDropState.STUCK || gameState == BlockDropState.CLEARED) {
+            onOverlayButtonTapped()
+            scheduleDemoTick()
+            return
+        }
+        // Wait out pop animation
+        if (gameState == BlockDropState.POPPING) { scheduleDemoTick(); return }
+
+        // Find the largest clearable group across the board
+        var bestGroup = emptyList<Pair<Int, Int>>()
+        for (r in 0 until rows) for (c in 0 until cols) {
+            val g = findGroup(r, c)
+            if (g.size >= MIN_GROUP && g.size > bestGroup.size) bestGroup = g
+        }
+        if (bestGroup.isNotEmpty()) clearGroup(bestGroup)
+        scheduleDemoTick()
+    }
 
     // ── Layout ─────────────────────────────────────────────────────────────
 
@@ -198,9 +241,9 @@ class BlockDropView @JvmOverloads constructor(
 
     init { startLevel() }
 
-    fun onPause()   { handler.removeCallbacksAndMessages(null) }
+    fun onPause()   { demoMode = false; handler.removeCallbacksAndMessages(null) }
     fun onResume()  { invalidate() }
-    fun onDestroy() { handler.removeCallbacksAndMessages(null) }
+    fun onDestroy() { demoMode = false; handler.removeCallbacksAndMessages(null) }
 
     // ── Measure / layout ───────────────────────────────────────────────────
 
@@ -346,6 +389,14 @@ class BlockDropView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
+        // Stop demo when user touches — restart for a clean user game
+        if (demoMode) {
+            demoMode = false
+            handler.removeCallbacksAndMessages(null)
+            resetForNewGame()
+            post { onDemoStopped?.invoke() }
+            return true
+        }
         val x = event.x; val y = event.y
         if (gameState != BlockDropState.PLAYING && gameState != BlockDropState.POPPING) {
             if (overlayBtnRect.contains(x, y)) onOverlayButtonTapped()

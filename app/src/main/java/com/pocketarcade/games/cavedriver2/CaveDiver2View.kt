@@ -105,25 +105,43 @@ class CaveDiverView @JvmOverloads constructor(
     @Volatile private var shadersNeedRebuild = false
     private var gameThread: Thread?    = null
 
+    // ── Demo mode ──────────────────────────────────────────────────────────
+    @Volatile private var demoMode = false
+
+    /** Start an AI-controlled demo game. */
+    fun startDemo() {
+        demoMode    = true
+        startPending = true   // game thread calls resetGame() → CD2Phase.PLAYING
+    }
+
+    /** Autopilot thrust decision: aim for the center of the nearest upcoming gap. */
+    private fun computeDemoThrust(): Boolean {
+        val nearest = pipes.filter { it.x > SHIP_X - PIPE_W }.minByOrNull { it.x } ?: return false
+        val gapCenter = nearest.topH + GAP / 2f
+        // Slight frame-phase jitter so the ship oscillates naturally (not locked on center)
+        val jitter = if (frame % 20 < 10) -10f else 10f
+        return shipY > gapCenter + jitter
+    }
+
     // ── Public callbacks ───────────────────────────────────────────────────
     var onGameOver:    ((Int) -> Unit)? = null
     var onGameStarted: (() -> Unit)?    = null
+    var onDemoStopped: (() -> Unit)?    = null
 
     fun loadBestScore(b: Int) { bestScore = b }
-    fun isUserPlaying() = phase == CD2Phase.PLAYING
+    fun isUserPlaying() = phase == CD2Phase.PLAYING && !demoMode
 
     /**
      * Called by the activity for touch-zone presses as well as in-canvas touches.
      * May be called from the main thread — must NOT touch pipes/stars directly.
      */
     fun setThrusting(pressed: Boolean) {
+        if (demoMode) return  // external thrust zone ignored during demo
         if (pressed && phase != CD2Phase.PLAYING) {
             startPending = true           // game thread will call resetGame()
         } else if (phase == CD2Phase.PLAYING) {
             thrust = pressed
-            if (pressed) {
-                post { performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
-            }
+            // Haptic intentionally removed from Cave Diver thrust input
         } else {
             thrust = false
         }
@@ -218,6 +236,11 @@ class CaveDiverView @JvmOverloads constructor(
 
     // Background gradient (shader set in surfaceChanged; fallback color used until then)
     private val bgPaint = Paint().apply { color = BG2 }
+
+    // ── CRT scanline flag ───────────────────────────────────────────────────
+    // Set CRT_SCANLINES_ENABLED = true to re-enable the scanline overlay for evaluation.
+    // The calls are gated in drawIdle/drawDead/drawPlaying — no rendering code removed.
+    private val CRT_SCANLINES_ENABLED = false
 
     // Scanline overlay — rgba(0,0,20,0.18) → argb(46, 0, 0, 20)
     private val scanPaint = Paint().apply { color = Color.argb(46, 0, 0, 20) }
@@ -423,11 +446,17 @@ class CaveDiverView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                if (demoMode) {
+                    // User touch during demo — exit demo, return to idle
+                    demoMode = false; thrust = false; phase = CD2Phase.IDLE
+                    post { onDemoStopped?.invoke() }
+                    return true
+                }
                 if (phase != CD2Phase.PLAYING) {
                     startPending = true
                 } else {
                     thrust = true
-                    performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                    // Haptic intentionally removed from Cave Diver thrust input
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -449,6 +478,9 @@ class CaveDiverView @JvmOverloads constructor(
         }
 
         if (phase != CD2Phase.PLAYING) return
+
+        // Demo autopilot overrides thrust when active
+        if (demoMode) thrust = computeDemoThrust()
 
         // ── JSX tick() physics ──────────────────────────────────────────
         frame++
@@ -501,7 +533,17 @@ class CaveDiverView @JvmOverloads constructor(
             if (score > bestScore) bestScore = score
             initStars()   // JSX: G.stars = makeStars() in paintDead
             val fs = score
-            post { onGameOver?.invoke(fs) }
+            if (demoMode) {
+                // Demo died — restart automatically after brief pause
+                demoMode = false   // reset so startPending triggers fresh reset
+                post {
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        demoMode = true; startPending = true
+                    }, 1_200L)
+                }
+            } else {
+                post { onGameOver?.invoke(fs) }
+            }
         }
     }
 
@@ -668,7 +710,7 @@ class CaveDiverView @JvmOverloads constructor(
      */
     private fun drawIdle(canvas: Canvas) {
         drawBg(canvas)
-        drawScanlines(canvas)
+        if (CRT_SCANLINES_ENABLED) drawScanlines(canvas)
         val cx = W / 2f
 
         canvas.drawText("CAVE DIVER",                     cx, 110f, titlePaint)
@@ -700,7 +742,7 @@ class CaveDiverView @JvmOverloads constructor(
     /** JSX paintDead() */
     private fun drawDead(canvas: Canvas) {
         drawBg(canvas)
-        drawScanlines(canvas)
+        if (CRT_SCANLINES_ENABLED) drawScanlines(canvas)
         val cx = W / 2f
 
         canvas.drawText("CRASHED",                           cx, 140f, deadTitlePaint)
@@ -717,7 +759,7 @@ class CaveDiverView @JvmOverloads constructor(
         drawBg(canvas)
         for (p in pipes) drawCave(canvas, p)
         drawShip(canvas, SHIP_X, shipY, thrustFrames > 0)
-        drawScanlines(canvas)
+        if (CRT_SCANLINES_ENABLED) drawScanlines(canvas)
 
         // HUD — left-aligned, matches JSX ctx.textAlign="left"
         canvas.drawText("SCORE",              14f, 22f, hudLabelPaint)

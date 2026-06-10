@@ -165,6 +165,23 @@
             android:background="@color/border" />
 
         <TextView
+            android:id="@+id/btnHaptics"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128243;"
+            android:textSize="17sp"
+            android:textColor="@color/accent_yellow"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
             android:id="@+id/btnSound"
             android:layout_width="0dp"
             android:layout_height="match_parent"

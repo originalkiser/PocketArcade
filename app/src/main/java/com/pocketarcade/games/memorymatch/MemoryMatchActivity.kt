@@ -2,6 +2,8 @@ package com.pocketarcade.games.memorymatch
 
 import android.app.Dialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -14,6 +16,7 @@ import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.handlePostGameLeaderboards
+import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
@@ -24,9 +27,20 @@ class MemoryMatchActivity : AppCompatActivity() {
         const val EXTRA_DIFFICULTY = "difficulty"
     }
 
-    private lateinit var gameView:  MemoryMatchView
+    private lateinit var gameView:    MemoryMatchView
+    private lateinit var btnLightMode: TextView
+    private lateinit var btnHaptics:   TextView
+    private lateinit var btnSound:     TextView
+    private lateinit var btnLeaderboard: TextView
     private var gameStartTime = 0L
     private var difficulty    = Difficulty.EASY
+
+    private val idleHandler = Handler(Looper.getMainLooper())
+    private val idleRunnable = Runnable {
+        if (PrefsManager.isDemoModeEnabled(this) && !gameView.isUserPlaying()) {
+            gameView.startDemo()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +49,28 @@ class MemoryMatchActivity : AppCompatActivity() {
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
-        gameView = findViewById(R.id.memoryMatchView)
+        gameView      = findViewById(R.id.memoryMatchView)
+        btnLightMode  = findViewById(R.id.btnLightModeMatch)
+        btnHaptics    = findViewById(R.id.btnHapticsMatch)
+        btnSound      = findViewById(R.id.btnSoundMatch)
+        btnLeaderboard = findViewById(R.id.btnLeaderboardMatch)
+
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettings).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
+        findViewById<TextView>(R.id.btnSettings).setOnClickListener {
+            startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java))
+        }
+        btnLightMode.setOnClickListener   { toggleLightMode() }
+        btnHaptics.setOnClickListener     { toggleHaptics() }
+        btnSound.setOnClickListener       { toggleSound() }
+        btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, "${GAME_KEY}_${difficulty.name.lowercase()}") }
 
         applyTheme()
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
 
         gameView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
+        gameView.onDemoStopped = { runOnUiThread { scheduleIdle() } }
 
         gameView.onGameWon = { moves, elapsedSecs ->
             val duration = System.currentTimeMillis() - gameStartTime
@@ -140,10 +169,48 @@ class MemoryMatchActivity : AppCompatActivity() {
 
     private fun applyTheme() {
         gameView.applyTheme(ThemeManager.currentTheme(this, GAME_KEY))
+        ThemeManager.applyWindowBackground(this, GAME_KEY)
+    }
+
+    private fun toggleLightMode() {
+        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        updateLightModeButton()
+        applyTheme()
+    }
+
+    private fun updateLightModeButton() {
+        btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
+    }
+
+    private fun toggleHaptics() {
+        PrefsManager.setHapticEnabled(this, !PrefsManager.isHapticEnabled(this))
+        updateHapticsButton()
+    }
+
+    private fun updateHapticsButton() {
+        btnHaptics.setTextColor(
+            if (PrefsManager.isHapticEnabled(this)) getColor(R.color.color_hud_match)
+            else getColor(R.color.muted)
+        )
+    }
+
+    private fun toggleSound() {
+        PrefsManager.setSoundEnabled(this, !PrefsManager.isSoundEnabled(this))
+        updateSoundButton()
+    }
+
+    private fun updateSoundButton() {
+        btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
+    }
+
+    private fun scheduleIdle() {
+        idleHandler.removeCallbacks(idleRunnable)
+        idleHandler.postDelayed(idleRunnable, 15_000L)
     }
 
     override fun onPause() {
         super.onPause()
+        idleHandler.removeCallbacksAndMessages(null)
         gameView.pauseTimer()
     }
 
@@ -151,6 +218,10 @@ class MemoryMatchActivity : AppCompatActivity() {
         super.onResume()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         applyTheme()
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
         gameView.resumeTimer()
+        scheduleIdle()
     }
 }

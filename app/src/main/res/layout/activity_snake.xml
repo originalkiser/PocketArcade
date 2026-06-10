@@ -93,7 +93,7 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <!-- Control zone Ã¢â‚¬â€ weight=1 fills all space between game and control bar -->
+    <!-- Control zone — weight=1 fills all space between game and control bar -->
     <FrameLayout
         android:id="@+id/controlZone"
         android:layout_width="match_parent"
@@ -121,14 +121,34 @@
                 android:alpha="0.7" />
         </FrameLayout>
 
-        <!-- D-pad (visible in D-PAD mode) Ã¢â‚¬â€ buttons positioned in code via LayoutParams -->
+        <!-- D-pad (visible in D-PAD mode) — cross/zone layout with arrow glyphs.
+             Zone dividers are drawn as thin Views; each arm is a transparent tap target.
+             Container background gives the cross its tile-styled border. -->
         <FrameLayout
             android:id="@+id/dpadContainer"
             android:layout_width="168dp"
             android:layout_height="168dp"
             android:layout_gravity="center"
+            android:background="@drawable/bg_game_tile"
             android:visibility="gone">
 
+            <!-- Horizontal zone-divider (separates Up/Down from center row) -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border"
+                android:alpha="0.5"
+                android:layout_gravity="center_vertical" />
+
+            <!-- Vertical zone-divider (separates Left/Right) -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/border"
+                android:alpha="0.5"
+                android:layout_gravity="center_horizontal" />
+
+            <!-- Up zone ▲ -->
             <TextView
                 android:id="@+id/btnUp"
                 android:layout_width="56dp"
@@ -137,13 +157,14 @@
                 android:layout_marginStart="56dp"
                 android:layout_marginTop="0dp"
                 android:gravity="center"
-                android:text="Ã¢â€“Â²"
+                android:text="&#9650;"
                 android:textColor="@color/text"
-                android:textSize="20sp"
-                android:background="@drawable/bg_game_tile"
+                android:textSize="22sp"
+                android:background="@android:color/transparent"
                 android:clickable="true"
                 android:focusable="true" />
 
+            <!-- Left zone ◀ -->
             <TextView
                 android:id="@+id/btnLeft"
                 android:layout_width="56dp"
@@ -152,13 +173,14 @@
                 android:layout_marginStart="0dp"
                 android:layout_marginTop="56dp"
                 android:gravity="center"
-                android:text="Ã¢â€”â€ž"
+                android:text="&#9664;"
                 android:textColor="@color/text"
-                android:textSize="20sp"
-                android:background="@drawable/bg_game_tile"
+                android:textSize="22sp"
+                android:background="@android:color/transparent"
                 android:clickable="true"
                 android:focusable="true" />
 
+            <!-- Right zone ▶ -->
             <TextView
                 android:id="@+id/btnRight"
                 android:layout_width="56dp"
@@ -167,13 +189,14 @@
                 android:layout_marginStart="112dp"
                 android:layout_marginTop="56dp"
                 android:gravity="center"
-                android:text="Ã¢â€“Âº"
+                android:text="&#9654;"
                 android:textColor="@color/text"
-                android:textSize="20sp"
-                android:background="@drawable/bg_game_tile"
+                android:textSize="22sp"
+                android:background="@android:color/transparent"
                 android:clickable="true"
                 android:focusable="true" />
 
+            <!-- Down zone ▼ -->
             <TextView
                 android:id="@+id/btnDown"
                 android:layout_width="56dp"
@@ -182,17 +205,17 @@
                 android:layout_marginStart="56dp"
                 android:layout_marginTop="112dp"
                 android:gravity="center"
-                android:text="Ã¢â€“Â¼"
+                android:text="&#9660;"
                 android:textColor="@color/text"
-                android:textSize="20sp"
-                android:background="@drawable/bg_game_tile"
+                android:textSize="22sp"
+                android:background="@android:color/transparent"
                 android:clickable="true"
                 android:focusable="true" />
 
         </FrameLayout>
     </FrameLayout>
 
-    <!-- Bottom control bar: SWIPE | D-PAD | light | settings -->
+    <!-- Bottom control bar: SWIPE | D-PAD | ☀/🌙 | 📳 | 🔊 | ⚙ -->
     <LinearLayout
         android:id="@+id/controlBar"
         android:layout_width="match_parent"
@@ -254,6 +277,23 @@
             android:background="@color/border" />
 
         <TextView
+            android:id="@+id/btnHaptics"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128243;"
+            android:textSize="17sp"
+            android:textColor="@color/accent_blue"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
             android:id="@+id/btnSound"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -284,4 +324,3 @@
     </LinearLayout>
 
 </LinearLayout>
-

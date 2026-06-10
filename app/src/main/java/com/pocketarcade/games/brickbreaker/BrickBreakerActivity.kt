@@ -34,6 +34,7 @@ class BrickBreakerActivity : AppCompatActivity() {
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
     private lateinit var btnSound: TextView
+    private lateinit var btnHaptics: TextView
     private lateinit var btnLightMode: TextView
     private lateinit var btnStartGame: TextView
     private lateinit var swipeZone: View
@@ -64,6 +65,7 @@ class BrickBreakerActivity : AppCompatActivity() {
         btnSettings    = findViewById(R.id.btnSettings)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
         btnSound       = findViewById(R.id.btnSound)
+        btnHaptics     = findViewById(R.id.btnHaptics)
         btnLightMode   = findViewById(R.id.btnLightMode)
         swipeZone      = findViewById(R.id.swipeZone)
         btnStartGame   = findViewById(R.id.btnStartGame)
@@ -185,10 +187,12 @@ class BrickBreakerActivity : AppCompatActivity() {
         btnSettings.setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_BRICKBREAKER) }
         btnSound.setOnClickListener { toggleSound() }
+        btnHaptics.setOnClickListener { toggleHaptics() }
         btnLightMode.setOnClickListener { toggleLightMode() }
 
         bbView.difficulty = indexToDifficulty(PrefsManager.getBBDifficulty(this))
         updateSoundButton()
+        updateHapticsButton()
         updateLightModeButton()
         scheduleIdle()
         showDifficultyDialog(goBackOnCancel = true)
@@ -328,6 +332,18 @@ class BrickBreakerActivity : AppCompatActivity() {
         btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
     }
 
+    private fun toggleHaptics() {
+        PrefsManager.setHapticEnabled(this, !PrefsManager.isHapticEnabled(this))
+        updateHapticsButton()
+    }
+
+    private fun updateHapticsButton() {
+        btnHaptics.setTextColor(
+            if (PrefsManager.isHapticEnabled(this)) getColor(R.color.accent_yellow)
+            else getColor(R.color.muted)
+        )
+    }
+
     private fun scheduleIdle() {
         idleHandler.removeCallbacks(idleRunnable)
         idleHandler.postDelayed(idleRunnable, 15_000L)
@@ -338,6 +354,7 @@ class BrickBreakerActivity : AppCompatActivity() {
         bbView.applyTheme(ThemeManager.currentTheme(this, PrefsManager.GAME_BRICKBREAKER))
         ThemeManager.applyWindowBackground(this, PrefsManager.GAME_BRICKBREAKER)
         updateSoundButton()
+        updateHapticsButton()
         updateLightModeButton()
         scheduleIdle()
     }

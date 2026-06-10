@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -18,14 +20,26 @@ import com.pocketarcade.ads.AdManager
 import com.pocketarcade.leaderboard.GlobalLeaderboard
 import com.pocketarcade.leaderboard.checkAndShowLeaderboard
 import com.pocketarcade.leaderboard.handlePostGameLeaderboards
+import com.pocketarcade.leaderboard.showLeaderboardDialog
 import com.pocketarcade.showThemePickerDialog
 import com.pocketarcade.storage.PrefsManager
 
 class CaveDiverActivity : AppCompatActivity() {
 
-    private lateinit var gameView:   CaveDiverView
-    private lateinit var thrustZone: FrameLayout
+    private lateinit var gameView:      CaveDiverView
+    private lateinit var thrustZone:    FrameLayout
+    private lateinit var btnLightMode:  TextView
+    private lateinit var btnHaptics:    TextView
+    private lateinit var btnSound:      TextView
+    private lateinit var btnLeaderboard: TextView
     private var gameStartTime = 0L
+
+    private val idleHandler = Handler(Looper.getMainLooper())
+    private val idleRunnable = Runnable {
+        if (PrefsManager.isDemoModeEnabled(this) && !gameView.isUserPlaying()) {
+            gameView.startDemo()
+        }
+    }
 
     companion object {
         const val GAME_KEY = "cavedriver"
@@ -39,19 +53,33 @@ class CaveDiverActivity : AppCompatActivity() {
 
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
 
-        gameView   = findViewById(R.id.caveDiver2View)
-        thrustZone = findViewById(R.id.thrustZone2)
+        gameView      = findViewById(R.id.caveDiver2View)
+        thrustZone    = findViewById(R.id.thrustZone2)
+        btnLightMode  = findViewById(R.id.btnLightModeCave)
+        btnHaptics    = findViewById(R.id.btnHapticsCave)
+        btnSound      = findViewById(R.id.btnSoundCave)
+        btnLeaderboard = findViewById(R.id.btnLeaderboardCave)
 
         gameView.loadBestScore(PrefsManager.getHighScore(this, GAME_KEY))
 
         applyTheme()
 
         findViewById<TextView>(R.id.btnBack2).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnSettings2).setOnClickListener { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
-
-        gameView.onGameStarted = {
-            gameStartTime = System.currentTimeMillis()
+        findViewById<TextView>(R.id.btnSettings2).setOnClickListener {
+            startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java))
         }
+        // New bottom bar buttons
+        btnLightMode.setOnClickListener   { toggleLightMode() }
+        btnHaptics.setOnClickListener     { toggleHaptics() }
+        btnSound.setOnClickListener       { toggleSound() }
+        btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, GAME_KEY) }
+
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
+
+        gameView.onGameStarted = { gameStartTime = System.currentTimeMillis() }
+        gameView.onDemoStopped = { runOnUiThread { scheduleIdle() } }
 
         gameView.onGameOver = { score ->
             val duration = System.currentTimeMillis() - gameStartTime
@@ -91,8 +119,6 @@ class CaveDiverActivity : AppCompatActivity() {
         }
 
         // Thrust zone below game canvas mirrors in-canvas touch.
-        // Colors are theme-aware: dark mode keeps the original near-black feedback;
-        // light mode uses card-grey (pressed) / bg-white (released) instead.
         wireThrustZone()
     }
 
@@ -100,12 +126,22 @@ class CaveDiverActivity : AppCompatActivity() {
         super.onResume()
         AdManager.populateBannerContainer(findViewById(R.id.adContainer))
         applyTheme()
+        updateLightModeButton()
+        updateHapticsButton()
+        updateSoundButton()
         wireThrustZone()
+        scheduleIdle()
     }
 
     override fun onPause() {
         super.onPause()
+        idleHandler.removeCallbacksAndMessages(null)
         gameView.setThrusting(false)
+    }
+
+    private fun scheduleIdle() {
+        idleHandler.removeCallbacks(idleRunnable)
+        idleHandler.postDelayed(idleRunnable, 15_000L)
     }
 
     @android.annotation.SuppressLint("ClickableViewAccessibility")
@@ -113,7 +149,6 @@ class CaveDiverActivity : AppCompatActivity() {
         val isLight = ThemeManager.isLightMode(this)
         val bgNormal  = if (isLight) getColor(R.color.bg)   else Color.parseColor("#050510")
         val bgPressed = if (isLight) getColor(R.color.card) else Color.parseColor("#0a0a20")
-        // Reset to normal in case mode just changed
         thrustZone.setBackgroundColor(bgNormal)
         thrustZone.setOnTouchListener { v, event ->
             when (event.action) {
@@ -126,6 +161,39 @@ class CaveDiverActivity : AppCompatActivity() {
 
     private fun applyTheme() {
         gameView.applyTheme(ThemeManager.currentTheme(this, GAME_KEY))
+        ThemeManager.applyWindowBackground(this, GAME_KEY)
+    }
+
+    private fun toggleLightMode() {
+        ThemeManager.setLightMode(this, !ThemeManager.isLightMode(this))
+        updateLightModeButton()
+        applyTheme()
+        wireThrustZone()
+    }
+
+    private fun updateLightModeButton() {
+        btnLightMode.text = if (ThemeManager.isLightMode(this)) "☀" else "🌙"
+    }
+
+    private fun toggleHaptics() {
+        PrefsManager.setHapticEnabled(this, !PrefsManager.isHapticEnabled(this))
+        updateHapticsButton()
+    }
+
+    private fun updateHapticsButton() {
+        btnHaptics.setTextColor(
+            if (PrefsManager.isHapticEnabled(this)) getColor(R.color.color_hud_cave)
+            else getColor(R.color.muted)
+        )
+    }
+
+    private fun toggleSound() {
+        PrefsManager.setSoundEnabled(this, !PrefsManager.isSoundEnabled(this))
+        updateSoundButton()
+    }
+
+    private fun updateSoundButton() {
+        btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
     }
 
     private fun showSettingsDialog() {

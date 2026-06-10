@@ -1,7 +1,9 @@
 package com.pocketarcade.games.snake
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import com.pocketarcade.splitOvalDrawable
 import android.os.Bundle
@@ -10,6 +12,7 @@ import android.os.Looper
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -48,6 +51,7 @@ class SnakeActivity : AppCompatActivity() {
     private lateinit var btnSwipeMode: TextView
     private lateinit var btnDpadMode: TextView
     private lateinit var btnLightMode: TextView
+    private lateinit var btnHaptics: TextView
     private lateinit var btnSound: TextView
     private lateinit var btnSettings: TextView
     private lateinit var btnLeaderboard: TextView
@@ -99,6 +103,7 @@ class SnakeActivity : AppCompatActivity() {
         btnSwipeMode       = findViewById(R.id.btnSwipeMode)
         btnDpadMode        = findViewById(R.id.btnDpadMode)
         btnLightMode       = findViewById(R.id.btnLightMode)
+        btnHaptics         = findViewById(R.id.btnHaptics)
         btnSound           = findViewById(R.id.btnSound)
         btnSettings        = findViewById(R.id.btnSettings)
         btnLeaderboard     = findViewById(R.id.btnLeaderboard)
@@ -176,11 +181,13 @@ class SnakeActivity : AppCompatActivity() {
         btnSwipeMode.setOnClickListener  { setDpadMode(false) }
         btnDpadMode.setOnClickListener   { setDpadMode(true) }
         btnLightMode.setOnClickListener  { toggleLightMode() }
+        btnHaptics.setOnClickListener    { toggleHaptics() }
         btnSound.setOnClickListener      { toggleSound() }
         btnSettings.setOnClickListener   { startActivity(android.content.Intent(this, com.pocketarcade.SettingsActivity::class.java)) }
         btnLeaderboard.setOnClickListener { showLeaderboardDialog(this, PrefsManager.GAME_SNAKE) }
 
         updateSoundButton()
+        updateHapticsButton()
 
         swipeZoneContainer.setOnTouchListener { _, event ->
             snakeView.handleExternalTouch(event)
@@ -250,6 +257,18 @@ class SnakeActivity : AppCompatActivity() {
 
     private fun updateSoundButton() {
         btnSound.text = if (PrefsManager.isSoundEnabled(this)) "🔊" else "🔇"
+    }
+
+    private fun toggleHaptics() {
+        PrefsManager.setHapticEnabled(this, !PrefsManager.isHapticEnabled(this))
+        updateHapticsButton()
+    }
+
+    private fun updateHapticsButton() {
+        btnHaptics.setTextColor(
+            if (PrefsManager.isHapticEnabled(this)) getColor(R.color.accent_blue)
+            else getColor(R.color.muted)
+        )
     }
 
     // ── Settings persistence ───────────────────────────────────────────────────
@@ -492,13 +511,75 @@ class SnakeActivity : AppCompatActivity() {
 
     private fun showControlHintDialog(message: String) {
         val switchText = if (isDpadMode) "SWITCH TO SWIPE" else "SWITCH TO D-PAD"
-        AlertDialog.Builder(this)
-            .setMessage(message)
-            .setPositiveButton(switchText) { _, _ -> setDpadMode(!isDpadMode) }
-            .setNegativeButton("DISMISS", null)
-            .create()
-            .also { it.window?.setBackgroundDrawableResource(R.color.surface) }
-            .show()
+        val dp = resources.displayMetrics.density
+
+        // Root container — styled like HintManager bubble (dark navy, blue border)
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding((20 * dp).toInt(), (20 * dp).toInt(), (20 * dp).toInt(), (14 * dp).toInt())
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f * dp
+                setColor(0xEE1A2040.toInt())
+                setStroke((1.5f * dp).toInt(), 0xFF4488FF.toInt())
+            }
+        }
+
+        // Hint message
+        root.addView(TextView(this).apply {
+            text = "💡 $message"
+            setTextColor(Color.WHITE)
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, (16 * dp).toInt())
+        })
+
+        // Button row
+        val btnRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+
+        // DISMISS button
+        val btnDismiss = TextView(this).apply {
+            text = "DISMISS"
+            setTextColor(0xFF6688AA.toInt())
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, (40 * dp).toInt(), 1f)
+        }
+
+        // SWITCH button
+        val btnSwitch = TextView(this).apply {
+            text = switchText
+            setTextColor(0xFF4488FF.toInt())
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, (40 * dp).toInt(), 1f).apply {
+                marginStart = (8 * dp).toInt()
+            }
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 8f * dp
+                setColor(0x334488FF.toInt())
+                setStroke((1 * dp).toInt(), 0xFF4488FF.toInt())
+            }
+        }
+
+        btnRow.addView(btnDismiss)
+        btnRow.addView(btnSwitch)
+        root.addView(btnRow)
+
+        val dialog = Dialog(this)
+        dialog.setContentView(root)
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+
+        btnDismiss.setOnClickListener { dialog.dismiss() }
+        btnSwitch.setOnClickListener  { dialog.dismiss(); setDpadMode(!isDpadMode) }
+        dialog.show()
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

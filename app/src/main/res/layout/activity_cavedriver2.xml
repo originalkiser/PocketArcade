@@ -12,7 +12,7 @@
         android:layout_height="50dp"
         android:background="@drawable/bg_ad_banner" />
 
-    <!-- Header: back + title -->
+    <!-- Header: back + title + settings -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="44dp"
@@ -96,5 +96,93 @@
             android:letterSpacing="0.2" />
 
     </FrameLayout>
+
+    <!-- Bottom bar: ☀/🌙 | 📳 | 🔊 | 🏆 | ⚙ -->
+    <LinearLayout
+        android:id="@+id/controlBarCave"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btnLightModeCave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127769;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnHapticsCave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128243;"
+            android:textSize="17sp"
+            android:textColor="@color/color_hud_cave"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSoundCave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#128266;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnLeaderboardCave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#127942;"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="@color/border" />
+
+        <TextView
+            android:id="@+id/btnSettingsCave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="&#9881;"
+            android:textColor="@color/muted"
+            android:textSize="17sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
 
 </LinearLayout>
