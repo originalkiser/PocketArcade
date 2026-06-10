@@ -30,9 +30,20 @@ class BlockDropActivity : AppCompatActivity() {
     private var gameStartTime = 0L
     private var difficulty = BlockDropDifficulty.MEDIUM
 
+    /** Reference kept so the idle-demo path can dismiss it without triggering finish(). */
+    private var difficultyDialog: Dialog? = null
+
     private val idleHandler = Handler(Looper.getMainLooper())
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !gameView.isUserPlaying()) {
+            // Dismiss the difficulty picker silently (dismiss() does NOT fire onCancelListener)
+            // and auto-select a random difficulty so the demo is actually visible.
+            difficultyDialog?.dismiss()
+            difficultyDialog = null
+            val demoDiff = BlockDropDifficulty.values().random()
+            difficulty = demoDiff
+            gameView.loadBestScore(PrefsManager.getHighScore(this, scoreKey(demoDiff)))
+            gameView.difficulty = demoDiff  // setter resets board
             gameView.startDemo()
         }
     }
@@ -126,6 +137,7 @@ class BlockDropActivity : AppCompatActivity() {
     private fun showDifficultyDialog() {
         val view   = layoutInflater.inflate(R.layout.dialog_bd_difficulty, null)
         val dialog = Dialog(this)
+        difficultyDialog = dialog
         dialog.setContentView(view)
         dialog.setCancelable(true)
         dialog.setOnCancelListener { finish() }
@@ -138,10 +150,11 @@ class BlockDropActivity : AppCompatActivity() {
             difficulty = diff
             gameView.loadBestScore(PrefsManager.getHighScore(this, scoreKey(diff)))
             gameView.difficulty = diff   // triggers resetForNewGame via setter
+            difficultyDialog = null
             dialog.dismiss()
         }
 
-        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { dialog.dismiss(); finish() }
+        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { difficultyDialog = null; dialog.dismiss(); finish() }
         view.findViewById<LinearLayout>(R.id.btnEasy).setOnClickListener   { pick(BlockDropDifficulty.EASY)   }
         view.findViewById<LinearLayout>(R.id.btnMedium).setOnClickListener { pick(BlockDropDifficulty.MEDIUM) }
         view.findViewById<LinearLayout>(R.id.btnHard).setOnClickListener   { pick(BlockDropDifficulty.HARD)   }

@@ -114,13 +114,30 @@ class CaveDiverView @JvmOverloads constructor(
         startPending = true   // game thread calls resetGame() → CD2Phase.PLAYING
     }
 
-    /** Autopilot thrust decision: aim for the center of the nearest upcoming gap. */
+    /**
+     * Velocity-aware autopilot: simulates the next [DEMO_LOOKAHEAD] frames of free-fall and
+     * thrusts now if the predicted position would overshoot the gap centre.
+     * This handles the high-inertia Flappy-Bird physics correctly — pure positional
+     * comparison ignores current velocity and causes constant over/undershoot.
+     */
     private fun computeDemoThrust(): Boolean {
-        val nearest = pipes.filter { it.x > SHIP_X - PIPE_W }.minByOrNull { it.x } ?: return false
-        val gapCenter = nearest.topH + GAP / 2f
-        // Slight frame-phase jitter so the ship oscillates naturally (not locked on center)
-        val jitter = if (frame % 20 < 10) -10f else 10f
-        return shipY > gapCenter + jitter
+        // Nearest pipe whose exit hasn't cleared the ship nose yet
+        val upcoming = pipes.filter { it.x + PIPE_W >= SHIP_X - SHIP_W / 2f }
+                           .minByOrNull { it.x }
+        // Aim for gap centre; if sky is clear, hold at canvas centre
+        val target = upcoming?.let { it.topH + GAP / 2f } ?: (H / 2f)
+
+        // Simulate 10 frames of physics WITHOUT thrust to predict where we'll be
+        var pY  = shipY
+        var pVy = vy
+        repeat(10) {
+            pVy += GRAVITY
+            pVy *= DAMPING
+            pVy = pVy.coerceIn(VY_MIN, VY_MAX)
+            pY += pVy
+        }
+        // Thrust now if predicted position is below target (we'll be too low)
+        return pY > target
     }
 
     // ── Public callbacks ───────────────────────────────────────────────────

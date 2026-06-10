@@ -35,9 +35,19 @@ class MemoryMatchActivity : AppCompatActivity() {
     private var gameStartTime = 0L
     private var difficulty    = Difficulty.EASY
 
+    /** Reference kept so the idle-demo path can dismiss it without triggering finish(). */
+    private var difficultyDialog: Dialog? = null
+
     private val idleHandler = Handler(Looper.getMainLooper())
     private val idleRunnable = Runnable {
         if (PrefsManager.isDemoModeEnabled(this) && !gameView.isUserPlaying()) {
+            // If the difficulty picker is still on screen, dismiss it silently and
+            // auto-select a random difficulty so the demo can actually be seen.
+            difficultyDialog?.dismiss()   // dismiss() does NOT fire onCancelListener
+            difficultyDialog = null
+            val demoDiff = Difficulty.values().random()
+            difficulty = demoDiff
+            gameView.difficulty = demoDiff  // setter resets board + layout
             gameView.startDemo()
         }
     }
@@ -125,6 +135,7 @@ class MemoryMatchActivity : AppCompatActivity() {
     private fun showDifficultyDialog() {
         val view = layoutInflater.inflate(R.layout.dialog_mm_difficulty, null)
         val dialog = Dialog(this)
+        difficultyDialog = dialog
         dialog.setContentView(view)
         dialog.setCancelable(true)
         dialog.setOnCancelListener { finish() }
@@ -136,10 +147,11 @@ class MemoryMatchActivity : AppCompatActivity() {
         fun pick(diff: Difficulty) {
             difficulty = diff
             gameView.difficulty = diff
+            difficultyDialog = null
             dialog.dismiss()
         }
 
-        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { dialog.dismiss(); finish() }
+        view.findViewById<TextView>(R.id.btnDiffBack).setOnClickListener { difficultyDialog = null; dialog.dismiss(); finish() }
         view.findViewById<LinearLayout>(R.id.btnEasy).setOnClickListener   { pick(Difficulty.EASY)   }
         view.findViewById<LinearLayout>(R.id.btnMedium).setOnClickListener { pick(Difficulty.MEDIUM) }
         view.findViewById<LinearLayout>(R.id.btnHard).setOnClickListener   { pick(Difficulty.HARD)   }
