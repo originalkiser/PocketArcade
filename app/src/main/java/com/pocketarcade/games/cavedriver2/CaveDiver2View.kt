@@ -108,24 +108,38 @@ class CaveDiverView @JvmOverloads constructor(
     // ── Demo mode ──────────────────────────────────────────────────────────
     @Volatile private var demoMode = false
 
+    // Jitter: slowly-drifting aim offset so the ship doesn't lock perfectly on centre.
+    // Updated only on the game thread (inside computeDemoThrust), so no @Volatile needed.
+    private var demoJitter         = 0f
+    private var demoJitterCountdown = 0
+
     /** Start an AI-controlled demo game. */
     fun startDemo() {
-        demoMode    = true
+        demoMode         = true
+        demoJitter        = 0f
+        demoJitterCountdown = 0
         startPending = true   // game thread calls resetGame() → CD2Phase.PLAYING
     }
 
     /**
-     * Velocity-aware autopilot: simulates the next [DEMO_LOOKAHEAD] frames of free-fall and
-     * thrusts now if the predicted position would overshoot the gap centre.
-     * This handles the high-inertia Flappy-Bird physics correctly — pure positional
-     * comparison ignores current velocity and causes constant over/undershoot.
+     * Velocity-aware autopilot with human-like jitter.
+     * Simulates 10 frames of free-fall to decide whether to thrust now, targeting the
+     * gap centre offset by a slowly-drifting random value (±30 px, re-rolled every
+     * 30–50 frames).  The lookahead handles high-inertia physics; the jitter makes the
+     * flight path look natural rather than perfectly locked on centre.
      */
     private fun computeDemoThrust(): Boolean {
+        // Slowly drift the aim point to produce visible, human-like oscillation
+        if (--demoJitterCountdown <= 0) {
+            demoJitter          = Random.nextFloat() * 60f - 30f   // -30 … +30 px
+            demoJitterCountdown = 30 + Random.nextInt(20)           // 30-50 frames
+        }
+
         // Nearest pipe whose exit hasn't cleared the ship nose yet
         val upcoming = pipes.filter { it.x + PIPE_W >= SHIP_X - SHIP_W / 2f }
                            .minByOrNull { it.x }
-        // Aim for gap centre; if sky is clear, hold at canvas centre
-        val target = upcoming?.let { it.topH + GAP / 2f } ?: (H / 2f)
+        // Aim for gap centre + jitter; fall back to canvas centre when sky is clear
+        val target = (upcoming?.let { it.topH + GAP / 2f } ?: (H / 2f)) + demoJitter
 
         // Simulate 10 frames of physics WITHOUT thrust to predict where we'll be
         var pY  = shipY

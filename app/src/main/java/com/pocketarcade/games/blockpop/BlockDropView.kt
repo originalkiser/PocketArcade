@@ -101,9 +101,13 @@ class BlockDropView @JvmOverloads constructor(
 
     private var demoMode = false
 
-    /** True when a real user is actively playing (not in demo). */
-    fun isUserPlaying() = !demoMode && (gameState == BlockDropState.PLAYING ||
-            gameState == BlockDropState.POPPING)
+    /**
+     * True only when a real user is actively playing (not in demo).
+     * Requires totalMoves > 0 so that a freshly-initialised board (gameState=PLAYING
+     * from init/startLevel but no taps yet) does not block the idle-demo trigger.
+     */
+    fun isUserPlaying() = !demoMode && totalMoves > 0 &&
+            (gameState == BlockDropState.PLAYING || gameState == BlockDropState.POPPING)
 
     /** Start an AI-driven demo that auto-clears the largest group every ~800 ms. */
     fun startDemo() {
